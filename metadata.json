@@ -1,0 +1,5 @@
+{
+  "name": "REO - Rádio Escolar Online",
+  "description": "The official web app for REO school radio, featuring latest podcasts, social media links, and a Google Drive-powered audio archive.",
+  "requestFramePermissions": []
+}

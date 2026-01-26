@@ -1,0 +1,24 @@
+{
+  "name": "REO - Rádio Escolar Online",
+  "short_name": "REO",
+  "description": "Rádio Escolar Online do Agrupamento de Escolas de S. Bento de Vizela",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0b0b13",
+  "theme_color": "#0b0b13",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://i.imgur.com/1j0n3tR.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.imgur.com/1j0n3tR.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
