@@ -2,10 +2,13 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
   <title>REO - Rádio Escolar Online</title>
 
-  <!-- ✅ PWA + Icons (LOCAL FILES in /public) -->
+  <!-- ✅ PWA + Icons (keep exactly like this) -->
   <link rel="icon" href="/favicon.ico" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -14,7 +17,14 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="REO" />
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <!-- ✅ THIS WAS MISSING -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  />
 
   <style>
     body {
@@ -23,12 +33,18 @@
       color: #f8fafc;
       overflow-x: hidden;
       -webkit-tap-highlight-color: transparent;
+      margin: 0;
     }
 
     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.2); border-radius: 10px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(245, 158, 11, 0.4); }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(245, 158, 11, 0.2);
+      border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(245, 158, 11, 0.4);
+    }
 
     @keyframes float {
       0% { transform: translateY(0px); }
@@ -37,11 +53,16 @@
     }
     .animate-float { animation: float 6s ease-in-out infinite; }
 
-    .sticky-header { position: sticky; top: 0; z-index: 50; }
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
   </style>
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
+  <!-- importmap must be before module scripts -->
   <script type="importmap">
   {
     "imports": {
@@ -57,7 +78,8 @@
 
 <body>
   <div id="root"></div>
+
+  <!-- ✅ load app ONCE -->
   <script type="module" src="index.tsx"></script>
 </body>
 </html>
-
