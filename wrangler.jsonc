@@ -1,5 +1,5 @@
 {
-  "name": "reo-app",
+  "name": "reo",
   "compatibility_date": "2026-01-26",
   "assets": {
     "directory": "./dist"
