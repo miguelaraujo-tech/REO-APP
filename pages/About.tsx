@@ -47,9 +47,7 @@ const About: React.FC = () => {
             </p>
 
             <p>
-              Desde a sua génese, a REO é coordenada por <span className="text-white font-bold">Miguel Araújo</span>, que tem assegurado
-              de forma contínua a liderança, a consolidação e a evolução do projeto. Atualmente, a REO ultrapassa o conceito tradicional
-              de rádio escolar, afirmando-se como um <span className="text-white font-bold">hub digital educativo</span>, onde tecnologia e
+              Atualmente, a REO ultrapassa o conceito tradicional de rádio escolar, afirmando-se como um <span className="text-white font-bold">hub digital educativo</span>, onde tecnologia e
               pedagogia se cruzam para dar voz aos alunos, promover a criatividade e reforçar a ligação entre a escola e a comunidade.
             </p>
           </div>
