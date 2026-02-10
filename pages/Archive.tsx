@@ -594,9 +594,10 @@ const coverId = idxs.coverId !== -1 ? row[idxs.coverId].trim() : '';
             </div>
           </div>
         </div>
-      )}
-    </div>
-  );
-};
+return (
+  <div>
+    ...
+  </div>
+);
 
 export default Archive;
