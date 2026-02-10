@@ -10,6 +10,7 @@ interface Episode {
   year: string;
   program: string;
   fileId: string;
+  coverId: string;
 }
 
 interface NavItem {
@@ -17,6 +18,7 @@ interface NavItem {
   name: string;
   id: string;
   data?: Episode;
+  coverId?: string;        // added for program items
 }
 
 const Archive: React.FC = () => {
@@ -26,7 +28,7 @@ const Archive: React.FC = () => {
   const [activeEpisode, setActiveEpisode] = useState<Episode | null>(null);
   const [playbackError, setPlaybackError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  
+
   const normalize = (str: string) => {
     if (!str) return "";
     return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
@@ -51,7 +53,6 @@ const Archive: React.FC = () => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setActiveEpisode(null);
     };
-
     if (activeEpisode) {
       const scrollY = window.scrollY;
       document.body.style.position = 'fixed';
@@ -67,7 +68,6 @@ const Archive: React.FC = () => {
         window.scrollTo(0, parseInt(scrollY || '0') * -1);
       }
     }
-
     return () => {
       document.body.style.position = '';
       window.removeEventListener('keydown', handleEsc);
@@ -85,7 +85,6 @@ const Archive: React.FC = () => {
 
         let headerIndex = 0;
         let delimiter = lines[0].includes(';') ? ';' : ',';
-
         if (lines[0].toLowerCase().trim().startsWith("sep=")) {
           const sepChar = lines[0].split('=')[1]?.trim();
           if (sepChar) {
@@ -117,10 +116,10 @@ const Archive: React.FC = () => {
           program: findIdx(['program', 'programa']),
           title: findIdx(['filename', 'file', 'name', 'nome', 'title', 'titulo']),
           audio: findIdx(['playlink', 'playurl', 'audiourl', 'linkaudio', 'mp3', 'audio', 'url', 'link']),
+          cover: findIdx(['cover', 'coverlink', 'capa', 'coverimage', 'coverid', 'imagemcapa', 'capaurl']),
         };
 
         const tree: Record<string, Record<string, Episode[]>> = {};
-
         for (let i = headerIndex + 1; i < lines.length; i++) {
           const row = splitLine(lines[i], delimiter);
           if (row.length <= 1) continue;
@@ -128,21 +127,26 @@ const Archive: React.FC = () => {
           const year = (idxs.year !== -1 ? row[idxs.year] : '') || 'Geral';
           const program = (idxs.program !== -1 ? row[idxs.program] : '') || 'Geral';
           const title = (idxs.title !== -1 ? row[idxs.title] : '') || `Emissão ${i}`;
-          
+
           const playLink = (idxs.audio !== -1 ? row[idxs.audio] : '').trim();
           const fileId = extractDriveFileId(playLink) || "";
 
+          const coverLink = (idxs.cover !== -1 ? row[idxs.cover] : '').trim();
+          const coverId = extractDriveFileId(coverLink) || "";
+
           if (!tree[year]) tree[year] = {};
           if (!tree[year][program]) tree[year][program] = [];
-          
+
           tree[year][program].push({
             id: `ep-${i}-${normalize(year)}-${normalize(program)}`,
             title,
             year,
             program,
-            fileId
+            fileId,
+            coverId,
           });
         }
+
         setArchiveTree(tree);
         setLoading(false);
       })
@@ -195,11 +199,15 @@ const Archive: React.FC = () => {
     }
     if (currentPath.length === 1) {
       const year = currentPath[0];
-      return Object.keys(archiveTree[year] || {}).sort().map(p => ({
-        type: 'folder',
-        name: p,
-        id: p
-      }));
+      return Object.keys(archiveTree[year] || {}).sort().map(p => {
+        const firstEp = archiveTree[year][p]?.[0];
+        return {
+          type: 'folder',
+          name: p,
+          id: p,
+          coverId: firstEp?.coverId || ''
+        };
+      });
     }
     const [year, program] = currentPath;
     return (archiveTree[year]?.[program] || []).map(ep => ({
@@ -219,8 +227,8 @@ const Archive: React.FC = () => {
           <ArrowLeft className="w-3.5 h-3.5 mr-1.5 group-hover:-translate-x-1 transition-transform" /> Início
         </Link>
         {currentPath.length > 0 && (
-          <button 
-            onClick={() => { setPlaybackError(null); setCurrentPath(currentPath.slice(0, -1)); }} 
+          <button
+            onClick={() => { setPlaybackError(null); setCurrentPath(currentPath.slice(0, -1)); }}
             className="text-[10px] font-black uppercase tracking-widest bg-white/5 hover:bg-white/10 text-white px-3 py-1.5 rounded-full flex items-center gap-2 border border-white/5 transition-all active:scale-95"
           >
             <ChevronRight className="w-3 h-3 rotate-180" /> Voltar
@@ -248,10 +256,30 @@ const Archive: React.FC = () => {
               </React.Fragment>
             ))}
           </div>
+
           <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-3 tracking-tighter italic uppercase leading-none">
             <Folder className="text-amber-500 w-6 h-6 sm:w-8 sm:h-8" />
             {currentPath.length === 0 ? "Arquivo" : currentPath[currentPath.length - 1]}
           </h1>
+
+          {/* BIG COVER IMAGE / BACKGROUND when inside a program */}
+          {currentPath.length === 2 && items.length > 0 && items[0].data?.coverId && (
+            <div 
+              className="relative -mx-6 sm:-mx-8 h-64 sm:h-80 md:h-96 lg:h-[420px] mt-6 overflow-hidden rounded-b-3xl shadow-2xl"
+              style={{
+                backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.45), rgba(0,0,0,0.75)), ur[](https://drive.google.com/uc?export=view&id=${items[0].data.coverId})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
+              }}
+            >
+              <div className="absolute inset-0 flex items-end justify-center pb-8 px-6 text-center">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white drop-shadow-2xl tracking-tight">
+                  {currentPath[1]}
+                </h2>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="divide-y divide-white/5 min-h-[350px] max-h-[60vh] overflow-y-auto custom-scrollbar">
@@ -264,15 +292,36 @@ const Archive: React.FC = () => {
             <div className="flex flex-col items-center justify-center py-32 text-slate-600 italic uppercase font-bold tracking-widest opacity-30">Vazio</div>
           ) : (
             items.map((item) => (
-              <div 
-                key={item.id} 
-                onClick={() => handleItemClick(item)} 
+              <div
+                key={item.id}
+                onClick={() => handleItemClick(item)}
                 className="p-5 sm:p-6 flex items-center justify-between hover:bg-white/[0.03] active:bg-white/[0.05] transition-colors group cursor-pointer"
               >
                 <div className="flex items-center gap-4 sm:gap-6">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-inner ${item.type === 'folder' ? 'bg-amber-500/10 text-amber-500' : 'bg-blue-500/10 text-blue-400'}`}>
-                    {item.type === 'folder' ? <Folder className="w-6 h-6" /> : <FileAudio className="w-6 h-6" />}
-                  </div>
+                  {/* Cover thumbnail for program folders */}
+                  {item.type === 'folder' ? (
+                    <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-md bg-gradient-to-br from-slate-800 to-slate-950">
+                      {item.coverId ? (
+                        <img
+                          src={`https://drive.google.com/uc?export=view&id=${item.coverId}`}
+                          alt={`Capa ${item.name}`}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          referrerPolicy="no-referrer"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Music className="w-7 h-7 text-amber-600/50" />
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-inner bg-blue-500/10 text-blue-400`}>
+                      <FileAudio className="w-6 h-6" />
+                    </div>
+                  )}
+
                   <div className="min-w-0">
                     <span className="font-bold text-white text-base sm:text-lg block tracking-tight group-hover:text-amber-500 transition-colors truncate max-w-[160px] sm:max-w-md">
                       {item.name}
@@ -282,9 +331,10 @@ const Archive: React.FC = () => {
                     </p>
                   </div>
                 </div>
+
                 <div className="flex items-center gap-3">
                   {item.type === 'file' && item.data ? (
-                    <button 
+                    <button
                       onClick={(e) => { e.stopPropagation(); openPlayer(item.data!); }}
                       aria-label={`Ouvir ${item.name}`}
                       className="w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-xl shrink-0 bg-white/5 text-white hover:bg-amber-500 hover:text-black"
@@ -303,8 +353,8 @@ const Archive: React.FC = () => {
 
       {activeEpisode && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-          <div 
-            className="absolute inset-0 bg-black/90 backdrop-blur-md animate-in fade-in duration-300" 
+          <div
+            className="absolute inset-0 bg-black/90 backdrop-blur-md animate-in fade-in duration-300"
             onClick={() => setActiveEpisode(null)}
           />
           
@@ -324,8 +374,8 @@ const Archive: React.FC = () => {
                   </p>
                 </div>
               </div>
-              <button 
-                onClick={() => setActiveEpisode(null)} 
+              <button
+                onClick={() => setActiveEpisode(null)}
                 className="w-9 h-9 bg-white/5 hover:bg-red-500/20 hover:text-red-400 rounded-full flex items-center justify-center text-slate-400 transition-all shrink-0 active:scale-90"
                 aria-label="Fechar"
               >
@@ -335,7 +385,7 @@ const Archive: React.FC = () => {
 
             <div className="p-6">
               <div className="relative w-full h-[180px] bg-black/40 rounded-[1.5rem] overflow-hidden border border-white/5 shadow-inner">
-                <iframe 
+                <iframe
                   key={activeEpisode.fileId}
                   src={`https://drive.google.com/file/d/${activeEpisode.fileId}/preview`}
                   className="absolute inset-0 w-full h-full border-0"
@@ -345,9 +395,9 @@ const Archive: React.FC = () => {
               </div>
               
               <div className="mt-6 flex flex-col gap-3">
-                <a 
-                  href={`https://drive.google.com/file/d/${activeEpisode.fileId}/view`} 
-                  target="_blank" 
+                <a
+                  href={`https://drive.google.com/file/d/${activeEpisode.fileId}/view`}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-amber-500 hover:bg-amber-400 text-black rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl active:scale-95 italic"
                 >
@@ -355,7 +405,7 @@ const Archive: React.FC = () => {
                   Baixar do Google Drive
                 </a>
                 
-                <button 
+                <button
                   onClick={() => copyToClipboard(`https://drive.google.com/file/d/${activeEpisode.fileId}/view`)}
                   className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-white/5 active:scale-95 ${copied ? 'bg-green-500 text-black border-transparent' : 'bg-white/5 hover:bg-white/10 text-white'}`}
                 >
