@@ -40,7 +40,9 @@ const Archive: React.FC = () => {
       /\/d\/([a-zA-Z0-9_-]+)/,
       /\/file\/d\/([a-zA-Z0-9_-]+)/,
       /[?&]id=([a-zA-Z0-9_-]+)/,
-      /id=([a-zA-Z0-9_-]+)/
+      /id=([a-zA-Z0-9_-]+)/,
+      /uc\?export=view&id=([a-zA-Z0-9_-]+)/,   // added for uc?export=view&id=
+      /uc\?id=([a-zA-Z0-9_-]+)/
     ];
     for (const pattern of patterns) {
       const match = url.match(pattern);
@@ -116,8 +118,10 @@ const Archive: React.FC = () => {
           program: findIdx(['program', 'programa']),
           title: findIdx(['filename', 'file', 'name', 'nome', 'title', 'titulo']),
           audio: findIdx(['playlink', 'playurl', 'audiourl', 'linkaudio', 'mp3', 'audio', 'url', 'link']),
-          cover: findIdx(['cover', 'coverlink', 'capa', 'coverimage', 'coverid', 'imagemcapa', 'capaurl', 'cover link', 'link capa']),
+          cover: findIdx(['cover', 'coverlink', 'capa', 'coverimage', 'coverid', 'imagemcapa', 'capaurl', 'cover link', 'link capa', 'imagem', 'foto', 'capa link', 'cover url', 'linkcover', 'coverlink']),
         };
+
+        console.log('[CSV DEBUG] Detected column indices:', idxs); // see if cover index > -1
 
         const tree: Record<string, Record<string, Episode[]>> = {};
         for (let i = headerIndex + 1; i < lines.length; i++) {
@@ -262,18 +266,15 @@ const Archive: React.FC = () => {
             {currentPath.length === 0 ? "Arquivo" : currentPath[currentPath.length - 1]}
           </h1>
 
-          {/* Debug text on page */}
-          {currentPath.length === 2 && (
-            <div className="text-xs text-amber-300 mt-2 text-center">
-              Debug: Cover = {items.find(i => i.data?.coverId)?.data?.coverId || 'EMPTY'}
-            </div>
-          )}
+          {/* On-page debug */}
+          <div className="text-xs text-amber-300 mt-2 text-center">
+            Debug: Cover ID = {items.find(i => i.data?.coverId)?.data?.coverId || 'EMPTY'}
+          </div>
 
-          {/* BIG COVER - only for program pages */}
+          {/* BIG COVER - only program pages */}
           {currentPath.length === 2 && items.length > 0 && (() => {
             const coverId = items.find(item => item.data?.coverId)?.data?.coverId || items[0]?.data?.coverId || '';
 
-            // Console debug
             console.log(`[DEBUG] Program: ${currentPath[1]}`);
             console.log(`[DEBUG] Cover ID: ${coverId || 'NOT FOUND'}`);
             console.log(`[DEBUG] All episode covers:`, items.map(i => i.data?.coverId || 'missing'));
