@@ -32,7 +32,6 @@ interface NavItem {
   name: string;
   id: string;
   data?: Episode;
-  coverId?: string;
 }
 
 const Archive: React.FC = () => {
@@ -50,89 +49,46 @@ const Archive: React.FC = () => {
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]/g, '');
 
-  const extractUrlFromCell = (value: string): string => {
+  const extractDriveFileId = (value: string): string => {
     if (!value) return '';
-    const m1 = value.match(/HYPERLINK\(\s*"([^"]+)"/i);
-    const m2 = value.match(/HYPERLINK\(\s*'([^']+)'/i);
-    return m1?.[1] || m2?.[1] || value;
+    const m = value.match(/\/d\/([a-zA-Z0-9_-]+)|id=([a-zA-Z0-9_-]+)/);
+    return m?.[1] || m?.[2] || '';
   };
-
-  const extractDriveFileId = (url: string): string | null => {
-    const clean = extractUrlFromCell(url);
-    const patterns = [
-      /\/d\/([a-zA-Z0-9_-]+)/,
-      /[?&]id=([a-zA-Z0-9_-]+)/,
-      /thumbnail\?id=([a-zA-Z0-9_-]+)/,
-    ];
-    for (const p of patterns) {
-      const m = clean.match(p);
-      if (m) return m[1];
-    }
-    return null;
-  };
-
-  const driveThumb = (id: string, size = 1200) =>
-    `https://drive.google.com/thumbnail?id=${id}&sz=w${size}`;
 
   useEffect(() => {
-    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setActiveEpisode(null);
-    window.addEventListener('keydown', esc);
-    return () => window.removeEventListener('keydown', esc);
-  }, []);
-
-  const loadData = () => {
-    setLoading(true);
-    setPlaybackError(null);
-
     fetch(`${CSV_URL}&t=${Date.now()}`, { cache: 'no-store' })
       .then((res) => res.text())
       .then((text) => {
         const lines = text.split('\n').filter(Boolean);
+        if (lines.length < 2) throw new Error('CSV vazio');
+
         const headers = lines[0].split(',').map(normalize);
 
-        const findIdx = (keys: string[]) =>
-          headers.findIndex((h) => keys.some((k) => h.includes(normalize(k))));
-
-        const idxs = {
-          year: findIdx(['year']),
-          program: findIdx(['program']),
-          title: findIdx(['title']),
-          audioId: findIdx(['audiofileid']),
-          coverId: findIdx(['coverfileid']),
+        const idx = {
+          year: headers.findIndex((h) => h.includes('year')),
+          program: headers.findIndex((h) => h.includes('program')),
+          title: headers.findIndex((h) => h.includes('title')),
+          audioId: headers.findIndex((h) => h.includes('audio')),
+          coverId: headers.findIndex((h) => h.includes('cover')),
         };
-
-        const nothingMatched =
-          idxs.year === -1 &&
-          idxs.program === -1 &&
-          idxs.title === -1 &&
-          idxs.audioId === -1 &&
-          idxs.coverId === -1;
-
-        if (nothingMatched) {
-          setPlaybackError('Cabeçalhos CSV não reconhecidos.');
-          setLoading(false);
-          return;
-        }
 
         const tree: Record<string, Record<string, Episode[]>> = {};
 
         for (let i = 1; i < lines.length; i++) {
           const cols = lines[i].split(',');
-          const year = cols[idxs.year] || 'Geral';
-          const program = cols[idxs.program] || 'Geral';
-          const title = cols[idxs.title] || `Emissão ${i}`;
-          const fileId = extractDriveFileId(cols[idxs.audioId]) || '';
-          const coverId = extractDriveFileId(cols[idxs.coverId]) || '';
+          const year = cols[idx.year] || 'Geral';
+          const program = cols[idx.program] || 'Geral';
 
           tree[year] ??= {};
           tree[year][program] ??= [];
+
           tree[year][program].push({
             id: `${i}-${year}-${program}`,
-            title,
+            title: cols[idx.title] || `Emissão ${i}`,
             year,
             program,
-            fileId,
-            coverId,
+            fileId: extractDriveFileId(cols[idx.audioId]),
+            coverId: extractDriveFileId(cols[idx.coverId]),
           });
         }
 
@@ -140,15 +96,13 @@ const Archive: React.FC = () => {
         setLoading(false);
       })
       .catch(() => {
-        setPlaybackError('Erro ao carregar CSV.');
+        setPlaybackError('Erro ao carregar o arquivo.');
         setLoading(false);
       });
-  };
-
-  useEffect(loadData, []);
+  }, []);
 
   const items: NavItem[] = (() => {
-    if (!currentPath.length)
+    if (currentPath.length === 0)
       return Object.keys(archiveTree).map((y) => ({ type: 'folder', name: y, id: y }));
 
     if (currentPath.length === 1)
@@ -158,7 +112,8 @@ const Archive: React.FC = () => {
         id: p,
       }));
 
-    return (archiveTree[currentPath[0]]?.[currentPath[1]] || []).map((ep) => ({
+    const [year, program] = currentPath;
+    return (archiveTree[year]?.[program] || []).map((ep) => ({
       type: 'file',
       name: ep.title,
       id: ep.id,
@@ -167,14 +122,87 @@ const Archive: React.FC = () => {
   })();
 
   return (
-    <div className="pb-24">
-      {/* --- UI unchanged --- */}
+    <div className="pb-24 px-4 max-w-3xl mx-auto">
+
+      <Link
+        to="/"
+        className="inline-flex items-center text-amber-500 hover:text-amber-400 mb-6 font-black uppercase tracking-widest text-[10px]"
+      >
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Início
+      </Link>
+
+      {playbackError && (
+        <div className="mb-6 bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400 text-xs font-bold uppercase">
+          {playbackError}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-24 gap-4 text-slate-500">
+          <Loader2 className="w-10 h-10 animate-spin text-amber-500" />
+          <span className="text-xs font-black uppercase tracking-widest">A ler arquivo…</span>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {items.map((item) => (
+            <div
+              key={item.id}
+              onClick={() => {
+                if (item.type === 'folder') {
+                  setCurrentPath([...currentPath, item.id]);
+                } else if (item.data) {
+                  setActiveEpisode(item.data);
+                }
+              }}
+              className="flex items-center justify-between p-4 rounded-2xl bg-white/5 hover:bg-white/10 cursor-pointer transition"
+            >
+              <div className="flex items-center gap-4 min-w-0">
+                {item.type === 'folder' ? (
+                  <Folder className="w-6 h-6 text-amber-500" />
+                ) : (
+                  <FileAudio className="w-6 h-6 text-blue-400" />
+                )}
+                <span className="text-white font-bold truncate">{item.name}</span>
+              </div>
+
+              {item.type === 'folder' ? (
+                <ChevronRight className="w-5 h-5 text-slate-500" />
+              ) : (
+                <Play className="w-6 h-6 text-amber-500" />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
       {activeEpisode && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-black/90"
             onClick={() => setActiveEpisode(null)}
           />
+          <div className="relative bg-[#0f0f18] rounded-3xl p-6 w-full max-w-lg border border-white/10">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-white font-black text-sm uppercase italic">
+                  {activeEpisode.title}
+                </h3>
+                <p className="text-[9px] text-slate-500 uppercase tracking-widest">
+                  {activeEpisode.year} • {activeEpisode.program}
+                </p>
+              </div>
+              <button onClick={() => setActiveEpisode(null)}>
+                <X className="w-5 h-5 text-slate-400" />
+              </button>
+            </div>
+
+            <iframe
+              src={`https://drive.google.com/file/d/${activeEpisode.fileId}/preview`}
+              className="w-full h-[180px] rounded-xl border border-white/5"
+              allow="autoplay"
+            />
+          </div>
         </div>
       )}
     </div>
