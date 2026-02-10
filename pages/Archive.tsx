@@ -378,13 +378,34 @@ const coverId = idxs.coverId !== -1 ? row[idxs.coverId].trim() : '';
       <div className="bg-slate-900/40 backdrop-blur-md rounded-[2.5rem] shadow-2xl border border-white/5 overflow-hidden">
         <div className="p-6 sm:p-8 border-b border-white/5 bg-white/[0.02]">
           <div className="flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">
-            {breadcrumbs.map((crumb, idx) => (
-              <React.Fragment key={idx}>
-                <span className={idx === breadcrumbs.length - 1 ? 'text-amber-500' : ''}>{crumb}</span>
-                {idx < breadcrumbs.length - 1 && <ChevronRight className="w-3 h-3 opacity-30" />}
-              </React.Fragment>
-            ))}
-          </div>
+            {breadcrumbs.map((crumb, idx) => {
+  const isLast = idx === breadcrumbs.length - 1;
+
+  return (
+    <React.Fragment key={idx}>
+      <button
+        disabled={isLast}
+        onClick={() => {
+          if (!isLast) {
+            // idx 0 = Arquivo → []
+            // idx 1 = Year → [year]
+            setPlaybackError(null);
+            setCurrentPath(currentPath.slice(0, idx));
+          }
+        }}
+        className={`text-[10px] font-black uppercase tracking-widest transition-colors
+          ${isLast
+            ? 'text-amber-500 cursor-default'
+            : 'text-slate-500 hover:text-white cursor-pointer'}
+        `}
+      >
+        {crumb}
+      </button>
+
+      {!isLast && <ChevronRight className="w-3 h-3 opacity-30" />}
+    </React.Fragment>
+  );
+})}
 
           <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-3 tracking-tighter italic uppercase leading-none">
             <Folder className="text-amber-500 w-6 h-6 sm:w-8 sm:h-8" />
