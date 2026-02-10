@@ -262,11 +262,11 @@ const Archive: React.FC = () => {
             {currentPath.length === 0 ? "Arquivo" : currentPath[currentPath.length - 1]}
           </h1>
 
-          {/* BIG COVER BACKGROUND - fixed syntax */}
+          {/* BIG COVER BACKGROUND */}
           {currentPath.length === 2 && items.length > 0 && (() => {
             const coverId = items.find(item => item.data?.coverId)?.data?.coverId || items[0]?.data?.coverId || '';
             
-            // Debug in console
+            // Debug logs
             console.log(`[DEBUG] Program: ${currentPath[1]}`);
             console.log(`[DEBUG] Cover ID: ${coverId || 'NOT FOUND'}`);
             console.log(`[DEBUG] All episode covers:`, items.map(i => i.data?.coverId || 'missing'));
