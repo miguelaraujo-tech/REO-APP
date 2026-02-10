@@ -11,7 +11,7 @@ const Home: React.FC = () => {
         
         <div className="relative animate-float">
           <div className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[450px] lg:h-[450px] p-4 mx-auto transform hover:rotate-6 transition-all duration-1000 ease-out cursor-pointer">
-            <Logo className="w-full h-full border-4 border-white/10 bg-[#1a110f]" />
+           <Logo className="w-full h-full rounded-full border-4 border-white/10 bg-[#1a110f] object-contain" />
           </div>
         </div>
 
