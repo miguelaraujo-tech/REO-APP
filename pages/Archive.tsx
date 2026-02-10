@@ -193,23 +193,12 @@ const Archive: React.FC = () => {
           headers.findIndex((h) => needles.some((n) => h.includes(normalize(n))));
 
         const idxs = {
-          year: findIdx(['year', 'ano']),
-          program: findIdx(['program', 'programa']),
-          title: findIdx(['filename', 'file', 'name', 'nome', 'title', 'titulo']),
-          audio: findIdx(['playlink', 'playurl', 'audiourl', 'linkaudio', 'mp3', 'audio', 'url', 'link']),
-          cover: findIdx([
-            'cover',
-            'coverlink',
-            'capa',
-            'coverimage',
-            'coverid',
-            'imagemcapa',
-            'capaurl',
-            'linkcover',
-            'imagem',
-            'foto',
-          ]),
-        };
+  year: findIdx(['year']),
+  program: findIdx(['program']),
+  title: findIdx(['title', 'file name', 'filename']),
+  audioId: findIdx(['audiofileid']),
+  coverId: findIdx(['coverfileid']),
+};
 
         console.log('[CSV DEBUG] Header:', headerRow);
         console.log('[CSV DEBUG] Column indices:', idxs);
@@ -240,13 +229,8 @@ const Archive: React.FC = () => {
           const program = (idxs.program !== -1 ? row[idxs.program] : '') || 'Geral';
           const title = (idxs.title !== -1 ? row[idxs.title] : '') || `Emissão ${i}`;
 
-          const playCell = (idxs.audio !== -1 ? row[idxs.audio] : '').trim();
-          const playLink = extractUrlFromCell(playCell);
-          const fileId = extractDriveFileId(playLink) || '';
-
-          const coverCell = (idxs.cover !== -1 ? row[idxs.cover] : '').trim();
-          const coverLink = extractUrlFromCell(coverCell);
-          const coverId = extractDriveFileId(coverLink) || '';
+         const fileId = idxs.audioId !== -1 ? row[idxs.audioId].trim() : '';
+const coverId = idxs.coverId !== -1 ? row[idxs.coverId].trim() : '';
 
           if (!tree[year]) tree[year] = {};
           if (!tree[year][program]) tree[year][program] = [];
