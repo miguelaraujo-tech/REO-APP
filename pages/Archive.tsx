@@ -94,6 +94,20 @@ const Archive: React.FC = () => {
       window.removeEventListener('keydown', handleEsc);
     };
   }, [activeEpisode]);
+const extractUrlFromCell = (value: string): string => {
+  if (!value) return '';
+  const v = value.trim();
+
+  // =HYPERLINK("url","label") or HYPERLINK("url","label")
+  const m1 = v.match(/HYPERLINK\(\s*"([^"]+)"\s*,/i);
+  if (m1?.[1]) return m1[1];
+
+  // If someone used single quotes
+  const m2 = v.match(/HYPERLINK\(\s*'([^']+)'\s*,/i);
+  if (m2?.[1]) return m2[1];
+
+  return v;
+};
 
   const loadData = () => {
     setLoading(true);
@@ -211,11 +225,15 @@ const Archive: React.FC = () => {
           const program = (idxs.program !== -1 ? row[idxs.program] : '') || 'Geral';
           const title = (idxs.title !== -1 ? row[idxs.title] : '') || `Emissão ${i}`;
 
-          const playLink = (idxs.audio !== -1 ? row[idxs.audio] : '').trim();
-          const fileId = extractDriveFileId(playLink) || '';
+          const playCell = (idxs.audio !== -1 ? row[idxs.audio] : '').trim();
+          
+const playLink = extractUrlFromCell(playCell);
+const fileId = extractDriveFileId(playLink) || '';
 
-          const coverLink = (idxs.cover !== -1 ? row[idxs.cover] : '').trim();
-          const coverId = extractDriveFileId(coverLink) || '';
+const coverCell = (idxs.cover !== -1 ? row[idxs.cover] : '').trim();
+const coverLink = extractUrlFromCell(coverCell);
+const coverId = extractDriveFileId(coverLink) || '';
+
 
           if (!tree[year]) tree[year] = {};
           if (!tree[year][program]) tree[year][program] = [];
