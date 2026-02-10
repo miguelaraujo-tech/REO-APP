@@ -262,10 +262,23 @@ const Archive: React.FC = () => {
             {currentPath.length === 0 ? "Arquivo" : currentPath[currentPath.length - 1]}
           </h1>
 
-          {/* BIG COVER BACKGROUND when inside program */}
+          {/* BIG COVER BACKGROUND - fixed syntax */}
           {currentPath.length === 2 && items.length > 0 && (() => {
-            const coverId = items.find(item => item.data?.coverId)?.data?.coverId || '';
-            if (!coverId) return null;
+            const coverId = items.find(item => item.data?.coverId)?.data?.coverId || items[0]?.data?.coverId || '';
+            
+            // Debug in console
+            console.log(`[DEBUG] Program: ${currentPath[1]}`);
+            console.log(`[DEBUG] Cover ID: ${coverId || 'NOT FOUND'}`);
+            console.log(`[DEBUG] All episode covers:`, items.map(i => i.data?.coverId || 'missing'));
+
+            if (!coverId) {
+              return (
+                <div className="mt-6 -mx-6 sm:-mx-8 h-48 bg-slate-800/50 rounded-b-3xl flex items-center justify-center text-slate-400 text-sm italic">
+                  Sem capa para {currentPath[1]} (verifique pasta Drive / CSV)
+                </div>
+              );
+            }
+
             return (
               <div 
                 className="relative -mx-6 sm:-mx-8 h-64 sm:h-80 md:h-96 lg:h-[420px] mt-6 overflow-hidden rounded-b-3xl shadow-2xl"
