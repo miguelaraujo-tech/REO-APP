@@ -9,6 +9,9 @@ import {
   Loader2,
   X,
   AlertCircle,
+  Copy,
+  Check,
+  Download,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -32,8 +35,49 @@ interface NavItem {
   coverId?: string;
 }
 
+/* ---------------- CSV HELPERS ---------------- */
+
+const normalize = (str: string) =>
+  (str || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '');
+
+const extractUrlFromCell = (value: string): string => {
+  if (!value) return '';
+  const v = value.trim();
+
+  const m1 = v.match(/HYPERLINK\(\s*"([^"]+)"/i);
+  if (m1?.[1]) return m1[1];
+
+  const m2 = v.match(/HYPERLINK\(\s*'([^']+)'/i);
+  if (m2?.[1]) return m2[1];
+
+  return v;
+};
+
+const extractDriveFileId = (url: string): string => {
+  if (!url) return '';
+  const clean = extractUrlFromCell(url);
+
+  const patterns = [
+    /\/d\/([a-zA-Z0-9_-]+)/,
+    /[?&]id=([a-zA-Z0-9_-]+)/,
+    /thumbnail\?id=([a-zA-Z0-9_-]+)/,
+  ];
+
+  for (const p of patterns) {
+    const m = clean.match(p);
+    if (m?.[1]) return m[1];
+  }
+  return '';
+};
+
 const driveThumb = (id: string, size = 1200) =>
   `https://drive.google.com/thumbnail?id=${id}&sz=w${size}`;
+
+/* ---------------- COMPONENT ---------------- */
 
 const Archive: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -41,54 +85,76 @@ const Archive: React.FC = () => {
   const [currentPath, setCurrentPath] = useState<string[]>([]);
   const [activeEpisode, setActiveEpisode] = useState<Episode | null>(null);
   const [playbackError, setPlaybackError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  const normalize = (str: string) =>
-    str
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]/g, '');
-
-  const extractDriveFileId = (value: string): string => {
-    if (!value) return '';
-    const m = value.match(/\/d\/([a-zA-Z0-9_-]+)|id=([a-zA-Z0-9_-]+)/);
-    return m?.[1] || m?.[2] || '';
-  };
+  /* ---------------- LOAD CSV ---------------- */
 
   useEffect(() => {
+    setLoading(true);
     fetch(`${CSV_URL}&t=${Date.now()}`, { cache: 'no-store' })
-      .then((res) => res.text())
-      .then((text) => {
-        const lines = text.split('\n').filter(Boolean);
-        if (lines.length < 2) throw new Error('CSV vazio');
+      .then(async (res) => {
+        const text = await res.text();
+        if (/<!doctype html>|<html/i.test(text)) throw new Error('HTML');
+        return text;
+      })
+      .then((csv) => {
+        const clean = csv.replace(/\r/g, '');
+        const lines = clean.split('\n').filter(Boolean);
 
-        const headers = lines[0].split(',').map(normalize);
+        let headerIndex = 0;
+        if (lines[0].toLowerCase().startsWith('sep=')) headerIndex = 1;
 
+        const headerLine = lines[headerIndex];
+        const delimiter =
+          (headerLine.match(/;/g)?.length || 0) >
+          (headerLine.match(/,/g)?.length || 0)
+            ? ';'
+            : ',';
+
+        const split = (line: string) => {
+          const out: string[] = [];
+          let cur = '';
+          let q = false;
+
+          for (const c of line) {
+            if (c === '"') q = !q;
+            else if (c === delimiter && !q) {
+              out.push(cur);
+              cur = '';
+            } else cur += c;
+          }
+          out.push(cur);
+          return out.map((v) => v.replace(/^"|"$/g, '').trim());
+        };
+
+        const headers = split(lines[headerIndex]).map(normalize);
         const idx = {
           year: headers.findIndex((h) => h.includes('year')),
           program: headers.findIndex((h) => h.includes('program')),
           title: headers.findIndex((h) => h.includes('title')),
-          audioId: headers.findIndex((h) => h.includes('audio')),
-          coverId: headers.findIndex((h) => h.includes('cover')),
+          audio: headers.findIndex((h) => h.includes('audio')),
+          cover: headers.findIndex((h) => h.includes('cover')),
         };
 
         const tree: Record<string, Record<string, Episode[]>> = {};
 
-        for (let i = 1; i < lines.length; i++) {
-          const cols = lines[i].split(',');
-          const year = cols[idx.year] || 'Geral';
-          const program = cols[idx.program] || 'Geral';
+        for (let i = headerIndex + 1; i < lines.length; i++) {
+          const row = split(lines[i]);
+          if (!row.length) continue;
+
+          const year = row[idx.year] || 'Geral';
+          const program = row[idx.program] || 'Geral';
 
           tree[year] ??= {};
           tree[year][program] ??= [];
 
           tree[year][program].push({
-            id: `${i}-${year}-${program}`,
-            title: cols[idx.title] || `Emissão ${i}`,
+            id: `ep-${i}-${year}-${program}`,
+            title: row[idx.title] || `Emissão ${i}`,
             year,
             program,
-            fileId: extractDriveFileId(cols[idx.audioId]),
-            coverId: extractDriveFileId(cols[idx.coverId]),
+            fileId: extractDriveFileId(row[idx.audio]),
+            coverId: extractDriveFileId(row[idx.cover]),
           });
         }
 
@@ -101,32 +167,21 @@ const Archive: React.FC = () => {
       });
   }, []);
 
-  const items: NavItem[] = (() => {
-    // YEARS
-    if (currentPath.length === 0) {
-      return Object.keys(archiveTree).map((y) => ({
-        type: 'folder',
-        name: y,
-        id: y,
-      }));
-    }
+  /* ---------------- NAV ITEMS ---------------- */
 
-    // PROGRAMS (WITH SMALL COVERS)
+  const items: NavItem[] = (() => {
+    if (currentPath.length === 0)
+      return Object.keys(archiveTree).map((y) => ({ type: 'folder', name: y, id: y }));
+
     if (currentPath.length === 1) {
       const year = currentPath[0];
       return Object.keys(archiveTree[year] || {}).map((p) => {
         const coverId =
           archiveTree[year][p]?.find((ep) => ep.coverId)?.coverId || '';
-        return {
-          type: 'folder',
-          name: p,
-          id: p,
-          coverId,
-        };
+        return { type: 'folder', name: p, id: p, coverId };
       });
     }
 
-    // FILES
     const [year, program] = currentPath;
     return (archiveTree[year]?.[program] || []).map((ep) => ({
       type: 'file',
@@ -138,138 +193,89 @@ const Archive: React.FC = () => {
 
   const programCoverId =
     currentPath.length === 2
-      ? archiveTree[currentPath[0]]?.[currentPath[1]]?.find(
-          (ep) => ep.coverId
-        )?.coverId || ''
+      ? archiveTree[currentPath[0]]?.[currentPath[1]]?.find((e) => e.coverId)
+          ?.coverId || ''
       : '';
+
+  /* ---------------- RENDER ---------------- */
 
   return (
     <div className="pb-24 px-4 max-w-3xl mx-auto">
-      <Link
-        to="/"
-        className="inline-flex items-center text-amber-500 hover:text-amber-400 mb-6 font-black uppercase tracking-widest text-[10px]"
-      >
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Início
+      <Link to="/" className="text-amber-500 text-xs font-black uppercase">
+        <ArrowLeft className="inline w-4 h-4 mr-2" /> Início
       </Link>
 
-      {playbackError && (
-        <div className="mb-6 bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400 text-xs font-bold uppercase flex items-center gap-2">
-          <AlertCircle className="w-4 h-4" />
-          {playbackError}
-        </div>
-      )}
-
       {/* BIG PROGRAM COVER */}
-      {currentPath.length === 2 && !loading && (
+      {currentPath.length === 2 && programCoverId && (
         <div
-          className="relative mb-6 h-56 sm:h-72 md:h-80 rounded-3xl overflow-hidden shadow-2xl"
+          className="my-6 h-72 rounded-3xl overflow-hidden shadow-2xl"
           style={{
-            backgroundImage: programCoverId
-              ? `linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.85)), url(${driveThumb(
-                  programCoverId,
-                  2000
-                )})`
-              : undefined,
+            backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,.4), rgba(0,0,0,.9)), url(${driveThumb(
+              programCoverId,
+              2000
+            )})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
         >
-          {!programCoverId && (
-            <div className="absolute inset-0 flex items-center justify-center text-slate-500 italic">
-              Sem imagem de capa
-            </div>
-          )}
-          <div className="absolute inset-0 flex items-end justify-center pb-6">
-            <h2 className="text-2xl sm:text-3xl font-black text-white drop-shadow-2xl">
-              {currentPath[1]}
-            </h2>
+          <div className="h-full flex items-end justify-center pb-6">
+            <h2 className="text-3xl font-black text-white">{currentPath[1]}</h2>
           </div>
         </div>
       )}
 
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-24 gap-4 text-slate-500">
-          <Loader2 className="w-10 h-10 animate-spin text-amber-500" />
-          <span className="text-xs font-black uppercase tracking-widest">
-            A ler arquivo…
-          </span>
+        <div className="py-24 text-center text-slate-500">
+          <Loader2 className="w-10 h-10 animate-spin mx-auto text-amber-500" />
         </div>
       ) : (
         <div className="space-y-3">
           {items.map((item) => (
             <div
               key={item.id}
-              onClick={() => {
-                if (item.type === 'folder') {
-                  setCurrentPath([...currentPath, item.id]);
-                } else if (item.data) {
-                  setActiveEpisode(item.data);
-                }
-              }}
-              className="flex items-center justify-between p-4 rounded-2xl bg-white/5 hover:bg-white/10 cursor-pointer transition"
+              onClick={() =>
+                item.type === 'folder'
+                  ? setCurrentPath([...currentPath, item.id])
+                  : setActiveEpisode(item.data!)
+              }
+              className="flex items-center justify-between p-4 bg-white/5 rounded-2xl cursor-pointer"
             >
-              <div className="flex items-center gap-4 min-w-0">
+              <div className="flex items-center gap-4">
                 {item.type === 'folder' ? (
-                  <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center shadow-inner">
+                  <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-800">
                     {item.coverId ? (
                       <img
                         src={driveThumb(item.coverId, 500)}
-                        alt={item.name}
                         className="w-full h-full object-cover"
-                        loading="lazy"
-                        referrerPolicy="no-referrer"
                       />
                     ) : (
-                      <Music className="w-6 h-6 text-amber-500/50" />
+                      <Music className="w-full h-full p-4 text-amber-500/40" />
                     )}
                   </div>
                 ) : (
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-blue-500/10 text-blue-400">
-                    <FileAudio className="w-6 h-6" />
-                  </div>
+                  <FileAudio className="w-6 h-6 text-blue-400" />
                 )}
-                <span className="text-white font-bold truncate">
-                  {item.name}
-                </span>
+                <span className="text-white font-bold truncate">{item.name}</span>
               </div>
-
-              {item.type === 'folder' ? (
-                <ChevronRight className="w-5 h-5 text-slate-500" />
-              ) : (
-                <Play className="w-6 h-6 text-amber-500" />
-              )}
+              {item.type === 'folder' ? <ChevronRight /> : <Play />}
             </div>
           ))}
         </div>
       )}
 
+      {/* PLAYER */}
       {activeEpisode && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/90"
-            onClick={() => setActiveEpisode(null)}
-          />
-          <div className="relative bg-[#0f0f18] rounded-3xl p-6 w-full max-w-lg border border-white/10">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-white font-black text-sm uppercase italic">
-                  {activeEpisode.title}
-                </h3>
-                <p className="text-[9px] text-slate-500 uppercase tracking-widest">
-                  {activeEpisode.year} • {activeEpisode.program}
-                </p>
-              </div>
-              <button onClick={() => setActiveEpisode(null)}>
-                <X className="w-5 h-5 text-slate-400" />
-              </button>
-            </div>
-
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4">
+          <div className="bg-[#0f0f18] p-6 rounded-3xl w-full max-w-lg">
+            <h3 className="text-white font-black">{activeEpisode.title}</h3>
             <iframe
               src={`https://drive.google.com/file/d/${activeEpisode.fileId}/preview`}
-              className="w-full h-[180px] rounded-xl border border-white/5"
+              className="w-full h-48 mt-4 rounded-xl"
               allow="autoplay"
             />
+            <button onClick={() => setActiveEpisode(null)} className="mt-4 text-red-400">
+              Fechar
+            </button>
           </div>
         </div>
       )}
