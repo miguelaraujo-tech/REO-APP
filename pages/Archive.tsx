@@ -41,8 +41,9 @@ const Archive: React.FC = () => {
       /\/file\/d\/([a-zA-Z0-9_-]+)/,
       /[?&]id=([a-zA-Z0-9_-]+)/,
       /id=([a-zA-Z0-9_-]+)/,
-      /uc\?export=view&id=([a-zA-Z0-9_-]+)/,   // added for uc?export=view&id=
-      /uc\?id=([a-zA-Z0-9_-]+)/
+      /uc\?export=view&id=([a-zA-Z0-9_-]+)/,
+      /uc\?id=([a-zA-Z0-9_-]+)/,
+      /uc\?export=download&id=([a-zA-Z0-9_-]+)/
     ];
     for (const pattern of patterns) {
       const match = url.match(pattern);
@@ -118,10 +119,10 @@ const Archive: React.FC = () => {
           program: findIdx(['program', 'programa']),
           title: findIdx(['filename', 'file', 'name', 'nome', 'title', 'titulo']),
           audio: findIdx(['playlink', 'playurl', 'audiourl', 'linkaudio', 'mp3', 'audio', 'url', 'link']),
-          cover: findIdx(['cover', 'coverlink', 'capa', 'coverimage', 'coverid', 'imagemcapa', 'capaurl', 'cover link', 'link capa', 'imagem', 'foto', 'capa link', 'cover url', 'linkcover', 'coverlink']),
+          cover: findIdx(['cover', 'coverlink', 'capa', 'coverimage', 'coverid', 'imagemcapa', 'capaurl', 'cover link', 'link capa', 'imagem', 'foto', 'capa link', 'cover url', 'linkcover', 'coverlink', 'coverlink', 'cover link', 'capa link']),
         };
 
-        console.log('[CSV DEBUG] Detected column indices:', idxs); // see if cover index > -1
+        console.log('[CSV DEBUG] Column indices:', idxs);
 
         const tree: Record<string, Record<string, Episode[]>> = {};
         for (let i = headerIndex + 1; i < lines.length; i++) {
@@ -266,12 +267,7 @@ const Archive: React.FC = () => {
             {currentPath.length === 0 ? "Arquivo" : currentPath[currentPath.length - 1]}
           </h1>
 
-          {/* On-page debug */}
-          <div className="text-xs text-amber-300 mt-2 text-center">
-            Debug: Cover ID = {items.find(i => i.data?.coverId)?.data?.coverId || 'EMPTY'}
-          </div>
-
-          {/* BIG COVER - only program pages */}
+          {/* Debug + Cover ONLY on program pages */}
           {currentPath.length === 2 && items.length > 0 && (() => {
             const coverId = items.find(item => item.data?.coverId)?.data?.coverId || items[0]?.data?.coverId || '';
 
