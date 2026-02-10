@@ -52,8 +52,29 @@ const Archive: React.FC = () => {
       .replace(/[^a-z0-9]/g, '');
   };
 
+  // If the CSV contains formula text like =HYPERLINK("url","label"),
+  // extract the URL portion so we can grab the Drive ID.
+  const extractUrlFromCell = (value: string): string => {
+    if (!value) return '';
+    const v = value.trim();
+
+    // =HYPERLINK("url","label")  or  HYPERLINK("url","label")
+    const m1 = v.match(/HYPERLINK\(\s*"([^"]+)"\s*,/i);
+    if (m1?.[1]) return m1[1];
+
+    // HYPERLINK('url','label')
+    const m2 = v.match(/HYPERLINK\(\s*'([^']+)'\s*,/i);
+    if (m2?.[1]) return m2[1];
+
+    return v;
+  };
+
   const extractDriveFileId = (url: string): string | null => {
     if (!url) return null;
+
+    // Some cells may include the whole formula, so normalize first
+    const clean = extractUrlFromCell(url);
+
     const patterns = [
       /\/d\/([a-zA-Z0-9_-]+)/,
       /\/file\/d\/([a-zA-Z0-9_-]+)/,
@@ -62,13 +83,19 @@ const Archive: React.FC = () => {
       /uc\?export=view&id=([a-zA-Z0-9_-]+)/,
       /uc\?id=([a-zA-Z0-9_-]+)/,
       /uc\?export=download&id=([a-zA-Z0-9_-]+)/,
+      /thumbnail\?id=([a-zA-Z0-9_-]+)/,
     ];
+
     for (const pattern of patterns) {
-      const match = url.match(pattern);
+      const match = clean.match(pattern);
       if (match && match[1]) return match[1];
     }
     return null;
   };
+
+  // More reliable than uc?export=view for public images
+  const driveThumb = (id: string, size = 1200) =>
+    `https://drive.google.com/thumbnail?id=${id}&sz=w${size}`;
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -94,25 +121,12 @@ const Archive: React.FC = () => {
       window.removeEventListener('keydown', handleEsc);
     };
   }, [activeEpisode]);
-const extractUrlFromCell = (value: string): string => {
-  if (!value) return '';
-  const v = value.trim();
-
-  // =HYPERLINK("url","label") or HYPERLINK("url","label")
-  const m1 = v.match(/HYPERLINK\(\s*"([^"]+)"\s*,/i);
-  if (m1?.[1]) return m1[1];
-
-  // If someone used single quotes
-  const m2 = v.match(/HYPERLINK\(\s*'([^']+)'\s*,/i);
-  if (m2?.[1]) return m2[1];
-
-  return v;
-};
 
   const loadData = () => {
     setLoading(true);
     setPlaybackError(null);
 
+    // Note: CSV_URL already includes ?output=csv, so cache-busters should use &...
     fetch(`${CSV_URL}&t=${Date.now()}&nocache=${Math.random()}`, { cache: 'no-store' })
       .then(async (res) => {
         const text = await res.text();
@@ -124,9 +138,7 @@ const extractUrlFromCell = (value: string): string => {
           /accounts\.google\.com/i.test(text) ||
           /ServiceLogin/i.test(text);
 
-        if (!res.ok || looksLikeHtml) {
-          throw new Error('CSV_NOT_AVAILABLE');
-        }
+        if (!res.ok || looksLikeHtml) throw new Error('CSV_NOT_AVAILABLE');
 
         return text;
       })
@@ -154,7 +166,7 @@ const extractUrlFromCell = (value: string): string => {
         const headerLine = lines[headerIndex] || lines[0] || '';
         const commaCount = (headerLine.match(/,/g) || []).length;
         const semiCount = (headerLine.match(/;/g) || []).length;
-        let delimiter = semiCount > commaCount ? ';' : ',';
+        const delimiter = semiCount > commaCount ? ';' : ',';
 
         const splitLine = (line: string, d: string) => {
           const result: string[] = [];
@@ -176,6 +188,7 @@ const extractUrlFromCell = (value: string): string => {
 
         const headerRow = splitLine(lines[headerIndex], delimiter);
         const headers = headerRow.map(normalize);
+
         const findIdx = (needles: string[]) =>
           headers.findIndex((h) => needles.some((n) => h.includes(normalize(n))));
 
@@ -210,7 +223,9 @@ const extractUrlFromCell = (value: string): string => {
 
         if (nothingMatched) {
           setArchiveTree({});
-          setPlaybackError('Não consegui identificar as colunas do CSV. Confirma os cabeçalhos (Ano/Programa/Título/Link).');
+          setPlaybackError(
+            'Não consegui identificar as colunas do CSV. Confirma os cabeçalhos (Ano/Programa/Título/Link/Capas).'
+          );
           setLoading(false);
           return;
         }
@@ -226,14 +241,12 @@ const extractUrlFromCell = (value: string): string => {
           const title = (idxs.title !== -1 ? row[idxs.title] : '') || `Emissão ${i}`;
 
           const playCell = (idxs.audio !== -1 ? row[idxs.audio] : '').trim();
-          
-const playLink = extractUrlFromCell(playCell);
-const fileId = extractDriveFileId(playLink) || '';
+          const playLink = extractUrlFromCell(playCell);
+          const fileId = extractDriveFileId(playLink) || '';
 
-const coverCell = (idxs.cover !== -1 ? row[idxs.cover] : '').trim();
-const coverLink = extractUrlFromCell(coverCell);
-const coverId = extractDriveFileId(coverLink) || '';
-
+          const coverCell = (idxs.cover !== -1 ? row[idxs.cover] : '').trim();
+          const coverLink = extractUrlFromCell(coverCell);
+          const coverId = extractDriveFileId(coverLink) || '';
 
           if (!tree[year]) tree[year] = {};
           if (!tree[year][program]) tree[year][program] = [];
@@ -263,6 +276,7 @@ const coverId = extractDriveFileId(coverLink) || '';
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const openPlayer = (episode: Episode) => {
@@ -303,6 +317,7 @@ const coverId = extractDriveFileId(coverLink) || '';
           id: y,
         }));
     }
+
     if (currentPath.length === 1) {
       const year = currentPath[0];
       return Object.keys(archiveTree[year] || {})
@@ -317,6 +332,7 @@ const coverId = extractDriveFileId(coverLink) || '';
           };
         });
     }
+
     const [year, program] = currentPath;
     return (archiveTree[year]?.[program] || []).map((ep) => ({
       type: 'file',
@@ -328,7 +344,7 @@ const coverId = extractDriveFileId(coverLink) || '';
 
   const breadcrumbs = ['Arquivo', ...currentPath];
 
-  // Cover for program header: use first episode coverId in that program (if any)
+  // Cover for program header: first non-empty coverId inside that program
   const programCoverId =
     currentPath.length === 2
       ? archiveTree[currentPath[0]]?.[currentPath[1]]?.find((ep) => !!ep.coverId)?.coverId || ''
@@ -402,8 +418,10 @@ const coverId = extractDriveFileId(coverLink) || '';
                 <div
                   className="relative -mx-6 sm:-mx-8 h-64 sm:h-80 md:h-96 lg:h-[420px] mt-6 overflow-hidden rounded-b-3xl shadow-2xl"
                   style={{
-                    // ✅ FIXED: url(...) not ur[](...)
-                    backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.45), rgba(0,0,0,0.75)), url(https://drive.google.com/uc?export=view&id=${programCoverId})`,
+                    backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.45), rgba(0,0,0,0.75)), url(${driveThumb(
+                      programCoverId,
+                      2000
+                    )})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
@@ -442,7 +460,7 @@ const coverId = extractDriveFileId(coverLink) || '';
                     <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-md bg-gradient-to-br from-slate-800 to-slate-950">
                       {item.coverId ? (
                         <img
-                          src={`https://drive.google.com/uc?export=view&id=${item.coverId}`}
+                          src={driveThumb(item.coverId, 500)}
                           alt={`Capa ${item.name}`}
                           className="w-full h-full object-cover"
                           loading="lazy"
@@ -517,6 +535,7 @@ const coverId = extractDriveFileId(coverLink) || '';
                   </p>
                 </div>
               </div>
+
               <button
                 onClick={() => setActiveEpisode(null)}
                 className="w-9 h-9 bg-white/5 hover:bg-red-500/20 hover:text-red-400 rounded-full flex items-center justify-center text-slate-400 transition-all shrink-0 active:scale-90"
@@ -551,9 +570,7 @@ const coverId = extractDriveFileId(coverLink) || '';
                 <button
                   onClick={() => copyToClipboard(`https://drive.google.com/file/d/${activeEpisode.fileId}/view`)}
                   className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-white/5 active:scale-95 ${
-                    copied
-                      ? 'bg-green-500 text-black border-transparent'
-                      : 'bg-white/5 hover:bg-white/10 text-white'
+                    copied ? 'bg-green-500 text-black border-transparent' : 'bg-white/5 hover:bg-white/10 text-white'
                   }`}
                 >
                   {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
