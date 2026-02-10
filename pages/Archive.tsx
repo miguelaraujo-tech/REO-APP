@@ -9,9 +9,6 @@ import {
   Loader2,
   X,
   AlertCircle,
-  Copy,
-  Check,
-  Download,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -32,7 +29,11 @@ interface NavItem {
   name: string;
   id: string;
   data?: Episode;
+  coverId?: string;
 }
+
+const driveThumb = (id: string, size = 500) =>
+  `https://drive.google.com/thumbnail?id=${id}&sz=w${size}`;
 
 const Archive: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -40,7 +41,6 @@ const Archive: React.FC = () => {
   const [currentPath, setCurrentPath] = useState<string[]>([]);
   const [activeEpisode, setActiveEpisode] = useState<Episode | null>(null);
   const [playbackError, setPlaybackError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
 
   const normalize = (str: string) =>
     str
@@ -103,14 +103,24 @@ const Archive: React.FC = () => {
 
   const items: NavItem[] = (() => {
     if (currentPath.length === 0)
-      return Object.keys(archiveTree).map((y) => ({ type: 'folder', name: y, id: y }));
-
-    if (currentPath.length === 1)
-      return Object.keys(archiveTree[currentPath[0]] || {}).map((p) => ({
+      return Object.keys(archiveTree).map((y) => ({
         type: 'folder',
-        name: p,
-        id: p,
+        name: y,
+        id: y,
       }));
+
+    if (currentPath.length === 1) {
+      const year = currentPath[0];
+      return Object.keys(archiveTree[year] || {}).map((p) => {
+        const firstEp = archiveTree[year][p]?.[0];
+        return {
+          type: 'folder',
+          name: p,
+          id: p,
+          coverId: firstEp?.coverId || '',
+        };
+      });
+    }
 
     const [year, program] = currentPath;
     return (archiveTree[year]?.[program] || []).map((ep) => ({
@@ -123,7 +133,6 @@ const Archive: React.FC = () => {
 
   return (
     <div className="pb-24 px-4 max-w-3xl mx-auto">
-
       <Link
         to="/"
         className="inline-flex items-center text-amber-500 hover:text-amber-400 mb-6 font-black uppercase tracking-widest text-[10px]"
@@ -133,7 +142,8 @@ const Archive: React.FC = () => {
       </Link>
 
       {playbackError && (
-        <div className="mb-6 bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400 text-xs font-bold uppercase">
+        <div className="mb-6 bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400 text-xs font-bold uppercase flex items-center gap-2">
+          <AlertCircle className="w-4 h-4" />
           {playbackError}
         </div>
       )}
@@ -159,10 +169,28 @@ const Archive: React.FC = () => {
             >
               <div className="flex items-center gap-4 min-w-0">
                 {item.type === 'folder' ? (
-                  <Folder className="w-6 h-6 text-amber-500" />
+                  <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center shadow-inner">
+                    {item.coverId ? (
+                      <img
+                        src={driveThumb(item.coverId)}
+                        alt={`Capa ${item.name}`}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <Music className="w-6 h-6 text-amber-500/50" />
+                    )}
+                  </div>
                 ) : (
-                  <FileAudio className="w-6 h-6 text-blue-400" />
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-blue-500/10 text-blue-400">
+                    <FileAudio className="w-6 h-6" />
+                  </div>
                 )}
+
                 <span className="text-white font-bold truncate">{item.name}</span>
               </div>
 
