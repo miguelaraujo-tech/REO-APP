@@ -32,7 +32,7 @@ interface NavItem {
   coverId?: string;
 }
 
-const driveThumb = (id: string, size = 500) =>
+const driveThumb = (id: string, size = 1200) =>
   `https://drive.google.com/thumbnail?id=${id}&sz=w${size}`;
 
 const Archive: React.FC = () => {
@@ -102,26 +102,31 @@ const Archive: React.FC = () => {
   }, []);
 
   const items: NavItem[] = (() => {
-    if (currentPath.length === 0)
+    // YEARS
+    if (currentPath.length === 0) {
       return Object.keys(archiveTree).map((y) => ({
         type: 'folder',
         name: y,
         id: y,
       }));
+    }
 
+    // PROGRAMS (WITH SMALL COVERS)
     if (currentPath.length === 1) {
       const year = currentPath[0];
       return Object.keys(archiveTree[year] || {}).map((p) => {
-        const firstEp = archiveTree[year][p]?.[0];
+        const coverId =
+          archiveTree[year][p]?.find((ep) => ep.coverId)?.coverId || '';
         return {
           type: 'folder',
           name: p,
           id: p,
-          coverId: firstEp?.coverId || '',
+          coverId,
         };
       });
     }
 
+    // FILES
     const [year, program] = currentPath;
     return (archiveTree[year]?.[program] || []).map((ep) => ({
       type: 'file',
@@ -130,6 +135,13 @@ const Archive: React.FC = () => {
       data: ep,
     }));
   })();
+
+  const programCoverId =
+    currentPath.length === 2
+      ? archiveTree[currentPath[0]]?.[currentPath[1]]?.find(
+          (ep) => ep.coverId
+        )?.coverId || ''
+      : '';
 
   return (
     <div className="pb-24 px-4 max-w-3xl mx-auto">
@@ -148,10 +160,40 @@ const Archive: React.FC = () => {
         </div>
       )}
 
+      {/* BIG PROGRAM COVER */}
+      {currentPath.length === 2 && !loading && (
+        <div
+          className="relative mb-6 h-56 sm:h-72 md:h-80 rounded-3xl overflow-hidden shadow-2xl"
+          style={{
+            backgroundImage: programCoverId
+              ? `linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.85)), url(${driveThumb(
+                  programCoverId,
+                  2000
+                )})`
+              : undefined,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          {!programCoverId && (
+            <div className="absolute inset-0 flex items-center justify-center text-slate-500 italic">
+              Sem imagem de capa
+            </div>
+          )}
+          <div className="absolute inset-0 flex items-end justify-center pb-6">
+            <h2 className="text-2xl sm:text-3xl font-black text-white drop-shadow-2xl">
+              {currentPath[1]}
+            </h2>
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24 gap-4 text-slate-500">
           <Loader2 className="w-10 h-10 animate-spin text-amber-500" />
-          <span className="text-xs font-black uppercase tracking-widest">A ler arquivo…</span>
+          <span className="text-xs font-black uppercase tracking-widest">
+            A ler arquivo…
+          </span>
         </div>
       ) : (
         <div className="space-y-3">
@@ -172,14 +214,11 @@ const Archive: React.FC = () => {
                   <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center shadow-inner">
                     {item.coverId ? (
                       <img
-                        src={driveThumb(item.coverId)}
-                        alt={`Capa ${item.name}`}
+                        src={driveThumb(item.coverId, 500)}
+                        alt={item.name}
                         className="w-full h-full object-cover"
                         loading="lazy"
                         referrerPolicy="no-referrer"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                        }}
                       />
                     ) : (
                       <Music className="w-6 h-6 text-amber-500/50" />
@@ -190,8 +229,9 @@ const Archive: React.FC = () => {
                     <FileAudio className="w-6 h-6" />
                   </div>
                 )}
-
-                <span className="text-white font-bold truncate">{item.name}</span>
+                <span className="text-white font-bold truncate">
+                  {item.name}
+                </span>
               </div>
 
               {item.type === 'folder' ? (
