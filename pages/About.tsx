@@ -83,9 +83,9 @@ const About: React.FC = () => {
                 <h3 className="text-white font-black uppercase tracking-wider text-sm">Tecnologia</h3>
               </div>
               <p className="text-slate-400 text-sm leading-relaxed">
-                A APP da REO assenta numa plataforma digital PWA (Progressive Web App), desenvolvida para garantir um acesso rápido,
-                intuitivo e multiplataforma aos conteúdos áudio, permitindo ouvir programas e podcasts em qualquer dispositivo, a qualquer
-                momento, sem barreiras tecnológicas.
+                A APP da REO assenta numa plataforma digital PWA (Progressive Web App), desenvolvida em ambiente Visual Studio Code,
+                com versionamento em GitHub e alojamento na plataforma Cloudflare Pages, garantindo um acesso rápido, seguro e multiplataforma
+                aos conteúdos áudio do arquivo digital da REO, alojado no Google Drive da escola.
               </p>
             </div>
 
@@ -107,7 +107,7 @@ const About: React.FC = () => {
               "REO - A voz da escola, o som de Vizela."
             </p>
             <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-700 opacity-40 mt-4">
-              Coordenação e Programação: Miguel Araújo
+              Coordenação e Desenvolvimento: Miguel Araújo
             </p>
           </div>
         </div>
