@@ -116,7 +116,7 @@ const Archive: React.FC = () => {
           program: findIdx(['program', 'programa']),
           title: findIdx(['filename', 'file', 'name', 'nome', 'title', 'titulo']),
           audio: findIdx(['playlink', 'playurl', 'audiourl', 'linkaudio', 'mp3', 'audio', 'url', 'link']),
-          cover: findIdx(['cover', 'coverlink', 'capa', 'coverimage', 'coverid', 'imagemcapa', 'capaurl']),
+          cover: findIdx(['cover', 'coverlink', 'capa', 'coverimage', 'coverid', 'imagemcapa', 'capaurl', 'cover link', 'link capa']),
         };
 
         const tree: Record<string, Record<string, Episode[]>> = {};
@@ -262,11 +262,18 @@ const Archive: React.FC = () => {
             {currentPath.length === 0 ? "Arquivo" : currentPath[currentPath.length - 1]}
           </h1>
 
-          {/* BIG COVER BACKGROUND */}
+          {/* Debug text on page */}
+          {currentPath.length === 2 && (
+            <div className="text-xs text-amber-300 mt-2 text-center">
+              Debug: Cover = {items.find(i => i.data?.coverId)?.data?.coverId || 'EMPTY'}
+            </div>
+          )}
+
+          {/* BIG COVER - only for program pages */}
           {currentPath.length === 2 && items.length > 0 && (() => {
             const coverId = items.find(item => item.data?.coverId)?.data?.coverId || items[0]?.data?.coverId || '';
-            
-            // Debug logs
+
+            // Console debug
             console.log(`[DEBUG] Program: ${currentPath[1]}`);
             console.log(`[DEBUG] Cover ID: ${coverId || 'NOT FOUND'}`);
             console.log(`[DEBUG] All episode covers:`, items.map(i => i.data?.coverId || 'missing'));
