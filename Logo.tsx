@@ -5,7 +5,7 @@ type LogoProps = {
 const Logo = ({ className }: LogoProps) => {
   return (
     <img
-      src="/logo.png"
+      src="/REO_logo_round_512x512.png"
       alt="REO – Rádio Escolar Online"
       className={className}
       draggable={false}
