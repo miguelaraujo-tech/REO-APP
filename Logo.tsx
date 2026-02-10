@@ -1,15 +1,15 @@
-import React from 'react';
-import ReoLogo from './ReoLogo';
-
-interface LogoProps {
+type LogoProps = {
   className?: string;
-}
+};
 
-const Logo: React.FC<LogoProps> = ({ className = "" }) => {
+const Logo = ({ className }: LogoProps) => {
   return (
-    <div className={`flex items-center justify-center overflow-hidden rounded-full ${className}`}>
-      <ReoLogo className="w-full h-full" />
-    </div>
+    <img
+      src="/logo.png"
+      alt="REO – Rádio Escolar Online"
+      className={className}
+      draggable={false}
+    />
   );
 };
 
