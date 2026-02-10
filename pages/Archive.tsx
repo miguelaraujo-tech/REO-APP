@@ -18,7 +18,7 @@ interface NavItem {
   name: string;
   id: string;
   data?: Episode;
-  coverId?: string;        // added for program items
+  coverId?: string;
 }
 
 const Archive: React.FC = () => {
@@ -76,7 +76,7 @@ const Archive: React.FC = () => {
 
   const loadData = () => {
     setLoading(true);
-    fetch(`${CSV_URL}&t=${Date.now()}`)
+    fetch(`${CSV_URL}?t=${Date.now()}&nocache=${Math.random()}`)
       .then(res => res.text())
       .then(csvText => {
         let cleanText = csvText.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
@@ -262,24 +262,28 @@ const Archive: React.FC = () => {
             {currentPath.length === 0 ? "Arquivo" : currentPath[currentPath.length - 1]}
           </h1>
 
-          {/* BIG COVER IMAGE / BACKGROUND when inside a program */}
-          {currentPath.length === 2 && items.length > 0 && items[0].data?.coverId && (
-            <div 
-              className="relative -mx-6 sm:-mx-8 h-64 sm:h-80 md:h-96 lg:h-[420px] mt-6 overflow-hidden rounded-b-3xl shadow-2xl"
-              style={{
-                backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.45), rgba(0,0,0,0.75)), ur[](https://drive.google.com/uc?export=view&id=${items[0].data.coverId})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat'
-              }}
-            >
-              <div className="absolute inset-0 flex items-end justify-center pb-8 px-6 text-center">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white drop-shadow-2xl tracking-tight">
-                  {currentPath[1]}
-                </h2>
+          {/* BIG COVER BACKGROUND when inside program */}
+          {currentPath.length === 2 && items.length > 0 && (() => {
+            const coverId = items.find(item => item.data?.coverId)?.data?.coverId || '';
+            if (!coverId) return null;
+            return (
+              <div 
+                className="relative -mx-6 sm:-mx-8 h-64 sm:h-80 md:h-96 lg:h-[420px] mt-6 overflow-hidden rounded-b-3xl shadow-2xl"
+                style={{
+                  backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.45), rgba(0,0,0,0.75)), ur[](https://drive.google.com/uc?export=view&id=${coverId})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat'
+                }}
+              >
+                <div className="absolute inset-0 flex items-end justify-center pb-8 px-6 text-center">
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white drop-shadow-2xl tracking-tight">
+                    {currentPath[1]}
+                  </h2>
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
 
         <div className="divide-y divide-white/5 min-h-[350px] max-h-[60vh] overflow-y-auto custom-scrollbar">
@@ -298,7 +302,6 @@ const Archive: React.FC = () => {
                 className="p-5 sm:p-6 flex items-center justify-between hover:bg-white/[0.03] active:bg-white/[0.05] transition-colors group cursor-pointer"
               >
                 <div className="flex items-center gap-4 sm:gap-6">
-                  {/* Cover thumbnail for program folders */}
                   {item.type === 'folder' ? (
                     <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-md bg-gradient-to-br from-slate-800 to-slate-950">
                       {item.coverId ? (
