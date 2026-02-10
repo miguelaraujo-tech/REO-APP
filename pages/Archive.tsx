@@ -25,6 +25,7 @@ interface Episode {
   program: string;
   fileId: string;
   coverId: string;
+  folderCoverId?: string;
 }
 
 interface NavItem {
@@ -34,8 +35,6 @@ interface NavItem {
   data?: Episode;
   coverId?: string;
 }
-
-/* ---------------- CSV HELPERS ---------------- */
 
 const normalize = (str: string) =>
   (str || '')
@@ -47,26 +46,22 @@ const normalize = (str: string) =>
 const extractUrlFromCell = (value: string): string => {
   if (!value) return '';
   const v = value.trim();
-
   const m1 = v.match(/HYPERLINK\(\s*"([^"]+)"/i);
   if (m1?.[1]) return m1[1];
-
   const m2 = v.match(/HYPERLINK\(\s*'([^']+)'/i);
   if (m2?.[1]) return m2[1];
-
   return v;
 };
 
-const extractDriveFileId = (url: string): string => {
-  if (!url) return '';
-  const clean = extractUrlFromCell(url);
-
+const extractDriveFileId = (value: string): string => {
+  if (!value) return '';
+  const clean = extractUrlFromCell(value);
   const patterns = [
     /\/d\/([a-zA-Z0-9_-]+)/,
+    /\/folders\/([a-zA-Z0-9_-]+)/,
     /[?&]id=([a-zA-Z0-9_-]+)/,
     /thumbnail\?id=([a-zA-Z0-9_-]+)/,
   ];
-
   for (const p of patterns) {
     const m = clean.match(p);
     if (m?.[1]) return m[1];
@@ -77,8 +72,6 @@ const extractDriveFileId = (url: string): string => {
 const driveThumb = (id: string, size = 1200) =>
   `https://drive.google.com/thumbnail?id=${id}&sz=w${size}`;
 
-/* ---------------- COMPONENT ---------------- */
-
 const Archive: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [archiveTree, setArchiveTree] = useState<Record<string, Record<string, Episode[]>>>({});
@@ -87,10 +80,9 @@ const Archive: React.FC = () => {
   const [playbackError, setPlaybackError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  /* ---------------- LOAD CSV ---------------- */
-
   useEffect(() => {
     setLoading(true);
+
     fetch(`${CSV_URL}&t=${Date.now()}`, { cache: 'no-store' })
       .then(async (res) => {
         const text = await res.text();
@@ -98,8 +90,7 @@ const Archive: React.FC = () => {
         return text;
       })
       .then((csv) => {
-        const clean = csv.replace(/\r/g, '');
-        const lines = clean.split('\n').filter(Boolean);
+        const lines = csv.replace(/\r/g, '').split('\n').filter(Boolean);
 
         let headerIndex = 0;
         if (lines[0].toLowerCase().startsWith('sep=')) headerIndex = 1;
@@ -114,11 +105,10 @@ const Archive: React.FC = () => {
         const split = (line: string) => {
           const out: string[] = [];
           let cur = '';
-          let q = false;
-
+          let inQuotes = false;
           for (const c of line) {
-            if (c === '"') q = !q;
-            else if (c === delimiter && !q) {
+            if (c === '"') inQuotes = !inQuotes;
+            else if (c === delimiter && !inQuotes) {
               out.push(cur);
               cur = '';
             } else cur += c;
@@ -128,6 +118,7 @@ const Archive: React.FC = () => {
         };
 
         const headers = split(lines[headerIndex]).map(normalize);
+
         const idx = {
           year: headers.findIndex((h) => h.includes('year')),
           program: headers.findIndex((h) => h.includes('program')),
@@ -155,6 +146,7 @@ const Archive: React.FC = () => {
             program,
             fileId: extractDriveFileId(row[idx.audio]),
             coverId: extractDriveFileId(row[idx.cover]),
+            folderCoverId: extractDriveFileId(row[idx.program]),
           });
         }
 
@@ -167,17 +159,20 @@ const Archive: React.FC = () => {
       });
   }, []);
 
-  /* ---------------- NAV ITEMS ---------------- */
-
   const items: NavItem[] = (() => {
     if (currentPath.length === 0)
-      return Object.keys(archiveTree).map((y) => ({ type: 'folder', name: y, id: y }));
+      return Object.keys(archiveTree)
+        .sort((a, b) => b.localeCompare(a))
+        .map((y) => ({ type: 'folder', name: y, id: y }));
 
     if (currentPath.length === 1) {
       const year = currentPath[0];
       return Object.keys(archiveTree[year] || {}).map((p) => {
+        const episodes = archiveTree[year][p] || [];
         const coverId =
-          archiveTree[year][p]?.find((ep) => ep.coverId)?.coverId || '';
+          episodes.find((e) => e.coverId)?.coverId ||
+          episodes.find((e) => e.folderCoverId)?.folderCoverId ||
+          '';
         return { type: 'folder', name: p, id: p, coverId };
       });
     }
@@ -193,11 +188,14 @@ const Archive: React.FC = () => {
 
   const programCoverId =
     currentPath.length === 2
-      ? archiveTree[currentPath[0]]?.[currentPath[1]]?.find((e) => e.coverId)
-          ?.coverId || ''
+      ? archiveTree[currentPath[0]]?.[currentPath[1]]?.find(
+          (e) => e.coverId || e.folderCoverId
+        )?.coverId ||
+        archiveTree[currentPath[0]]?.[currentPath[1]]?.find(
+          (e) => e.folderCoverId
+        )?.folderCoverId ||
+        ''
       : '';
-
-  /* ---------------- RENDER ---------------- */
 
   return (
     <div className="pb-24 px-4 max-w-3xl mx-auto">
@@ -205,7 +203,13 @@ const Archive: React.FC = () => {
         <ArrowLeft className="inline w-4 h-4 mr-2" /> Início
       </Link>
 
-      {/* BIG PROGRAM COVER */}
+      {playbackError && (
+        <div className="mt-4 bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-red-400 text-xs font-bold uppercase flex items-center gap-2">
+          <AlertCircle className="w-4 h-4" />
+          {playbackError}
+        </div>
+      )}
+
       {currentPath.length === 2 && programCoverId && (
         <div
           className="my-6 h-72 rounded-3xl overflow-hidden shadow-2xl"
@@ -219,7 +223,9 @@ const Archive: React.FC = () => {
           }}
         >
           <div className="h-full flex items-end justify-center pb-6">
-            <h2 className="text-3xl font-black text-white">{currentPath[1]}</h2>
+            <h2 className="text-3xl font-black text-white">
+              {currentPath[1]}
+            </h2>
           </div>
         </div>
       )}
@@ -229,7 +235,7 @@ const Archive: React.FC = () => {
           <Loader2 className="w-10 h-10 animate-spin mx-auto text-amber-500" />
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 mt-6">
           {items.map((item) => (
             <div
               key={item.id}
@@ -247,6 +253,8 @@ const Archive: React.FC = () => {
                       <img
                         src={driveThumb(item.coverId, 500)}
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
                       />
                     ) : (
                       <Music className="w-full h-full p-4 text-amber-500/40" />
@@ -255,7 +263,9 @@ const Archive: React.FC = () => {
                 ) : (
                   <FileAudio className="w-6 h-6 text-blue-400" />
                 )}
-                <span className="text-white font-bold truncate">{item.name}</span>
+                <span className="text-white font-bold truncate">
+                  {item.name}
+                </span>
               </div>
               {item.type === 'folder' ? <ChevronRight /> : <Play />}
             </div>
@@ -263,17 +273,21 @@ const Archive: React.FC = () => {
         </div>
       )}
 
-      {/* PLAYER */}
       {activeEpisode && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4">
           <div className="bg-[#0f0f18] p-6 rounded-3xl w-full max-w-lg">
-            <h3 className="text-white font-black">{activeEpisode.title}</h3>
+            <h3 className="text-white font-black">
+              {activeEpisode.title}
+            </h3>
             <iframe
               src={`https://drive.google.com/file/d/${activeEpisode.fileId}/preview`}
               className="w-full h-48 mt-4 rounded-xl"
               allow="autoplay"
             />
-            <button onClick={() => setActiveEpisode(null)} className="mt-4 text-red-400">
+            <button
+              onClick={() => setActiveEpisode(null)}
+              className="mt-4 text-red-400"
+            >
               Fechar
             </button>
           </div>
