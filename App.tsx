@@ -5,6 +5,7 @@ import Socials from './pages/Socials';
 import Archive from './pages/Archive';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Logo from './Logo';
 
 const App: React.FC = () => {
   const [isInstalled, setIsInstalled] = useState(false);
@@ -42,26 +43,54 @@ const App: React.FC = () => {
   // 🔒 BLOCK ACCESS IF NOT INSTALLED
   if (!isInstalled) {
     return (
-      <div className="min-h-screen bg-[#0b0b13] text-white flex flex-col items-center justify-center text-center px-6">
-        <h1 className="text-3xl font-black uppercase mb-6">
+      <div className="min-h-screen bg-[#0b0b13] text-white flex flex-col items-center pt-20 px-6 text-center">
+        
+        {/* Logo */}
+        <Logo className="w-28 h-28 mb-8 rounded-full border-4 border-amber-500 shadow-[0_0_40px_rgba(245,158,11,0.3)]" />
+
+        {/* Title */}
+        <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight mb-4">
           Instale a aplicação REO
         </h1>
 
+        <p className="text-slate-400 text-sm max-w-md mb-10">
+          Para utilizar a Rádio Escolar Online, é necessário instalar a aplicação no seu dispositivo.
+        </p>
+
+        {/* ANDROID / CHROME */}
         {!isIOS && installPrompt && (
           <button
             onClick={handleInstall}
-            className="bg-amber-500 hover:bg-amber-400 text-black px-8 py-4 rounded-full font-black uppercase tracking-widest shadow-xl"
+            className="bg-amber-500 hover:bg-amber-400 text-black px-8 py-4 rounded-full font-black uppercase tracking-widest shadow-xl transition-all active:scale-95"
           >
             Instalar agora
           </button>
         )}
 
+        {/* IOS INSTRUCTIONS */}
         {isIOS && (
-          <p className="text-sm text-slate-300 max-w-md">
-            Para instalar no iPhone:
-            <br /><br />
-            Toque em <strong>Partilhar</strong> e selecione
-            <strong> “Adicionar ao ecrã principal”</strong>.
+          <div className="text-slate-300 text-sm max-w-md space-y-4 leading-relaxed">
+            <p className="font-bold text-white">
+              Para instalar no iPhone:
+            </p>
+
+            <ol className="text-left list-decimal list-inside space-y-2">
+              <li>Toque no botão <strong>Partilhar</strong> (ícone quadrado com seta).</li>
+              <li>Desça a lista e selecione <strong>“Adicionar ao ecrã principal”</strong>.</li>
+              <li>Confirme em <strong>Adicionar</strong>.</li>
+            </ol>
+
+            <p className="text-xs text-slate-500 mt-6">
+              Depois de instalada, abra a aplicação a partir do ecrã principal.
+            </p>
+          </div>
+        )}
+
+        {/* Fallback if Android but no install event yet */}
+        {!isIOS && !installPrompt && (
+          <p className="text-sm text-slate-500 max-w-md mt-4">
+            Se o botão não aparecer, utilize o menu do navegador e escolha 
+            <strong> “Instalar aplicação”</strong>.
           </p>
         )}
       </div>
