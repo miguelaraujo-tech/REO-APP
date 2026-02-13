@@ -252,7 +252,7 @@ const coverId = idxs.coverId !== -1 ? row[idxs.coverId].trim() : '';
         console.error('Erro ao carregar CSV:', err);
         setArchiveTree({});
         setPlaybackError(
-          'Não foi possível ler o CSV do Google Sheets. Confirma que está “Publicado na Web” como CSV e acessível sem login.'
+          'O arquivo não está disponível neste momento. Por favor, tenta novamente mais tarde ou contacta miguelaraujo@aesbvizela.pt.'
         );
         setLoading(false);
       });
