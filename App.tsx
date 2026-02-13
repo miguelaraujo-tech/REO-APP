@@ -48,11 +48,11 @@ const App: React.FC = () => {
 
   if (!isStandalone) {
     return (
-      <div className="min-h-screen bg-[#0b0b13] text-white flex flex-col items-center justify-start px-6 pt-8 pb-20 text-center">
+      <div className="min-h-screen bg-[#0b0b13] text-white flex flex-col items-center justify-start px-6 pt-6 pb-8 text-center">
 
         {/* Logo */}
-        <div className="mb-4 animate-float">
-          <Logo className="w-28 h-28 rounded-full border-4 border-amber-500 shadow-[0_0_60px_rgba(245,158,11,0.35)]" />
+        <div className="mb-3 animate-float">
+          <Logo className="w-24 h-24 rounded-full border-4 border-amber-500 shadow-[0_0_60px_rgba(245,158,11,0.35)]" />
         </div>
 
         {/* Title */}
@@ -61,24 +61,24 @@ const App: React.FC = () => {
         </h1>
 
         {/* Subtitle */}
-        <p className="text-slate-400 max-w-md mb-6 text-base leading-relaxed">
+        <p className="text-slate-400 max-w-md mb-5 text-base leading-relaxed">
           Para aceder à Rádio Escolar Online, adicione a aplicação ao ecrã principal.
         </p>
 
         {/* iOS Instructions */}
         {isIOS && (
-          <div className="max-w-md text-left space-y-4">
+          <div className="max-w-md text-left space-y-3 mt-1">
 
-            <h2 className="text-lg font-bold text-white text-center mb-2">
+            <h2 className="text-lg font-bold text-white text-center mb-1">
               No iPhone siga estes passos:
             </h2>
 
             {/* Floating Share Image */}
-            <div className="flex justify-center mb-2 animate-bounce">
+            <div className="flex justify-center mb-1 animate-bounce">
               <img
                 src="/share-icon.png"
                 alt="Partilhar"
-                className="w-20 h-20 object-contain drop-shadow-[0_0_30px_rgba(245,158,11,0.8)]"
+                className="w-16 h-16 object-contain drop-shadow-[0_0_25px_rgba(245,158,11,0.8)]"
                 draggable={false}
               />
             </div>
@@ -90,7 +90,7 @@ const App: React.FC = () => {
               <li><strong>4.</strong> Toque em <strong>Adicionar</strong>.</li>
             </ol>
 
-            <p className="text-amber-500 font-bold text-center pt-3">
+            <p className="text-amber-500 font-bold text-center pt-2">
               Não feche esta página enquanto instala.
             </p>
           </div>
@@ -100,7 +100,7 @@ const App: React.FC = () => {
         {!isIOS && deferredPrompt && (
           <button
             onClick={installAndroid}
-            className="mt-8 bg-amber-500 hover:bg-amber-400 text-black px-8 py-4 rounded-full font-black uppercase tracking-wide shadow-lg transition-all active:scale-95"
+            className="mt-6 bg-amber-500 hover:bg-amber-400 text-black px-8 py-4 rounded-full font-black uppercase tracking-wide shadow-lg transition-all active:scale-95"
           >
             Instalar Aplicação
           </button>
