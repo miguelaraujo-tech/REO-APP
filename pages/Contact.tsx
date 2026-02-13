@@ -10,7 +10,7 @@ const Contact: React.FC = () => {
     <div className="animate-in slide-in-from-bottom-4 duration-500">
       <Link to="/" className="inline-flex items-center text-amber-500 hover:text-amber-400 mb-8 font-bold uppercase tracking-widest text-xs group">
         <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-        Voltar para Home
+        Voltar para o Início
       </Link>
       
       <div className="bg-slate-900/40 backdrop-blur-md rounded-[3rem] p-10 md:p-16 shadow-2xl border border-white/5 text-center">
@@ -20,7 +20,7 @@ const Contact: React.FC = () => {
         
         <h1 className="text-4xl font-black text-white mb-6 tracking-tighter italic uppercase">Contacta-nos</h1>
         <p className="text-slate-400 max-w-lg mx-auto mb-12 text-lg font-medium leading-relaxed">
-          Tens uma sugestão de música? Queres participar numa emissão ou deixar um comentário? 
+          Queres participar numa emissão, sugerir uma música ou deixar um comentário? 
           Usa o nosso formulário oficial para falares diretamente com a equipa REO!
         </p>
         
