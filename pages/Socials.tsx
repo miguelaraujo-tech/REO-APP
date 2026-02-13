@@ -8,7 +8,7 @@ const Socials: React.FC = () => {
     <div className="animate-in slide-in-from-bottom-4 duration-500">
       <Link to="/" className="inline-flex items-center text-amber-500 hover:text-amber-400 mb-8 font-bold uppercase tracking-widest text-xs group">
         <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-        Voltar para Home
+        Voltar para o Início
       </Link>
       
       <div className="bg-slate-900/40 backdrop-blur-md rounded-[3rem] p-10 shadow-2xl border border-white/5">
