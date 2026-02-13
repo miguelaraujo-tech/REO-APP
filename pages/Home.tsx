@@ -1,49 +1,81 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { NAV_LINKS } from '../constants';
-import Logo from '../Logimport React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { NAV_LINKS } from '../constants';
 import Logo from '../Logo';
 
 const Home: React.FC = () => {
   const [rotation, setRotation] = useState(0);
+  const [transitionOn, setTransitionOn] = useState(true);
   const [isFastSpinning, setIsFastSpinning] = useState(false);
-  const [touchStartY, setTouchStartY] = useState<number | null>(null);
 
-  // Tap = small rotation
-  const handleTap = () => {
-    if (isFastSpinning) return;
-    setRotation((prev) => prev + 30);
-  };
+  const touchStartY = useRef<number | null>(null);
+  const didSwipe = useRef(false);
+  const resetTimer = useRef<number | null>(null);
 
-  // Detect swipe start
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartY(e.touches[0].clientY);
-  };
+  const TAP_STEP = 30;       // degrees per tap
+  const SWIPE_THRESHOLD = 60; // px upward
+  const FAST_SPINS = 3;      // 3 full spins
+  const FAST_DURATION_MS = 850;
 
-  // Detect swipe end
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartY === null) return;
-
-    const touchEndY = e.changedTouches[0].clientY;
-    const diff = touchStartY - touchEndY;
-
-    // Swipe up threshold
-    if (diff > 60 && !isFastSpinning) {
-      setIsFastSpinning(true);
-
-      // Add 3 full spins
-      setRotation((prev) => prev + 1080);
-
-      // Reset cleanly after animation
-      setTimeout(() => {
-        setRotation(0);
-        setIsFastSpinning(false);
-      }, 900);
+  const clearResetTimer = () => {
+    if (resetTimer.current) {
+      window.clearTimeout(resetTimer.current);
+      resetTimer.current = null;
     }
+  };
 
-    setTouchStartY(null);
+  // Tap = small incremental rotation (never reset)
+  const handleTap = () => {
+    // iOS can fire a click after a swipe — ignore that click once
+    if (didSwipe.current) {
+      didSwipe.current = false;
+      return;
+    }
+    if (isFastSpinning) return;
+
+    setRotation((prev) => prev + TAP_STEP);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+    didSwipe.current = false;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const startY = touchStartY.current;
+    if (startY === null) return;
+
+    const endY = e.changedTouches[0].clientY;
+    const diff = startY - endY; // positive = swipe up
+
+    touchStartY.current = null;
+
+    // Swipe up triggers fast spin + reset
+    if (diff > SWIPE_THRESHOLD && !isFastSpinning) {
+      didSwipe.current = true; // block ghost click
+      setIsFastSpinning(true);
+      clearResetTimer();
+
+      // Add 3 full spins on top of current rotation
+      setRotation((prev) => prev + 360 * FAST_SPINS);
+
+      // After the spin finishes: snap back to 0 WITHOUT animating backwards
+      resetTimer.current = window.setTimeout(() => {
+        // 1) turn transition off
+        setTransitionOn(false);
+
+        // 2) snap to 0 immediately
+        setRotation(0);
+
+        // 3) next frame re-enable transition and unlock
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setTransitionOn(true);
+            setIsFastSpinning(false);
+          });
+        });
+      }, FAST_DURATION_MS);
+    }
   };
 
   return (
@@ -57,11 +89,11 @@ const Home: React.FC = () => {
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
             style={{ transform: `rotate(${rotation}deg)` }}
-            className="
-              w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[450px] lg:h-[450px]
-              p-4 mx-auto cursor-pointer
-              transition-transform duration-700 ease-out
-            "
+            className={[
+              'w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[450px] lg:h-[450px]',
+              'p-4 mx-auto cursor-pointer select-none',
+              transitionOn ? 'transition-transform duration-[850ms] ease-out' : '',
+            ].join(' ')}
           >
             <Logo className="w-full h-full rounded-full border-[3px] border-amber-500/80 bg-[#1a110f] object-contain shadow-[0_0_40px_rgba(245,158,11,0.25)]" />
           </div>
