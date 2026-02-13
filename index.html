@@ -8,7 +8,7 @@
   />
   <title>REO - Rádio Escolar Online</title>
 
-  <!-- ✅ PWA + Icons (keep exactly like this) -->
+  <!-- PWA -->
   <link rel="icon" href="/favicon.ico" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -17,7 +17,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="REO" />
 
-  <!-- ✅ THIS WAS MISSING -->
+  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Fonts -->
@@ -36,6 +36,7 @@
       margin: 0;
     }
 
+    /* Scrollbar */
     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); }
     .custom-scrollbar::-webkit-scrollbar-thumb {
@@ -46,12 +47,26 @@
       background: rgba(245, 158, 11, 0.4);
     }
 
+    /* Floating logo animation */
     @keyframes float {
       0% { transform: translateY(0px); }
       50% { transform: translateY(-10px); }
       100% { transform: translateY(0px); }
     }
-    .animate-float { animation: float 6s ease-in-out infinite; }
+    .animate-float {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    /* 🔥 Subtle floating arrow animation for install guidance */
+    @keyframes floatArrow {
+      0% { transform: translateY(0px); opacity: 0.8; }
+      50% { transform: translateY(-6px); opacity: 1; }
+      100% { transform: translateY(0px); opacity: 0.8; }
+    }
+
+    .animate-float-arrow {
+      animation: floatArrow 2.5s ease-in-out infinite;
+    }
 
     .sticky-header {
       position: sticky;
@@ -60,9 +75,10 @@
     }
   </style>
 
+  <!-- Google Identity (optional, safe to keep) -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-  <!-- importmap must be before module scripts -->
+  <!-- Importmap -->
   <script type="importmap">
   {
     "imports": {
@@ -79,7 +95,7 @@
 <body>
   <div id="root"></div>
 
-  <!-- ✅ load app ONCE -->
+  <!-- Load app -->
   <script type="module" src="index.tsx"></script>
 </body>
 </html>
