@@ -10,7 +10,7 @@ const Home: React.FC = () => {
         <div className="absolute inset-0 bg-blue-600/10 blur-[120px] rounded-full -z-10 mx-auto w-3/4 h-full opacity-40"></div>
         
         <div className="relative animate-float">
-          <div className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 lg:w-[350px] lg:h-[350px] p-4 mx-auto transform hover:rotate-6 transition-all duration-1000 ease-out cursor-pointer">
+          <div className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[450px] lg:h-[450px] p-4 mx-auto transform hover:rotate-6 transition-all duration-1000 ease-out cursor-pointer">
           <Logo className="w-full h-full rounded-full border-[3px] border-amber-500/80 bg-[#1a110f] object-contain shadow-[0_0_40px_rgba(245,158,11,0.25)]" />
           </div>
         </div>
