@@ -7,22 +7,16 @@ const Home: React.FC = () => {
   const [rotation, setRotation] = useState(0);
   const [transitionOn, setTransitionOn] = useState(true);
   const [isFastSpinning, setIsFastSpinning] = useState(false);
+  const [glow, setGlow] = useState(false);
 
   const touchStartY = useRef<number | null>(null);
+  const touchStartTime = useRef<number | null>(null);
   const didSwipe = useRef(false);
-  const resetTimer = useRef<number | null>(null);
 
   const TAP_STEP = 30;
-  const SWIPE_THRESHOLD = 60;
-  const FAST_SPINS = 4; // faster feel
-  const FAST_DURATION_MS = 500; // much faster
-
-  const clearResetTimer = () => {
-    if (resetTimer.current) {
-      window.clearTimeout(resetTimer.current);
-      resetTimer.current = null;
-    }
-  };
+  const SWIPE_THRESHOLD = 50;
+  const MAX_SPINS = 6;
+  const MIN_SPINS = 2;
 
   const handleTap = () => {
     if (didSwipe.current) {
@@ -36,30 +30,46 @@ const Home: React.FC = () => {
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartY.current = e.touches[0].clientY;
+    touchStartTime.current = Date.now();
     didSwipe.current = false;
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    const startY = touchStartY.current;
-    if (startY === null) return;
+    if (!touchStartY.current || !touchStartTime.current) return;
 
     const endY = e.changedTouches[0].clientY;
-    const diff = endY - startY; // positive = swipe DOWN
+    const diff = endY - touchStartY.current; // swipe DOWN
+    const duration = Date.now() - touchStartTime.current;
 
     touchStartY.current = null;
+    touchStartTime.current = null;
 
-    // Swipe DOWN triggers fast spin
     if (diff > SWIPE_THRESHOLD && !isFastSpinning) {
       didSwipe.current = true;
       setIsFastSpinning(true);
-      clearResetTimer();
 
-      // disable scroll temporarily
+      // Velocity-based spin calculation
+      const velocity = diff / duration; // px per ms
+      let spins = Math.min(
+        MAX_SPINS,
+        Math.max(MIN_SPINS, Math.floor(velocity * 10))
+      );
+
+      const totalDegrees = 360 * spins;
+
+      // Haptic feedback (if supported)
+      if ('vibrate' in navigator) {
+        navigator.vibrate(20);
+      }
+
+      // Glow burst
+      setGlow(true);
+
       document.body.style.overflow = 'hidden';
 
-      setRotation((prev) => prev + 360 * FAST_SPINS);
+      setRotation((prev) => prev + totalDegrees);
 
-      resetTimer.current = window.setTimeout(() => {
+      setTimeout(() => {
         setTransitionOn(false);
         setRotation(0);
 
@@ -67,10 +77,11 @@ const Home: React.FC = () => {
           requestAnimationFrame(() => {
             setTransitionOn(true);
             setIsFastSpinning(false);
+            setGlow(false);
             document.body.style.overflow = '';
           });
         });
-      }, FAST_DURATION_MS);
+      }, 500);
     }
   };
 
@@ -88,15 +99,17 @@ const Home: React.FC = () => {
             style={{ transform: `rotate(${rotation}deg)` }}
             className={[
               'w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[450px] lg:h-[450px]',
-              'p-4 mx-auto cursor-pointer select-none',
-              'touch-none', // disables browser gestures
+              'p-4 mx-auto cursor-pointer select-none touch-none',
+              glow
+                ? 'shadow-[0_0_80px_rgba(245,158,11,0.9)]'
+                : 'shadow-[0_0_40px_rgba(245,158,11,0.25)]',
               transitionOn
-                ? 'transition-transform duration-[500ms] ease-[cubic-bezier(.3,1.6,.4,1)]'
+                ? 'transition-transform duration-[500ms] ease-[cubic-bezier(.2,1.4,.4,1)]'
                 : '',
             ].join(' ')}
           >
             <Logo
-              className="w-full h-full rounded-full border-[3px] border-amber-500/80 bg-[#1a110f] object-contain shadow-[0_0_40px_rgba(245,158,11,0.25)] pointer-events-none"
+              className="w-full h-full rounded-full border-[3px] border-amber-500/80 bg-[#1a110f] object-contain pointer-events-none"
               draggable={false}
             />
           </div>
@@ -122,7 +135,7 @@ const Home: React.FC = () => {
             width="100%"
             height="152"
             frameBorder="0"
-            allowFullScreen={true}
+            allowFullScreen
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
             loading="lazy"
             className="opacity-95 grayscale-[0.3] transition-all duration-500"
@@ -153,4 +166,3 @@ const Home: React.FC = () => {
 };
 
 export default Home;
-
