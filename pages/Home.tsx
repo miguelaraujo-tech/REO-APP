@@ -1,18 +1,49 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { NAV_LINKS } from '../constants';
+import Logo from '../Logimport React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { NAV_LINKS } from '../constants';
 import Logo from '../Logo';
 
 const Home: React.FC = () => {
-  const [spinning, setSpinning] = useState(false);
+  const [rotation, setRotation] = useState(0);
+  const [isFastSpinning, setIsFastSpinning] = useState(false);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
 
-  const handleSpin = () => {
-    if (spinning) return; // prevent spam tapping
-    setSpinning(true);
+  // Tap = small rotation
+  const handleTap = () => {
+    if (isFastSpinning) return;
+    setRotation((prev) => prev + 30);
+  };
 
-    setTimeout(() => {
-      setSpinning(false);
-    }, 800); // match duration below
+  // Detect swipe start
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartY(e.touches[0].clientY);
+  };
+
+  // Detect swipe end
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartY === null) return;
+
+    const touchEndY = e.changedTouches[0].clientY;
+    const diff = touchStartY - touchEndY;
+
+    // Swipe up threshold
+    if (diff > 60 && !isFastSpinning) {
+      setIsFastSpinning(true);
+
+      // Add 3 full spins
+      setRotation((prev) => prev + 1080);
+
+      // Reset cleanly after animation
+      setTimeout(() => {
+        setRotation(0);
+        setIsFastSpinning(false);
+      }, 900);
+    }
+
+    setTouchStartY(null);
   };
 
   return (
@@ -22,13 +53,15 @@ const Home: React.FC = () => {
 
         <div className="relative animate-float">
           <div
-            onClick={handleSpin}
-            className={`
+            onClick={handleTap}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            style={{ transform: `rotate(${rotation}deg)` }}
+            className="
               w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[450px] lg:h-[450px]
               p-4 mx-auto cursor-pointer
               transition-transform duration-700 ease-out
-              ${spinning ? 'rotate-[360deg]' : 'rotate-0'}
-            `}
+            "
           >
             <Logo className="w-full h-full rounded-full border-[3px] border-amber-500/80 bg-[#1a110f] object-contain shadow-[0_0_40px_rgba(245,158,11,0.25)]" />
           </div>
