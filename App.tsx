@@ -48,20 +48,20 @@ const App: React.FC = () => {
 
   if (!isStandalone) {
     return (
-      <div className="min-h-screen bg-[#0b0b13] text-white flex flex-col items-center justify-start px-6 pt-14 pb-40 text-center">
+      <div className="min-h-screen bg-[#0b0b13] text-white flex flex-col items-center justify-start px-6 pt-8 pb-20 text-center">
 
         {/* Logo */}
-        <div className="mb-6 animate-float">
+        <div className="mb-4 animate-float">
           <Logo className="w-28 h-28 rounded-full border-4 border-amber-500 shadow-[0_0_60px_rgba(245,158,11,0.35)]" />
         </div>
 
         {/* Title */}
-        <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-3">
+        <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2">
           Instale a Aplicação REO
         </h1>
 
         {/* Subtitle */}
-        <p className="text-slate-400 max-w-md mb-8 text-base leading-relaxed">
+        <p className="text-slate-400 max-w-md mb-6 text-base leading-relaxed">
           Para aceder à Rádio Escolar Online, adicione a aplicação ao ecrã principal.
         </p>
 
@@ -69,19 +69,18 @@ const App: React.FC = () => {
         {isIOS && (
           <div className="max-w-md text-left space-y-4">
 
-            <h2 className="text-lg font-bold text-white text-center mb-3">
+            <h2 className="text-lg font-bold text-white text-center mb-2">
               No iPhone siga estes passos:
             </h2>
 
-            {/* Share icon */}
-            <div className="flex justify-center mb-4 animate-float-arrow">
-              <div className="w-12 h-12 rounded-xl border-2 border-amber-500 flex items-center justify-center">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 16V4" />
-                  <path d="M8 8l4-4 4 4" />
-                  <path d="M4 20h16" />
-                </svg>
-              </div>
+            {/* Floating Share Image */}
+            <div className="flex justify-center mb-2 animate-bounce">
+              <img
+                src="/share-icon.png"
+                alt="Partilhar"
+                className="w-20 h-20 object-contain drop-shadow-[0_0_30px_rgba(245,158,11,0.8)]"
+                draggable={false}
+              />
             </div>
 
             <ol className="space-y-2 text-slate-300 text-base leading-snug">
@@ -91,7 +90,7 @@ const App: React.FC = () => {
               <li><strong>4.</strong> Toque em <strong>Adicionar</strong>.</li>
             </ol>
 
-            <p className="text-amber-500 font-bold text-center pt-4">
+            <p className="text-amber-500 font-bold text-center pt-3">
               Não feche esta página enquanto instala.
             </p>
           </div>
