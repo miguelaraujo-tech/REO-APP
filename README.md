@@ -104,6 +104,10 @@ The application has since been:
 
 AI was used as a development accelerator, while architectural decisions, customization, and deployment were handled manually.
 
+Credits for ios share icon for flaticon:
+https://www.flaticon.com/free-icon/share_4855052?k=1771003772865
+https://www.flaticon.com/download/icon/edited
+
 ---
 
 ## 👨‍💻 Developer
