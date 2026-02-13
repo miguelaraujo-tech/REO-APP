@@ -48,7 +48,7 @@ const App: React.FC = () => {
 
   if (!isStandalone) {
     return (
-      <div className="min-h-screen bg-[#0b0b13] text-white flex flex-col items-center justify-start px-6 pt-6 pb-8 text-center">
+      <div className="min-h-screen bg-[#0b0b13] text-white flex flex-col items-center justify-start px-6 pt-6 pb-6 text-center">
 
         {/* Logo */}
         <div className="mb-3 animate-float">
@@ -61,13 +61,13 @@ const App: React.FC = () => {
         </h1>
 
         {/* Subtitle */}
-        <p className="text-slate-400 max-w-md mb-5 text-base leading-relaxed">
+        <p className="text-slate-400 max-w-md mb-4 text-base leading-relaxed">
           Para aceder à Rádio Escolar Online, adicione a aplicação ao ecrã principal.
         </p>
 
         {/* iOS Instructions */}
         {isIOS && (
-          <div className="max-w-md text-left space-y-3 mt-1">
+          <div className="max-w-md text-left space-y-2 mt-1">
 
             <h2 className="text-lg font-bold text-white text-center mb-1">
               No iPhone siga estes passos:
@@ -83,16 +83,16 @@ const App: React.FC = () => {
               />
             </div>
 
-            <ol className="space-y-2 text-slate-300 text-base leading-snug">
+            <ol className="space-y-1 text-slate-300 text-base leading-snug">
               <li><strong>1.</strong> Toque em <strong>Partilhar</strong>.</li>
-              <li><strong>2.</strong> Se necessário, toque em <strong>Mais</strong>.</li>
-              <li><strong>3.</strong> Escolha <strong>Adicionar ao ecrã principal (+)</strong>.</li>
-              <li><strong>4.</strong> Toque em <strong>Adicionar</strong>.</li>
+              <li><strong>2.</strong> Escolha <strong>Adicionar ao ecrã principal (+)</strong>.</li>
+              <li><strong>3.</strong> Toque em <strong>Adicionar</strong>.</li>
             </ol>
 
             <p className="text-amber-500 font-bold text-center pt-2">
               Não feche esta página enquanto instala.
             </p>
+
           </div>
         )}
 
