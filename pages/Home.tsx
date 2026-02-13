@@ -12,10 +12,10 @@ const Home: React.FC = () => {
   const didSwipe = useRef(false);
   const resetTimer = useRef<number | null>(null);
 
-  const TAP_STEP = 30;       // degrees per tap
-  const SWIPE_THRESHOLD = 60; // px upward
-  const FAST_SPINS = 3;      // 3 full spins
-  const FAST_DURATION_MS = 850;
+  const TAP_STEP = 30;
+  const SWIPE_THRESHOLD = 60;
+  const FAST_SPINS = 4; // faster feel
+  const FAST_DURATION_MS = 500; // much faster
 
   const clearResetTimer = () => {
     if (resetTimer.current) {
@@ -24,9 +24,7 @@ const Home: React.FC = () => {
     }
   };
 
-  // Tap = small incremental rotation (never reset)
   const handleTap = () => {
-    // iOS can fire a click after a swipe — ignore that click once
     if (didSwipe.current) {
       didSwipe.current = false;
       return;
@@ -46,32 +44,30 @@ const Home: React.FC = () => {
     if (startY === null) return;
 
     const endY = e.changedTouches[0].clientY;
-    const diff = startY - endY; // positive = swipe up
+    const diff = endY - startY; // positive = swipe DOWN
 
     touchStartY.current = null;
 
-    // Swipe up triggers fast spin + reset
+    // Swipe DOWN triggers fast spin
     if (diff > SWIPE_THRESHOLD && !isFastSpinning) {
-      didSwipe.current = true; // block ghost click
+      didSwipe.current = true;
       setIsFastSpinning(true);
       clearResetTimer();
 
-      // Add 3 full spins on top of current rotation
+      // disable scroll temporarily
+      document.body.style.overflow = 'hidden';
+
       setRotation((prev) => prev + 360 * FAST_SPINS);
 
-      // After the spin finishes: snap back to 0 WITHOUT animating backwards
       resetTimer.current = window.setTimeout(() => {
-        // 1) turn transition off
         setTransitionOn(false);
-
-        // 2) snap to 0 immediately
         setRotation(0);
 
-        // 3) next frame re-enable transition and unlock
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             setTransitionOn(true);
             setIsFastSpinning(false);
+            document.body.style.overflow = '';
           });
         });
       }, FAST_DURATION_MS);
@@ -88,14 +84,21 @@ const Home: React.FC = () => {
             onClick={handleTap}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
+            onContextMenu={(e) => e.preventDefault()}
             style={{ transform: `rotate(${rotation}deg)` }}
             className={[
               'w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[450px] lg:h-[450px]',
               'p-4 mx-auto cursor-pointer select-none',
-              transitionOn ? 'transition-transform duration-[850ms] ease-out' : '',
+              'touch-none', // disables browser gestures
+              transitionOn
+                ? 'transition-transform duration-[500ms] ease-[cubic-bezier(.3,1.6,.4,1)]'
+                : '',
             ].join(' ')}
           >
-            <Logo className="w-full h-full rounded-full border-[3px] border-amber-500/80 bg-[#1a110f] object-contain shadow-[0_0_40px_rgba(245,158,11,0.25)]" />
+            <Logo
+              className="w-full h-full rounded-full border-[3px] border-amber-500/80 bg-[#1a110f] object-contain shadow-[0_0_40px_rgba(245,158,11,0.25)] pointer-events-none"
+              draggable={false}
+            />
           </div>
         </div>
 
@@ -132,14 +135,14 @@ const Home: React.FC = () => {
           <Link
             key={link.path}
             to={link.path}
-            className="group flex flex-col items-center p-6 sm:p-8 bg-white/[0.02] border border-white/5 rounded-[2.5rem] shadow-xl hover:shadow-amber-500/10 hover:border-amber-500/30 hover:bg-white/[0.04] transition-all duration-500 active:scale-95"
+            className="group flex flex-col items-center p-6 sm:p-8 bg-white/[0.02] border border-white/5 rounded-[2.5rem] shadow-xl transition-all duration-500 active:scale-95"
           >
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#0b0b13] border border-white/5 text-slate-500 flex items-center justify-center group-hover:bg-amber-500 group-hover:text-black transition-all duration-500 shadow-2xl mb-4 group-hover:scale-110 group-hover:rotate-2">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#0b0b13] border border-white/5 text-slate-500 flex items-center justify-center transition-all duration-500 shadow-2xl mb-4">
               {React.cloneElement(link.icon as React.ReactElement<any>, {
                 className: 'w-7 h-7',
               })}
             </div>
-            <span className="block font-black text-xs sm:text-lg text-white group-hover:text-amber-500 transition-colors tracking-tight uppercase italic text-center leading-tight">
+            <span className="block font-black text-xs sm:text-lg text-white tracking-tight uppercase italic text-center leading-tight">
               {link.name}
             </span>
           </Link>
