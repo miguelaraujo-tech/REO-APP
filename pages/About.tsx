@@ -11,7 +11,7 @@ const About: React.FC = () => {
         className="inline-flex items-center text-amber-500 hover:text-amber-400 mb-8 font-bold uppercase tracking-widest text-xs group"
       >
         <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-        Voltar para Home
+        Voltar para o Início
       </Link>
 
       <article className="bg-slate-900/40 backdrop-blur-md rounded-[3rem] p-10 md:p-16 shadow-2xl border border-white/5">
@@ -34,16 +34,16 @@ const About: React.FC = () => {
             <p>
               A <span className="text-white font-bold">REO – Rádio Escolar Online de Vizela</span> é um
               projeto educativo e cultural que nasceu da visão, persistência e envolvimento ativo da
-              comunidade escolar do <span className="text-white font-bold">Agrupamento de Escolas de S. Bento de Vizela</span>.
+              comunidade escolar do <span className="text-white font-bold">Agrupamento de Escolas de S. Bento e Agrupamento de Escolas de Vizela</span>.
             </p>
 
             <p>
               O projeto foi o grande vencedor da{' '}
               <span className="text-amber-500 font-bold">2.ª edição do Orçamento Participativo Jovem (OPJ) de Vizela, em 2018</span>,
               tendo conquistado <span className="text-white font-bold">47,37% dos votos</span>, um reflexo claro do reconhecimento e
-              apoio da comunidade local. No âmbito desta iniciativa, a Câmara Municipal de Vizela atribuiu uma verba até{' '}
-              <span className="text-amber-500 font-bold">15.000 euros</span>, possibilitando a criação de um estúdio de rádio profissional,
-              equipado com tecnologia de última geração.
+              apoio da comunidade local. No âmbito desta iniciativa, a Câmara Municipal de Vizela atribuiu uma verba de{' '}
+              <span className="text-amber-500 font-bold">15.000 euros</span>, possibilitando a criação de 3 estúdios de rádio profissional,
+              equipados com tecnologia de última geração.
             </p>
 
             <p>
@@ -95,7 +95,7 @@ const About: React.FC = () => {
                 <h3 className="text-white font-black uppercase tracking-wider text-sm">Coordenação</h3>
               </div>
               <p className="text-slate-400 text-sm leading-relaxed">
-                O projeto conta com a liderança dedicada de Miguel Araújo, responsável pela visão técnica e pedagógica da REO, assegurando a
+                O projeto conta com a liderança do professor Miguel Araújo, responsável pela visão técnica e pedagógica da REO, assegurando a
                 articulação entre inovação tecnológica, objetivos educativos e envolvimento da comunidade escolar, garantindo a identidade,
                 qualidade e evolução contínua do projeto.
               </p>
