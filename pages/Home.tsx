@@ -97,31 +97,14 @@ const Home: React.FC = () => {
             ].join(' ')}
           >
 
-            {/* OUTER RING + LOGO */}
             <div
               className={`
                 relative w-full h-full flex items-center justify-center
                 rounded-full transition-all duration-300
-                ${glow ? 'border-[10px] border-amber-400' : 'border-[6px] border-amber-500/80'}
+                ${glow ? 'ring-[5px] ring-amber-400' : 'ring-[4px] ring-amber-500/80'}
               `}
             >
-
-              {/* Soft amber aura */}
-              <div
-                className={`
-                  absolute inset-0 rounded-full -z-10
-                  ${glow
-                    ? 'bg-[radial-gradient(circle,rgba(245,158,11,0.45)_0%,transparent_65%)]'
-                    : 'bg-[radial-gradient(circle,rgba(245,158,11,0.20)_0%,transparent_65%)]'
-                  }
-                `}
-              />
-
-              {/* Smaller logo for breathing space */}
-              <div className="w-[82%] h-[82%] rounded-full overflow-hidden">
-                <Logo className="w-full h-full scale-[1.05]" />
-              </div>
-
+              <Logo className="w-[92%] h-[92%]" />
             </div>
           </div>
         </div>
@@ -133,59 +116,46 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      {/* RECENT */}
-      <div className="w-full max-w-2xl bg-[#12121c]/60 backdrop-blur-md p-4 sm:p-5 rounded-[2.5rem] shadow-2xl mb-12 sm:mb-20 border border-white/5">
-        <div className="flex items-center gap-3 mb-4 px-3">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.6)]" />
-          <h2 className="font-black text-slate-400 text-[10px] uppercase tracking-[0.4em]">
-            Emissão Recente
-          </h2>
-        </div>
-
-        <div className="rounded-3xl overflow-hidden bg-black/60 border border-white/5 shadow-inner">
-          <iframe
-            src="https://open.spotify.com/embed/show/3VjnTbbEDaFjd8fddfxWy6?utm_source=generator&theme=0"
-            width="100%"
-            height="152"
-            frameBorder="0"
-            allowFullScreen
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            loading="lazy"
-            className="opacity-95 grayscale-[0.3] supports-[hover:hover]:hover:grayscale-0 transition-all duration-500"
-          />
-        </div>
-      </div>
-
       {/* NAV */}
       <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full max-w-2xl px-2 pb-20">
         {NAV_LINKS.map((link) => (
           <Link
             key={link.path}
             to={link.path}
-            className={`
-              group relative flex flex-col items-center p-6 sm:p-8
-              rounded-[2.5rem] border border-white/5
-              bg-white/[0.02] shadow-xl
-              transition-all duration-500 active:scale-95
-              supports-[hover:hover]:hover:border-amber-500/40
-            `}
+            className="
+              group flex flex-col items-center p-6 sm:p-8
+              bg-white/[0.02] border border-white/5
+              rounded-[2.5rem] shadow-xl
+              transition-all duration-300
+              active:bg-amber-500/10
+              active:border-amber-500/40
+              active:scale-95
+              hover:shadow-amber-500/20
+              hover:border-amber-500/40
+            "
           >
-
-            {/* Amber surface wash */}
-            <div className="absolute inset-0 rounded-[2.5rem] bg-transparent supports-[hover:hover]:group-hover:bg-amber-500/10 transition-all duration-500" />
-
-            <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#0b0b13] border border-white/5 text-slate-500 flex items-center justify-center transition-all duration-500 shadow-2xl mb-4 supports-[hover:hover]:group-hover:bg-amber-500 supports-[hover:hover]:group-hover:text-black">
+            <div className="
+              w-14 h-14 sm:w-16 sm:h-16 rounded-2xl
+              bg-[#0b0b13] border border-white/5
+              text-slate-500 flex items-center justify-center
+              transition-all duration-300 shadow-2xl mb-4
+              group-hover:bg-amber-500
+              group-hover:text-black
+              group-active:bg-amber-500
+              group-active:text-black
+            ">
               {React.cloneElement(link.icon as React.ReactElement<any>, {
                 className: 'w-7 h-7',
               })}
             </div>
 
-            <span className="relative block font-black text-xs sm:text-lg text-white supports-[hover:hover]:group-hover:text-amber-500 transition-colors tracking-tight uppercase italic text-center leading-tight">
+            <span className="block font-black text-xs sm:text-lg text-white group-hover:text-amber-500 transition-colors tracking-tight uppercase italic text-center leading-tight">
               {link.name}
             </span>
           </Link>
         ))}
       </div>
+
     </div>
   );
 };
