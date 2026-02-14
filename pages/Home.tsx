@@ -48,8 +48,7 @@ const Home: React.FC = () => {
       didSwipe.current = true;
       setIsFastSpinning(true);
 
-      // Velocity-based spin calculation
-      const velocity = diff / duration; // px per ms
+      const velocity = diff / duration;
       let spins = Math.min(
         MAX_SPINS,
         Math.max(MIN_SPINS, Math.floor(velocity * 10))
@@ -57,14 +56,11 @@ const Home: React.FC = () => {
 
       const totalDegrees = 360 * spins;
 
-      // Haptic feedback (if supported)
       if ('vibrate' in navigator) {
         navigator.vibrate(20);
       }
 
-      // Glow burst
       setGlow(true);
-
       document.body.style.overflow = 'hidden';
 
       setRotation((prev) => prev + totalDegrees);
@@ -99,19 +95,25 @@ const Home: React.FC = () => {
             style={{ transform: `rotate(${rotation}deg)` }}
             className={[
               'w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[450px] lg:h-[450px]',
-              'p-4 mx-auto cursor-pointer select-none touch-none',
-              glow
-                ? 'shadow-[0_0_80px_rgba(245,158,11,0.9)]'
-                : 'shadow-[0_0_40px_rgba(245,158,11,0.25)]',
+              'mx-auto cursor-pointer select-none touch-none',
               transitionOn
                 ? 'transition-transform duration-[500ms] ease-[cubic-bezier(.2,1.4,.4,1)]'
                 : '',
             ].join(' ')}
           >
-            <Logo
-              className="w-full h-full rounded-full border-[3px] border-amber-500/80 bg-[#1a110f] object-contain pointer-events-none"
-              draggable={false}
-            />
+            <div
+              className={[
+                'w-full h-full rounded-full p-4',
+                glow
+                  ? 'shadow-[0_0_80px_rgba(245,158,11,0.9)]'
+                  : 'shadow-[0_0_40px_rgba(245,158,11,0.25)]',
+              ].join(' ')}
+            >
+              <Logo
+                className="w-full h-full rounded-full border-[3px] border-amber-500/80 bg-[#1a110f] object-contain pointer-events-none"
+                draggable={false}
+              />
+            </div>
           </div>
         </div>
 
