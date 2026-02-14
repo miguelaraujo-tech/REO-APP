@@ -7,6 +7,7 @@ import Archive from './pages/Archive';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Logo from './Logo';
+import ScrollToTop from './ScrollToTop';
 
 const App: React.FC = () => {
   const [isStandalone, setIsStandalone] = useState(false);
