@@ -11,8 +11,7 @@ const Logo = ({ className = "" }: LogoProps) => {
       className={`
         object-contain
         rounded-full
-        p-1
-        bg-black/40
+        select-none
         ${className}
       `}
     />
