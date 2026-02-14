@@ -160,7 +160,6 @@ const App: React.FC = () => {
             </div>
 
             <div className="flex flex-col items-center gap-1 opacity-40">
-
               <p className="text-slate-600 text-[9px] uppercase tracking-[0.3em] text-center">
                 © 2026 REO · RÁDIO ESCOLAR ONLINE
               </p>
@@ -173,7 +172,6 @@ const App: React.FC = () => {
                   {' '}· Miguel Araújo
                 </span>
               </p>
-
             </div>
 
           </div>
@@ -185,5 +183,6 @@ const App: React.FC = () => {
 };
 
 export default App;
+
 
 
