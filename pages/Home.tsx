@@ -4,7 +4,6 @@ import { NAV_LINKS } from '../constants';
 import Logo from '../Logo';
 
 const Home: React.FC = () => {
-  // Rotation + interaction
   const [rotation, setRotation] = useState(0);
   const [transitionOn, setTransitionOn] = useState(true);
   const [isFastSpinning, setIsFastSpinning] = useState(false);
@@ -20,7 +19,6 @@ const Home: React.FC = () => {
   const MIN_SPINS = 3;
 
   const handleTap = () => {
-    // iOS ghost click after swipe
     if (didSwipe.current) {
       didSwipe.current = false;
       return;
@@ -40,7 +38,7 @@ const Home: React.FC = () => {
     if (touchStartY.current === null || touchStartTime.current === null) return;
 
     const endY = e.changedTouches[0].clientY;
-    const diff = endY - touchStartY.current; // swipe DOWN
+    const diff = endY - touchStartY.current;
     const duration = Date.now() - touchStartTime.current;
 
     touchStartY.current = null;
@@ -79,6 +77,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center animate-in fade-in duration-700 max-w-full overflow-hidden">
+      {/* HERO */}
       <div className="mb-10 sm:mb-20 text-center relative w-full flex flex-col items-center">
         <div className="absolute inset-0 bg-blue-600/10 blur-[120px] rounded-full -z-10 mx-auto w-3/4 h-full opacity-40" />
 
@@ -92,7 +91,9 @@ const Home: React.FC = () => {
             className={[
               'w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[450px] lg:h-[450px]',
               'mx-auto cursor-pointer select-none touch-none',
-              transitionOn ? 'transition-transform duration-[420ms] ease-[cubic-bezier(.2,1.6,.3,1)]' : '',
+              transitionOn
+                ? 'transition-transform duration-[420ms] ease-[cubic-bezier(.2,1.6,.3,1)]'
+                : '',
             ].join(' ')}
           >
             <div className="relative w-full h-full rounded-full p-4 isolate">
@@ -119,34 +120,14 @@ const Home: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-8 sm:mt-12 space-y-2">
+        <div className="mt-8 sm:mt-12">
           <p className="text-[9px] sm:text-[11px] md:text-sm text-amber-500 font-black uppercase tracking-[0.3em] sm:tracking-[0.5em] px-4 opacity-80 text-center max-w-3xl">
             A RÁDIO ESCOLAR ONLINE DO AGRUPAMENTO DE ESCOLAS DE S. BENTO DE VIZELA
           </p>
         </div>
       </div>
 
-      <div className="w-full max-w-2xl bg-[#12121c]/60 backdrop-blur-md p-4 sm:p-5 rounded-[2.5rem] shadow-2xl mb-12 sm:mb-20 border border-white/5">
-        <div className="flex items-center gap-3 mb-4 px-3">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.6)]" />
-          <h2 className="font-black text-slate-400 text-[10px] uppercase tracking-[0.4em]">Emissão Recente</h2>
-        </div>
-
-        <div className="rounded-3xl overflow-hidden bg-black/60 border border-white/5 shadow-inner">
-          <iframe
-            src="https://open.spotify.com/embed/show/3VjnTbbEDaFjd8fddfxWy6?utm_source=generator&theme=0"
-            width="100%"
-            height="152"
-            frameBorder="0"
-            allowFullScreen
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            loading="lazy"
-            className="opacity-95 grayscale-[0.3] transition-all duration-500"
-          />
-        </div>
-      </div>
-
-      {/* NAV GRID (hover for desktop, active for iPhone) */}
+      {/* NAV GRID – MOBILE CORRECT */}
       <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full max-w-2xl px-2 pb-20">
         {NAV_LINKS.map((link) => (
           <Link
@@ -159,10 +140,11 @@ const Home: React.FC = () => {
               border border-white/5
               rounded-[2.5rem]
               shadow-xl
-              transition-all duration-500
-              hover:border-amber-500/40 hover:bg-white/[0.04] hover:shadow-amber-500/10
+              transition-all duration-300
               active:scale-95
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40
+              active:border-amber-500/40
+              active:bg-white/[0.04]
+              active:shadow-amber-500/20
             "
           >
             <div
@@ -173,14 +155,17 @@ const Home: React.FC = () => {
                 border border-white/5
                 text-slate-500
                 flex items-center justify-center
-                transition-all duration-500
+                transition-all duration-300
                 shadow-2xl
                 mb-4
-                group-hover:bg-amber-500 group-hover:text-black group-hover:scale-110 group-hover:rotate-2
-                group-active:bg-amber-500 group-active:text-black group-active:scale-105 group-active:rotate-2
+                group-active:bg-amber-500
+                group-active:text-black
+                group-active:scale-110
               "
             >
-              {React.cloneElement(link.icon as React.ReactElement<any>, { className: 'w-7 h-7' })}
+              {React.cloneElement(link.icon as React.ReactElement<any>, {
+                className: 'w-7 h-7',
+              })}
             </div>
 
             <span
@@ -190,7 +175,6 @@ const Home: React.FC = () => {
                 tracking-tight uppercase italic
                 text-center leading-tight
                 transition-colors duration-300
-                group-hover:text-amber-500
                 group-active:text-amber-500
               "
             >
