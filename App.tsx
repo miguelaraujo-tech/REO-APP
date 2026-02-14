@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { HashRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Home as HomeIcon } from 'lucide-react';
 import Home from './pages/Home';
 import Socials from './pages/Socials';
