@@ -116,9 +116,11 @@ const Home: React.FC = () => {
               {/* Thin premium ring (stays perfectly circular) */}
               <div
                 className={[
-                  'absolute inset-[10px] rounded-full pointer-events-none',
-                  glow ? 'ring-2 ring-amber-500/70' : 'ring-1 ring-amber-500/55',
-                ].join(' ')}
+                 'absolute inset-[10px] rounded-full pointer-events-none transition-all duration-300',
+    glow
+      ? 'ring-4 ring-amber-400'
+      : 'ring-2 ring-amber-500/70',
+  ].join(' ')}
               />
 
               {/* Actual logo */}
