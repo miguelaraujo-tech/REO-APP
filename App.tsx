@@ -164,10 +164,10 @@ const App: React.FC = () => {
   </p>
 
  <p className="text-[8px] uppercase tracking-[0.2em] text-center">
-  <span className="text-slate-600 opacity-70">
+  <span className="text-slate-600 opacity-80">
     Coordenação e Desenvolvimento
   </span>
-  <span className="text-slate-800 opacity-40">
+  <span className="text-slate-800 opacity-30">
     {' '}· Miguel Araújo
   </span>
 </p>
