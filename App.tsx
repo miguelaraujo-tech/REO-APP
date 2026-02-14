@@ -159,27 +159,23 @@ const App: React.FC = () => {
               </span>
             </div>
 
-           <div className="flex flex-col items-center gap-1 opacity-40">
+            <div className="flex flex-col items-center gap-1 opacity-40">
 
-  <p className="text-slate-600 text-[9px] uppercase tracking-[0.3em] text-center">
-    © 2026 REO · RÁDIO ESCOLAR ONLINE
-  </p>
+              <p className="text-slate-600 text-[9px] uppercase tracking-[0.3em] text-center">
+                © 2026 REO · RÁDIO ESCOLAR ONLINE
+              </p>
 
- <p className="text-[8px] uppercase tracking-[0.2em] text-center">
-  <span className="text-slate-600 opacity-80">
-    Coordenação e Desenvolvimento
-  </span>
-  <span className="text-slate-800 opacity-30">
-    {' '}· Miguel Araújo
-  </span>
-</p>
-
-</div>
-
+              <p className="text-[8px] uppercase tracking-[0.2em] text-center">
+                <span className="text-slate-600 opacity-80">
+                  Coordenação e Desenvolvimento
                 </span>
-              </div>
+                <span className="text-slate-800 opacity-30">
+                  {' '}· Miguel Araújo
+                </span>
+              </p>
 
             </div>
+
           </div>
         </footer>
 
@@ -189,4 +185,5 @@ const App: React.FC = () => {
 };
 
 export default App;
+
 
