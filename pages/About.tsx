@@ -16,9 +16,18 @@ const About: React.FC = () => {
 
       <article className="bg-slate-900/40 backdrop-blur-md rounded-[3rem] p-10 md:p-16 shadow-2xl border border-white/5">
         <div className="flex flex-col md:flex-row items-center gap-6 mb-12">
-          <div className="w-20 h-20 bg-amber-500 rounded-3xl flex items-center justify-center text-black shadow-xl rotate-3 overflow-hidden border border-white/10">
-            <Logo className="w-full h-full" />
-          </div>
+          <div className="relative w-20 h-20 flex items-center justify-center">
+  {/* Subtle outer aura */}
+  <div className="absolute inset-0 rounded-full bg-amber-500/10 blur-xl" />
+
+  {/* Thin accent ring */}
+  <div className="absolute inset-0 rounded-full ring-1 ring-amber-500/50" />
+
+  {/* Logo */}
+  <div className="relative w-full h-full rounded-full overflow-hidden">
+    <Logo className="w-full h-full" />
+  </div>
+</div>
           <div className="text-center md:text-left">
             <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none">
               SOBRE A REO
