@@ -163,8 +163,8 @@ const App: React.FC = () => {
     © 2026 REO · RÁDIO ESCOLAR ONLINE
   </p>
 
-  <p className="text-slate-700 text-[8px] uppercase tracking-[0.2em] text-center">
-    Coordenação e Desenvolvimento · Miguel Araújo
+ <p className="text-slate-800 text-[8px] uppercase tracking-[0.2em] text-center opacity-50">
+   Coordenação e Desenvolvimento · Miguel Araújo
   </p>
 
 </div>
