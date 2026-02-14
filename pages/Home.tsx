@@ -16,7 +16,7 @@ const Home: React.FC = () => {
 
   const TAP_STEP = 30;
   const SWIPE_THRESHOLD = 50;
-  const MAX_SPINS = 7; // a bit more premium "snap"
+  const MAX_SPINS = 7;
   const MIN_SPINS = 3;
 
   const handleTap = () => {
@@ -50,12 +50,10 @@ const Home: React.FC = () => {
       didSwipe.current = true;
       setIsFastSpinning(true);
 
-      // velocity -> spins
-      const velocity = diff / Math.max(duration, 1); // px/ms
+      const velocity = diff / Math.max(duration, 1);
       const spins = Math.min(MAX_SPINS, Math.max(MIN_SPINS, Math.round(velocity * 12)));
       const totalDegrees = 360 * spins;
 
-      // subtle haptic where supported
       if ('vibrate' in navigator) navigator.vibrate(15);
 
       setGlow(true);
@@ -63,7 +61,6 @@ const Home: React.FC = () => {
 
       setRotation((prev) => prev + totalDegrees);
 
-      // fast snap reset without “spin back”
       window.setTimeout(() => {
         setTransitionOn(false);
         setRotation(0);
@@ -86,7 +83,6 @@ const Home: React.FC = () => {
         <div className="absolute inset-0 bg-blue-600/10 blur-[120px] rounded-full -z-10 mx-auto w-3/4 h-full opacity-40" />
 
         <div className="relative animate-float">
-          {/* ROTATION WRAPPER (only rotation + input, no visuals that can square out) */}
           <div
             onClick={handleTap}
             onTouchStart={handleTouchStart}
@@ -96,14 +92,10 @@ const Home: React.FC = () => {
             className={[
               'w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[450px] lg:h-[450px]',
               'mx-auto cursor-pointer select-none touch-none',
-              transitionOn
-                ? 'transition-transform duration-[420ms] ease-[cubic-bezier(.2,1.6,.3,1)]'
-                : '',
+              transitionOn ? 'transition-transform duration-[420ms] ease-[cubic-bezier(.2,1.6,.3,1)]' : '',
             ].join(' ')}
           >
-            {/* PREMIUM CIRCULAR STACK (guaranteed round, no blur rectangles) */}
             <div className="relative w-full h-full rounded-full p-4 isolate">
-              {/* Amber aura (radial gradient, not blur) */}
               <div
                 className={[
                   'absolute inset-0 rounded-full -z-10',
@@ -113,7 +105,6 @@ const Home: React.FC = () => {
                 ].join(' ')}
               />
 
-              {/* Thin premium ring (stays perfectly circular) */}
               <div
                 className={[
                   'absolute inset-[10px] rounded-full pointer-events-none',
@@ -121,7 +112,6 @@ const Home: React.FC = () => {
                 ].join(' ')}
               />
 
-              {/* Actual logo */}
               <div className="relative w-full h-full rounded-full overflow-hidden">
                 <Logo className="w-full h-full" />
               </div>
@@ -139,9 +129,7 @@ const Home: React.FC = () => {
       <div className="w-full max-w-2xl bg-[#12121c]/60 backdrop-blur-md p-4 sm:p-5 rounded-[2.5rem] shadow-2xl mb-12 sm:mb-20 border border-white/5">
         <div className="flex items-center gap-3 mb-4 px-3">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.6)]" />
-          <h2 className="font-black text-slate-400 text-[10px] uppercase tracking-[0.4em]">
-            Emissão Recente
-          </h2>
+          <h2 className="font-black text-slate-400 text-[10px] uppercase tracking-[0.4em]">Emissão Recente</h2>
         </div>
 
         <div className="rounded-3xl overflow-hidden bg-black/60 border border-white/5 shadow-inner">
@@ -154,71 +142,58 @@ const Home: React.FC = () => {
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
             loading="lazy"
             className="opacity-95 grayscale-[0.3] transition-all duration-500"
-          ></iframe>
+          />
         </div>
       </div>
 
-     <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full max-w-2xl px-2 pb-20">
-  {NAV_LINKS.map((link) => (
-    <Link
-      key={link.path}
-      to={link.path}
-      className="
-        group flex flex-col items-center
-        p-6 sm:p-8
-        bg-white/[0.02]
-        border border-white/5
-        rounded-[2.5rem]
-        shadow-xl
-        transition-all duration-500
-        hover:border-amber-500/40
-        hover:bg-white/[0.04]
-        hover:shadow-amber-500/10
-        active:scale-95
-      "
-    >
-      <div
-        className="
-          w-14 h-14 sm:w-16 sm:h-16
-          rounded-2xl
-          bg-[#0b0b13]
-          border border-white/5
-          text-slate-500
-          flex items-center justify-center
-          transition-all duration-500
-          shadow-2xl
-          mb-4
-          group-hover:bg-amber-500
-          group-hover:text-black
-          group-hover:scale-110
-          group-hover:rotate-2
-        "
-      >
-        {React.cloneElement(link.icon as React.ReactElement<any>, {
-          className: 'w-7 h-7',
-        })}
-      </div>
-
-      <span
-        className="
-          block font-black text-xs sm:text-lg
-          text-white
-          tracking-tight uppercase italic
-          text-center leading-tight
-          transition-colors duration-300
-          group-hover:text-amber-500
-        "
-      >
-        {link.name}
-      </span>
-    </Link>
-  ))}
-</div>
-
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#0b0b13] border border-white/5 text-slate-500 flex items-center justify-center transition-all duration-500 shadow-2xl mb-4">
+      {/* NAV GRID (hover for desktop, active for iPhone) */}
+      <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full max-w-2xl px-2 pb-20">
+        {NAV_LINKS.map((link) => (
+          <Link
+            key={link.path}
+            to={link.path}
+            className="
+              group flex flex-col items-center
+              p-6 sm:p-8
+              bg-white/[0.02]
+              border border-white/5
+              rounded-[2.5rem]
+              shadow-xl
+              transition-all duration-500
+              hover:border-amber-500/40 hover:bg-white/[0.04] hover:shadow-amber-500/10
+              active:scale-95
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40
+            "
+          >
+            <div
+              className="
+                w-14 h-14 sm:w-16 sm:h-16
+                rounded-2xl
+                bg-[#0b0b13]
+                border border-white/5
+                text-slate-500
+                flex items-center justify-center
+                transition-all duration-500
+                shadow-2xl
+                mb-4
+                group-hover:bg-amber-500 group-hover:text-black group-hover:scale-110 group-hover:rotate-2
+                group-active:bg-amber-500 group-active:text-black group-active:scale-105 group-active:rotate-2
+              "
+            >
               {React.cloneElement(link.icon as React.ReactElement<any>, { className: 'w-7 h-7' })}
             </div>
-            <span className="block font-black text-xs sm:text-lg text-white tracking-tight uppercase italic text-center leading-tight">
+
+            <span
+              className="
+                block font-black text-xs sm:text-lg
+                text-white
+                tracking-tight uppercase italic
+                text-center leading-tight
+                transition-colors duration-300
+                group-hover:text-amber-500
+                group-active:text-amber-500
+              "
+            >
               {link.name}
             </span>
           </Link>
