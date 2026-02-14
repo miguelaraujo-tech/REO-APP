@@ -158,13 +158,63 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full max-w-2xl px-2 pb-20">
-        {NAV_LINKS.map((link) => (
-          <Link
-            key={link.path}
-            to={link.path}
-            className="group flex flex-col items-center p-6 sm:p-8 bg-white/[0.02] border border-white/5 rounded-[2.5rem] shadow-xl transition-all duration-500 active:scale-95"
-          >
+     <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full max-w-2xl px-2 pb-20">
+  {NAV_LINKS.map((link) => (
+    <Link
+      key={link.path}
+      to={link.path}
+      className="
+        group flex flex-col items-center
+        p-6 sm:p-8
+        bg-white/[0.02]
+        border border-white/5
+        rounded-[2.5rem]
+        shadow-xl
+        transition-all duration-500
+        hover:border-amber-500/40
+        hover:bg-white/[0.04]
+        hover:shadow-amber-500/10
+        active:scale-95
+      "
+    >
+      <div
+        className="
+          w-14 h-14 sm:w-16 sm:h-16
+          rounded-2xl
+          bg-[#0b0b13]
+          border border-white/5
+          text-slate-500
+          flex items-center justify-center
+          transition-all duration-500
+          shadow-2xl
+          mb-4
+          group-hover:bg-amber-500
+          group-hover:text-black
+          group-hover:scale-110
+          group-hover:rotate-2
+        "
+      >
+        {React.cloneElement(link.icon as React.ReactElement<any>, {
+          className: 'w-7 h-7',
+        })}
+      </div>
+
+      <span
+        className="
+          block font-black text-xs sm:text-lg
+          text-white
+          tracking-tight uppercase italic
+          text-center leading-tight
+          transition-colors duration-300
+          group-hover:text-amber-500
+        "
+      >
+        {link.name}
+      </span>
+    </Link>
+  ))}
+</div>
+
             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#0b0b13] border border-white/5 text-slate-500 flex items-center justify-center transition-all duration-500 shadow-2xl mb-4">
               {React.cloneElement(link.icon as React.ReactElement<any>, { className: 'w-7 h-7' })}
             </div>
