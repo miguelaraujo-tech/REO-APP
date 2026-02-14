@@ -4,7 +4,6 @@ import { NAV_LINKS } from '../constants';
 import Logo from '../Logo';
 
 const Home: React.FC = () => {
-  // Rotation + interaction
   const [rotation, setRotation] = useState(0);
   const [transitionOn, setTransitionOn] = useState(true);
   const [isFastSpinning, setIsFastSpinning] = useState(false);
@@ -16,11 +15,10 @@ const Home: React.FC = () => {
 
   const TAP_STEP = 30;
   const SWIPE_THRESHOLD = 50;
-  const MAX_SPINS = 7; // a bit more premium "snap"
+  const MAX_SPINS = 7;
   const MIN_SPINS = 3;
 
   const handleTap = () => {
-    // iOS ghost click after swipe
     if (didSwipe.current) {
       didSwipe.current = false;
       return;
@@ -40,7 +38,7 @@ const Home: React.FC = () => {
     if (touchStartY.current === null || touchStartTime.current === null) return;
 
     const endY = e.changedTouches[0].clientY;
-    const diff = endY - touchStartY.current; // swipe DOWN
+    const diff = endY - touchStartY.current;
     const duration = Date.now() - touchStartTime.current;
 
     touchStartY.current = null;
@@ -50,12 +48,14 @@ const Home: React.FC = () => {
       didSwipe.current = true;
       setIsFastSpinning(true);
 
-      // velocity -> spins
-      const velocity = diff / Math.max(duration, 1); // px/ms
-      const spins = Math.min(MAX_SPINS, Math.max(MIN_SPINS, Math.round(velocity * 12)));
+      const velocity = diff / Math.max(duration, 1);
+      const spins = Math.min(
+        MAX_SPINS,
+        Math.max(MIN_SPINS, Math.round(velocity * 12))
+      );
+
       const totalDegrees = 360 * spins;
 
-      // subtle haptic where supported
       if ('vibrate' in navigator) navigator.vibrate(15);
 
       setGlow(true);
@@ -63,7 +63,6 @@ const Home: React.FC = () => {
 
       setRotation((prev) => prev + totalDegrees);
 
-      // fast snap reset without “spin back”
       window.setTimeout(() => {
         setTransitionOn(false);
         setRotation(0);
@@ -86,7 +85,6 @@ const Home: React.FC = () => {
         <div className="absolute inset-0 bg-blue-600/10 blur-[120px] rounded-full -z-10 mx-auto w-3/4 h-full opacity-40" />
 
         <div className="relative animate-float">
-          {/* ROTATION WRAPPER (only rotation + input, no visuals that can square out) */}
           <div
             onClick={handleTap}
             onTouchStart={handleTouchStart}
@@ -101,31 +99,26 @@ const Home: React.FC = () => {
                 : '',
             ].join(' ')}
           >
-            {/* PREMIUM CIRCULAR STACK (guaranteed round, no blur rectangles) */}
-            <div className="relative w-full h-full rounded-full p-4 isolate">
-              {/* Amber aura (radial gradient, not blur) */}
-              <div
-                className={[
-                  'absolute inset-0 rounded-full -z-10',
-                  glow
-                    ? 'bg-[radial-gradient(circle,rgba(245,158,11,0.38)_0%,rgba(245,158,11,0.12)_45%,transparent_72%)]'
-                    : 'bg-[radial-gradient(circle,rgba(245,158,11,0.22)_0%,rgba(245,158,11,0.08)_45%,transparent_72%)]',
-                ].join(' ')}
-              />
-
-              {/* Thin premium ring (stays perfectly circular) */}
+            {/* OUTER RING WRAPPER */}
+            <div
+              className={`
+                relative w-full h-full flex items-center justify-center
+                rounded-full transition-all duration-300
+                ${glow ? 'ring-[6px] ring-amber-400' : 'ring-[3px] ring-amber-500/80'}
+              `}
+            >
+              {/* Radial amber aura */}
               <div
                 className={`
-    absolute inset-[8px] rounded-full pointer-events-none
-    transition-all duration-300
-    ${glow ? 'border-[4px] border-amber-400' : 'border-[2px] border-amber-500/80'}
-  `}
+                  absolute inset-0 rounded-full -z-10
+                  ${glow
+                    ? 'bg-[radial-gradient(circle,rgba(245,158,11,0.35)_0%,transparent_65%)]'
+                    : 'bg-[radial-gradient(circle,rgba(245,158,11,0.15)_0%,transparent_65%)]'
+                  }
+                `}
               />
 
-              {/* Actual logo */}
-              <div className="relative w-full h-full rounded-full overflow-hidden">
-                <Logo className="w-full h-full" />
-              </div>
+              <Logo className="w-[90%] h-[90%]" />
             </div>
           </div>
         </div>
@@ -155,7 +148,7 @@ const Home: React.FC = () => {
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
             loading="lazy"
             className="opacity-95 grayscale-[0.3] transition-all duration-500"
-          ></iframe>
+          />
         </div>
       </div>
 
@@ -164,12 +157,15 @@ const Home: React.FC = () => {
           <Link
             key={link.path}
             to={link.path}
-            className="group flex flex-col items-center p-6 sm:p-8 bg-white/[0.02] border border-white/5 rounded-[2.5rem] shadow-xl transition-all duration-500 active:scale-95"
+            className="group flex flex-col items-center p-6 sm:p-8 bg-white/[0.02] border border-white/5 rounded-[2.5rem] shadow-xl hover:shadow-amber-500/20 hover:border-amber-500/40 hover:bg-white/[0.04] transition-all duration-500 active:scale-95"
           >
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#0b0b13] border border-white/5 text-slate-500 flex items-center justify-center transition-all duration-500 shadow-2xl mb-4">
-              {React.cloneElement(link.icon as React.ReactElement<any>, { className: 'w-7 h-7' })}
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#0b0b13] border border-white/5 text-slate-500 flex items-center justify-center group-hover:bg-amber-500 group-hover:text-black transition-all duration-500 shadow-2xl mb-4 group-hover:scale-110 group-hover:rotate-2">
+              {React.cloneElement(link.icon as React.ReactElement<any>, {
+                className: 'w-7 h-7',
+              })}
             </div>
-            <span className="block font-black text-xs sm:text-lg text-white tracking-tight uppercase italic text-center leading-tight">
+
+            <span className="block font-black text-xs sm:text-lg text-white group-hover:text-amber-500 transition-colors tracking-tight uppercase italic text-center leading-tight">
               {link.name}
             </span>
           </Link>
