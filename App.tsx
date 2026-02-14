@@ -50,22 +50,18 @@ const App: React.FC = () => {
     return (
       <div className="min-h-screen bg-[#0b0b13] text-white flex flex-col items-center justify-start px-6 pt-6 pb-6 text-center">
 
-        {/* Logo */}
         <div className="mb-3 animate-float">
           <Logo className="w-24 h-24 rounded-full border-4 border-amber-500 shadow-[0_0_60px_rgba(245,158,11,0.35)]" />
         </div>
 
-        {/* Title */}
         <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2">
           Instale a Aplicação REO
         </h1>
 
-        {/* Subtitle */}
         <p className="text-slate-400 max-w-md mb-4 text-base leading-relaxed">
           Para aceder à Rádio Escolar Online, adicione a aplicação ao ecrã principal.
         </p>
 
-        {/* iOS Instructions */}
         {isIOS && (
           <div className="max-w-md text-left space-y-2 mt-1">
 
@@ -73,7 +69,6 @@ const App: React.FC = () => {
               No iPhone siga estes passos:
             </h2>
 
-            {/* Floating Share Image */}
             <div className="flex justify-center mb-1 animate-bounce">
               <img
                 src="/share-icon.png"
@@ -96,7 +91,6 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Android Install Button */}
         {!isIOS && deferredPrompt && (
           <button
             onClick={installAndroid}
@@ -155,27 +149,29 @@ const App: React.FC = () => {
 
         <footer className="py-12 border-t border-white/5 bg-[#08080d]">
           <div className="max-w-4xl mx-auto px-4 flex flex-col items-center gap-4">
+
             <div className="flex items-center gap-3 opacity-20 hover:opacity-40 transition-all duration-700">
               <Logo className="w-8 h-8 border border-white/5" />
-              <div className="flex flex-col text-white">
-                <span className="font-bold text-[10px] leading-none tracking-tight">
-                  REO
-                </span>
-              </div>
+              <span className="font-bold text-[10px] leading-none tracking-tight text-white">
+                REO
+              </span>
             </div>
 
-            <p className="text-slate-700 text-[9px] uppercase tracking-[0.35em] text-center px-4 opacity-60">
-              <div className="w-16 h-[1px] bg-amber-500/30 mb-4" />
-  © 2026 REO · RÁDIO ESCOLAR ONLINE
-</p>
-              <div className="mt-2 text-center leading-relaxed">
-  <span className="block text-[8px] uppercase tracking-[0.25em] text-slate-700 opacity-40">
-    Coordenação e Desenvolvimento
-  </span>
-  <span className="block text-[9px] font-black uppercase tracking-[0.35em] text-slate-600 mt-1">
-    Miguel Araújo
-  </span>
-</div>
+            <div className="flex flex-col items-center gap-2">
+
+              <p className="text-slate-700 text-[9px] uppercase tracking-[0.35em] text-center opacity-60">
+                © 2026 REO · RÁDIO ESCOLAR ONLINE
+              </p>
+
+              <div className="text-center leading-relaxed">
+                <span className="block text-[8px] uppercase tracking-[0.25em] text-slate-700 opacity-40">
+                  Coordenação e Desenvolvimento
+                </span>
+                <span className="block text-[9px] font-black uppercase tracking-[0.35em] text-slate-600 mt-1">
+                  Miguel Araújo
+                </span>
+              </div>
+
             </div>
           </div>
         </footer>
@@ -186,3 +182,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+
