@@ -38,7 +38,7 @@ const Home: React.FC = () => {
     if (!touchStartY.current || !touchStartTime.current) return;
 
     const endY = e.changedTouches[0].clientY;
-    const diff = endY - touchStartY.current; // swipe DOWN
+    const diff = endY - touchStartY.current;
     const duration = Date.now() - touchStartTime.current;
 
     touchStartY.current = null;
@@ -83,10 +83,14 @@ const Home: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center animate-in fade-in duration-700 max-w-full overflow-hidden">
+
+      {/* HERO SECTION */}
       <div className="mb-10 sm:mb-20 text-center relative w-full flex flex-col items-center">
         <div className="absolute inset-0 bg-blue-600/10 blur-[120px] rounded-full -z-10 mx-auto w-3/4 h-full opacity-40"></div>
 
         <div className="relative animate-float">
+
+          {/* ROTATION WRAPPER */}
           <div
             onClick={handleTap}
             onTouchStart={handleTouchStart}
@@ -101,19 +105,25 @@ const Home: React.FC = () => {
                 : '',
             ].join(' ')}
           >
-            <div
-              className={[
-                'w-full h-full rounded-full p-4',
-                glow
-                  ? 'shadow-[0_0_80px_rgba(245,158,11,0.9)]'
-                  : 'shadow-[0_0_40px_rgba(245,158,11,0.25)]',
-              ].join(' ')}
-            >
-              <Logo
-                className="w-full h-full rounded-full border-[3px] border-amber-500/80 bg-[#1a110f] object-contain pointer-events-none"
-                draggable={false}
+
+            {/* STRUCTURED PREMIUM LAYER */}
+            <div className="relative w-full h-full flex items-center justify-center">
+
+              {/* Thin amber accent ring */}
+              <div className="absolute inset-0 rounded-full border border-amber-500/60" />
+
+              {/* Soft controlled glow */}
+              <div
+                className={`
+                  absolute inset-[-12px] rounded-full
+                  ${glow ? 'bg-amber-500/20' : 'bg-amber-500/10'}
+                  blur-2xl
+                `}
               />
+
+              <Logo className="relative w-full h-full" />
             </div>
+
           </div>
         </div>
 
@@ -124,6 +134,7 @@ const Home: React.FC = () => {
         </div>
       </div>
 
+      {/* RECENT EPISODE */}
       <div className="w-full max-w-2xl bg-[#12121c]/60 backdrop-blur-md p-4 sm:p-5 rounded-[2.5rem] shadow-2xl mb-12 sm:mb-20 border border-white/5">
         <div className="flex items-center gap-3 mb-4 px-3">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.6)]" />
@@ -131,6 +142,7 @@ const Home: React.FC = () => {
             Emissão Recente
           </h2>
         </div>
+
         <div className="rounded-3xl overflow-hidden bg-black/60 border border-white/5 shadow-inner">
           <iframe
             src="https://open.spotify.com/embed/show/3VjnTbbEDaFjd8fddfxWy6?utm_source=generator&theme=0"
@@ -145,6 +157,7 @@ const Home: React.FC = () => {
         </div>
       </div>
 
+      {/* NAVIGATION GRID */}
       <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full max-w-2xl px-2 pb-20">
         {NAV_LINKS.map((link) => (
           <Link
@@ -157,6 +170,7 @@ const Home: React.FC = () => {
                 className: 'w-7 h-7',
               })}
             </div>
+
             <span className="block font-black text-xs sm:text-lg text-white tracking-tight uppercase italic text-center leading-tight">
               {link.name}
             </span>
