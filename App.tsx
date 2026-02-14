@@ -157,18 +157,18 @@ const App: React.FC = () => {
               </span>
             </div>
 
-            <div className="flex flex-col items-center gap-2">
+           <div className="flex flex-col items-center gap-1 opacity-40">
 
-              <p className="text-slate-700 text-[9px] uppercase tracking-[0.35em] text-center opacity-60">
-                © 2026 REO · RÁDIO ESCOLAR ONLINE
-              </p>
+  <p className="text-slate-600 text-[9px] uppercase tracking-[0.3em] text-center">
+    © 2026 REO · RÁDIO ESCOLAR ONLINE
+  </p>
 
-              <div className="text-center leading-relaxed">
-                <span className="block text-[8px] uppercase tracking-[0.25em] text-slate-700 opacity-40">
-                  Coordenação e Desenvolvimento
-                </span>
-                <span className="block text-[9px] font-black uppercase tracking-[0.35em] text-slate-600 mt-1">
-                  Miguel Araújo
+  <p className="text-slate-700 text-[8px] uppercase tracking-[0.2em] text-center">
+    Coordenação e Desenvolvimento · Miguel Araújo
+  </p>
+
+</div>
+
                 </span>
               </div>
 
