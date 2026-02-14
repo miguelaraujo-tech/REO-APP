@@ -5,7 +5,7 @@ import Logo from '../Logo';
 
 const About: React.FC = () => {
   return (
-    <div className="animate-in slide-in-from-bottom-4 duration-500">
+    <div>
       <Link
         to="/"
         className="inline-flex items-center text-amber-500 hover:text-amber-400 mb-8 font-bold uppercase tracking-widest text-xs group"
@@ -14,7 +14,7 @@ const About: React.FC = () => {
         Voltar para o Início
       </Link>
 
-      <article className="bg-slate-900/40 backdrop-blur-md rounded-[3rem] p-10 md:p-16 shadow-2xl border border-white/5">
+      <article className="animate-in slide-in-from-bottom-4 duration-500 bg-slate-900/40 backdrop-blur-md rounded-[3rem] p-10 md:p-16 shadow-2xl border border-white/5">
         <div className="flex flex-col md:flex-row items-center gap-6 mb-12">
           <div className="relative w-20 h-20 flex items-center justify-center">
   {/* Subtle outer aura */}
