@@ -115,9 +115,14 @@ const About: React.FC = () => {
             <p className="text-slate-600 italic text-xs uppercase font-bold tracking-widest opacity-60">
               "REO - A voz da escola, o som de Vizela."
             </p>
-            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-700 opacity-40 mt-4">
-              Coordenação e Desenvolvimento: Miguel Araújo
-            </p>
+            <div className="mt-4 text-center leading-relaxed">
+  <span className="block text-[9px] uppercase tracking-[0.25em] text-slate-600 opacity-50">
+    Coordenação e Desenvolvimento
+  </span>
+  <span className="block text-[10px] font-black uppercase tracking-[0.35em] text-slate-500 mt-1">
+    Miguel Araújo
+  </span>
+</div>
           </div>
         </div>
       </article>
