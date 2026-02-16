@@ -1,9 +1,23 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import { ArrowLeft, Podcast, Users, Target, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Logo from '../Logo';
 
 const About: React.FC = () => {
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    
+    // Backup: força no elemento main (flex-1 no teu App.tsx)
+    const main = document.querySelector('main');
+    if (main) {
+      main.scrollTop = 0;
+    }
+    
+    // Reforço extra para PWAs/mobile que às vezes ignoram o window
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, []); // só ao montar o componente
+
   return (
     <div className="pt-2">
       <Link
@@ -13,7 +27,6 @@ const About: React.FC = () => {
         <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
         Voltar para o Início
       </Link>
-
       <article className="animate-in fade-in duration-300 bg-slate-900/40 backdrop-blur-md rounded-[3rem] p-10 md:p-16 shadow-2xl border border-white/5">
         <div className="flex flex-col md:flex-row items-center gap-6 mb-12">
           <div className="relative w-20 h-20 flex items-center justify-center">
@@ -23,7 +36,6 @@ const About: React.FC = () => {
               <Logo className="w-full h-full" />
             </div>
           </div>
-
           <div className="text-center md:text-left">
             <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none">
               SOBRE A REO
@@ -33,7 +45,6 @@ const About: React.FC = () => {
             </p>
           </div>
         </div>
-
         <div className="prose prose-invert max-w-none text-slate-300 leading-relaxed space-y-8 font-medium text-lg">
           <div className="space-y-6">
             <p>
@@ -41,7 +52,6 @@ const About: React.FC = () => {
               projeto educativo e cultural que nasceu da visão, persistência e envolvimento ativo da
               comunidade escolar do <span className="text-white font-bold">Agrupamento de Escolas de S. Bento de Vizela</span>.
             </p>
-
             <p>
               O projeto foi o grande vencedor da{' '}
               <span className="text-amber-500 font-bold">2.ª edição do Orçamento Participativo Jovem (OPJ) de Vizela, em 2018</span>,
@@ -50,13 +60,11 @@ const About: React.FC = () => {
               <span className="text-amber-500 font-bold">15.000 euros</span>, possibilitando a criação de 3 estúdios de rádio profissional,
               equipados com tecnologia de última geração.
             </p>
-
             <p>
               Atualmente, a REO ultrapassa o conceito tradicional de rádio escolar, afirmando-se como um <span className="text-white font-bold">hub digital educativo</span>, onde tecnologia e
               pedagogia se cruzam para dar voz aos alunos, promover a criatividade e reforçar a ligação entre a escola e a comunidade.
             </p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
             <div className="bg-white/5 p-6 rounded-[2rem] border border-white/5 hover:border-amber-500/30 transition-colors group">
               <div className="flex items-center gap-4 mb-3">
@@ -69,7 +77,6 @@ const About: React.FC = () => {
                 e envolvimento cívico.
               </p>
             </div>
-
             <div className="bg-white/5 p-6 rounded-[2rem] border border-white/5 hover:border-amber-500/30 transition-colors group">
               <div className="flex items-center gap-4 mb-3">
                 <Calendar className="text-amber-500 w-6 h-6 group-hover:scale-110 transition-transform" />
@@ -81,7 +88,6 @@ const About: React.FC = () => {
                 inovação e impacto pedagógico continuado.
               </p>
             </div>
-
             <div className="bg-white/5 p-6 rounded-[2rem] border border-white/5 hover:border-amber-500/30 transition-colors group">
               <div className="flex items-center gap-4 mb-3">
                 <Podcast className="text-amber-500 w-6 h-6 group-hover:scale-110 transition-transform" />
@@ -93,7 +99,6 @@ const About: React.FC = () => {
                 aos conteúdos áudio do arquivo digital da REO, alojado no Google Drive da escola.
               </p>
             </div>
-
             <div className="bg-white/5 p-6 rounded-[2rem] border border-white/5 hover:border-amber-500/30 transition-colors group">
               <div className="flex items-center gap-4 mb-3">
                 <Users className="text-amber-500 w-6 h-6 group-hover:scale-110 transition-transform" />
@@ -106,7 +111,6 @@ const About: React.FC = () => {
               </p>
             </div>
           </div>
-
           <div className="mt-16 pt-10 border-t border-white/5 text-center flex flex-col items-center gap-2">
             <p className="text-slate-600 italic text-xs uppercase font-bold tracking-widest opacity-60">
               "REO - A voz da escola, o som de Vizela."
@@ -127,4 +131,3 @@ const About: React.FC = () => {
 };
 
 export default About;
-
