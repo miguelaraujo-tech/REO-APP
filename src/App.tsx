@@ -8,9 +8,6 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Logo from './Logo';
 import ScrollToTop from './ScrollToTop';
-/* ======================================================
-   TYPE SAFE beforeinstallprompt
-====================================================== */
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -20,11 +17,9 @@ interface BeforeInstallPromptEvent extends Event {
 const App: React.FC = () => {
   const [isStandalone, setIsStandalone] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
-    /* 🔥 FIX DEFINITIVO PARA SCROLL */
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
@@ -32,7 +27,6 @@ const App: React.FC = () => {
     const standalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as any).standalone === true;
-
     setIsStandalone(standalone);
 
     const ua = window.navigator.userAgent;
@@ -44,7 +38,6 @@ const App: React.FC = () => {
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
-
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
     };
@@ -52,39 +45,28 @@ const App: React.FC = () => {
 
   const installAndroid = async () => {
     if (!deferredPrompt) return;
-
     deferredPrompt.prompt();
     await deferredPrompt.userChoice;
-
     setDeferredPrompt(null);
   };
-
-  /* ======================================================
-     BLOCK ACCESS IF NOT INSTALLED
-  ====================================================== */
 
   if (!isStandalone) {
     return (
       <div className="min-h-screen bg-[#0b0b13] text-white flex flex-col items-center justify-start px-6 pt-6 pb-6 text-center">
-
         <div className="mb-3 animate-float">
           <Logo className="w-24 h-24 rounded-full border-4 border-amber-500 shadow-[0_0_60px_rgba(245,158,11,0.35)]" />
         </div>
-
         <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2">
           Instale a Aplicação REO
         </h1>
-
         <p className="text-slate-400 max-w-md mb-4 text-base leading-relaxed">
           Para aceder à Rádio Escolar Online, adicione a aplicação ao ecrã principal.
         </p>
-
         {isIOS && (
           <div className="max-w-md text-left space-y-2 mt-1">
             <h2 className="text-lg font-bold text-white text-center mb-1">
               No iPhone siga estes passos:
             </h2>
-
             <div className="flex justify-center mb-1 animate-bounce">
               <img
                 src="/share-icon.png"
@@ -93,19 +75,16 @@ const App: React.FC = () => {
                 draggable={false}
               />
             </div>
-
             <ol className="space-y-1 text-slate-300 text-base leading-snug">
               <li><strong>1.</strong> Toque em <strong>Partilhar</strong>.</li>
               <li><strong>2.</strong> Escolha <strong>Adicionar ao ecrã principal (+)</strong>.</li>
               <li><strong>3.</strong> Toque em <strong>Adicionar</strong>.</li>
             </ol>
-
             <p className="text-amber-500 font-bold text-center pt-2">
               Não feche esta página enquanto instala.
             </p>
           </div>
         )}
-
         {!isIOS && deferredPrompt && (
           <button
             onClick={installAndroid}
@@ -114,26 +93,19 @@ const App: React.FC = () => {
             Instalar Aplicação
           </button>
         )}
-
         {!isIOS && !deferredPrompt && (
           <p className="text-slate-400 mt-6 max-w-md">
-            Se o botão de instalação não aparecer, utilize o menu do navegador
-            e selecione “Instalar aplicação” ou “Adicionar ao ecrã principal”.
+            Se o botão de instalação não aparecer, utilize o menu do navegador e selecione “Instalar aplicação” ou “Adicionar ao ecrã principal”.
           </p>
         )}
       </div>
     );
   }
 
-  /* ======================================================
-     NORMAL APP (ONLY IF INSTALLED)
-  ====================================================== */
-
   return (
     <Router>
       <ScrollToTop />
       <div className="min-h-screen bg-[#0b0b13] text-slate-200 flex flex-col selection:bg-amber-900/30">
-
         <header className="sticky top-0 z-50 bg-[#0b0b13]/95 backdrop-blur-md border-b border-white/5">
           <div className="max-w-4xl mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3 group">
@@ -147,7 +119,6 @@ const App: React.FC = () => {
                 </span>
               </div>
             </Link>
-
             <nav className="flex items-center">
               <Link
                 to="/"
@@ -159,7 +130,6 @@ const App: React.FC = () => {
             </nav>
           </div>
         </header>
-
         <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-6 sm:py-10">
           <Routes>
             <Route path="/" element={<Home />} />
@@ -169,22 +139,18 @@ const App: React.FC = () => {
             <Route path="/contactar" element={<Contact />} />
           </Routes>
         </main>
-
         <footer className="py-12 border-t border-white/5 bg-[#08080d]">
           <div className="max-w-4xl mx-auto px-4 flex flex-col items-center gap-4">
-
             <div className="flex items-center gap-3 opacity-20 hover:opacity-40 transition-all duration-700">
               <Logo className="w-8 h-8 border border-white/5" />
               <span className="font-bold text-[10px] leading-none tracking-tight text-white">
                 REO
               </span>
             </div>
-
             <div className="flex flex-col items-center gap-1 opacity-40">
               <p className="text-slate-600 text-[9px] uppercase tracking-[0.3em] text-center">
                 © 2026 REO · RÁDIO ESCOLAR ONLINE
               </p>
-
               <p className="text-[8px] uppercase tracking-[0.2em] text-center">
                 <span className="text-slate-600 opacity-80">
                   Coordenação e Desenvolvimento
@@ -194,10 +160,8 @@ const App: React.FC = () => {
                 </span>
               </p>
             </div>
-
           </div>
         </footer>
-
       </div>
     </Router>
   );
