@@ -5,7 +5,9 @@ export default function ScrollToTop() {
   const { pathname } = useLocation();
 
   useLayoutEffect(() => {
-    window.scrollTo(0, 0);
+    // PWA / iOS standalone safe reset
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
   }, [pathname]);
 
   return null;
