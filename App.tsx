@@ -9,10 +9,20 @@ import Contact from './pages/Contact';
 import Logo from './Logo';
 import ScrollToTop from './ScrollToTop';
 
+/* ======================================================
+   TYPE SAFE beforeinstallprompt
+====================================================== */
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
 const App: React.FC = () => {
   const [isStandalone, setIsStandalone] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
     const standalone =
@@ -24,9 +34,9 @@ const App: React.FC = () => {
     const ua = window.navigator.userAgent;
     setIsIOS(/iPad|iPhone|iPod/.test(ua));
 
-    const handleBeforeInstall = (e: any) => {
+    const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
-      setDeferredPrompt(e);
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
@@ -38,8 +48,10 @@ const App: React.FC = () => {
 
   const installAndroid = async () => {
     if (!deferredPrompt) return;
+
     deferredPrompt.prompt();
     await deferredPrompt.userChoice;
+
     setDeferredPrompt(null);
   };
 
@@ -63,6 +75,7 @@ const App: React.FC = () => {
           Para aceder à Rádio Escolar Online, adicione a aplicação ao ecrã principal.
         </p>
 
+        {/* iOS INSTALL FLOW */}
         {isIOS && (
           <div className="max-w-md text-left space-y-2 mt-1">
 
@@ -92,6 +105,7 @@ const App: React.FC = () => {
           </div>
         )}
 
+        {/* ANDROID INSTALL BUTTON */}
         {!isIOS && deferredPrompt && (
           <button
             onClick={installAndroid}
@@ -100,6 +114,15 @@ const App: React.FC = () => {
             Instalar Aplicação
           </button>
         )}
+
+        {/* ANDROID FALLBACK IF EVENT NOT FIRED */}
+        {!isIOS && !deferredPrompt && (
+          <p className="text-slate-400 mt-6 max-w-md">
+            Se o botão de instalação não aparecer, utilize o menu do navegador
+            e selecione “Instalar aplicação” ou “Adicionar ao ecrã principal”.
+          </p>
+        )}
+
       </div>
     );
   }
@@ -183,6 +206,4 @@ const App: React.FC = () => {
 };
 
 export default App;
-
-
 
