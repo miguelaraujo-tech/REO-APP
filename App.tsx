@@ -25,6 +25,11 @@ const App: React.FC = () => {
     useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
+    /* 🔥 FIX DEFINITIVO PARA SCROLL */
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+
     const standalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as any).standalone === true;
@@ -75,10 +80,8 @@ const App: React.FC = () => {
           Para aceder à Rádio Escolar Online, adicione a aplicação ao ecrã principal.
         </p>
 
-        {/* iOS INSTALL FLOW */}
         {isIOS && (
           <div className="max-w-md text-left space-y-2 mt-1">
-
             <h2 className="text-lg font-bold text-white text-center mb-1">
               No iPhone siga estes passos:
             </h2>
@@ -101,11 +104,9 @@ const App: React.FC = () => {
             <p className="text-amber-500 font-bold text-center pt-2">
               Não feche esta página enquanto instala.
             </p>
-
           </div>
         )}
 
-        {/* ANDROID INSTALL BUTTON */}
         {!isIOS && deferredPrompt && (
           <button
             onClick={installAndroid}
@@ -115,14 +116,12 @@ const App: React.FC = () => {
           </button>
         )}
 
-        {/* ANDROID FALLBACK IF EVENT NOT FIRED */}
         {!isIOS && !deferredPrompt && (
           <p className="text-slate-400 mt-6 max-w-md">
             Se o botão de instalação não aparecer, utilize o menu do navegador
             e selecione “Instalar aplicação” ou “Adicionar ao ecrã principal”.
           </p>
         )}
-
       </div>
     );
   }
@@ -206,4 +205,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
