@@ -1,4 +1,5 @@
 {
+  "id": "/",
   "name": "REO - Rádio Escolar Online",
   "short_name": "REO",
   "description": "Rádio Escolar Online do Agrupamento de Escolas de S. Bento de Vizela",
@@ -13,13 +14,13 @@
       "src": "/pwa-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/pwa-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
