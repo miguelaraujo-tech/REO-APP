@@ -5,7 +5,7 @@ import Logo from '../Logo';
 
 const About: React.FC = () => {
   return (
-<div className="pt-2">
+    <div className="pt-2">
       <Link
         to="/"
         className="inline-flex items-center text-amber-500 hover:text-amber-400 mb-8 font-bold uppercase tracking-widest text-xs group"
@@ -17,17 +17,13 @@ const About: React.FC = () => {
       <article className="animate-in fade-in duration-300 bg-slate-900/40 backdrop-blur-md rounded-[3rem] p-10 md:p-16 shadow-2xl border border-white/5">
         <div className="flex flex-col md:flex-row items-center gap-6 mb-12">
           <div className="relative w-20 h-20 flex items-center justify-center">
-  {/* Subtle outer aura */}
-  <div className="absolute inset-0 rounded-full bg-amber-500/10 blur-xl" />
+            <div className="absolute inset-0 rounded-full bg-amber-500/10 blur-xl" />
+            <div className="absolute inset-0 rounded-full ring-1 ring-amber-500/50" />
+            <div className="relative w-full h-full rounded-full overflow-hidden">
+              <Logo className="w-full h-full" />
+            </div>
+          </div>
 
-  {/* Thin accent ring */}
-  <div className="absolute inset-0 rounded-full ring-1 ring-amber-500/50" />
-
-  {/* Logo */}
-  <div className="relative w-full h-full rounded-full overflow-hidden">
-    <Logo className="w-full h-full" />
-  </div>
-</div>
           <div className="text-center md:text-left">
             <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none">
               SOBRE A REO
@@ -43,7 +39,7 @@ const About: React.FC = () => {
             <p>
               A <span className="text-white font-bold">REO – Rádio Escolar Online de Vizela</span> é um
               projeto educativo e cultural que nasceu da visão, persistência e envolvimento ativo da
-              comunidade escolar do <span className="text-white font-bold">Agrupamento de Escolas de S. Bento e Agrupamento de Escolas de Vizela</span>.
+              comunidade escolar do <span className="text-white font-bold">Agrupamento de Escolas de S. Bento de Vizela</span>.
             </p>
 
             <p>
@@ -80,7 +76,7 @@ const About: React.FC = () => {
                 <h3 className="text-white font-black uppercase tracking-wider text-sm">Continuidade</h3>
               </div>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Em março de 2026, a REO mantém-se em plena expansão digital, consolidando-se como um projeto de referência na juventude de
+                A REO mantém-se em plena expansão digital, consolidando-se como um projeto de referência na juventude de
                 Vizela, com uma presença cada vez mais forte no universo digital, educativo e comunitário, garantindo sustentabilidade,
                 inovação e impacto pedagógico continuado.
               </p>
@@ -116,13 +112,13 @@ const About: React.FC = () => {
               "REO - A voz da escola, o som de Vizela."
             </p>
             <div className="mt-4 text-center leading-relaxed">
-  <span className="block text-[9px] uppercase tracking-[0.25em] text-slate-600 opacity-50">
-    Coordenação e Desenvolvimento
-  </span>
-  <span className="block text-[10px] font-black uppercase tracking-[0.35em] text-slate-500 mt-1">
-    Miguel Araújo
-  </span>
-</div>
+              <span className="block text-[9px] uppercase tracking-[0.25em] text-slate-600 opacity-50">
+                Coordenação e Desenvolvimento
+              </span>
+              <span className="block text-[10px] font-black uppercase tracking-[0.35em] text-slate-500 mt-1">
+                Miguel Araújo
+              </span>
+            </div>
           </div>
         </div>
       </article>
@@ -131,3 +127,4 @@ const About: React.FC = () => {
 };
 
 export default About;
+
