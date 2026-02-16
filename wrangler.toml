@@ -1,0 +1,10 @@
+name = "reo"                          
+compatibility_date = "2026-02-16"     
+
+pages_build_output_dir = "./dist"     
+
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status_code = 200
