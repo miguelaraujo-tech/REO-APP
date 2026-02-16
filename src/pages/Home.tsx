@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { NAV_LINKS } from '../constants';
 import Logo from '../Logo';
@@ -8,6 +8,7 @@ const Home: React.FC = () => {
   const [transitionOn, setTransitionOn] = useState(true);
   const [isFastSpinning, setIsFastSpinning] = useState(false);
   const [glow, setGlow] = useState(false);
+  const [showSpotify, setShowSpotify] = useState(false);
 
   const touchStartY = useRef<number | null>(null);
   const touchStartTime = useRef<number | null>(null);
@@ -18,13 +19,20 @@ const Home: React.FC = () => {
   const MAX_SPINS = 7;
   const MIN_SPINS = 3;
 
+  // Render Spotify after first paint (não bloqueia conteúdo)
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      setShowSpotify(true);
+    });
+    return () => cancelAnimationFrame(id);
+  }, []);
+
   const handleTap = () => {
     if (didSwipe.current) {
       didSwipe.current = false;
       return;
     }
     if (isFastSpinning) return;
-
     setRotation((prev) => prev + TAP_STEP);
   };
 
@@ -80,7 +88,15 @@ const Home: React.FC = () => {
 
       {/* HERO */}
       <div className="mb-10 sm:mb-20 text-center relative w-full flex flex-col items-center">
-        <div className="absolute inset-0 bg-blue-600/10 blur-[120px] rounded-full -z-10 mx-auto w-3/4 h-full opacity-40" />
+
+        {/* Substitui blur pesado por gradient equivalente */}
+        <div
+          className="absolute inset-0 rounded-full -z-10 mx-auto w-3/4 h-full opacity-40"
+          style={{
+            background:
+              'radial-gradient(circle at center, rgba(59,130,246,0.18), rgba(59,130,246,0.08) 45%, transparent 70%)'
+          }}
+        />
 
         <div className="relative animate-float will-change-transform">
           <div
@@ -139,15 +155,17 @@ const Home: React.FC = () => {
         </div>
 
         <div className="rounded-3xl overflow-hidden bg-black/60 border border-white/5 shadow-inner h-[152px]">
-          <iframe
-            src="https://open.spotify.com/embed/show/3VjnTbbEDaFjd8fddfxWy6?utm_source=generator&theme=0"
-            width="100%"
-            height="152"
-            frameBorder="0"
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            style={{ display: 'block' }}
-            loading="lazy"
-          />
+          {showSpotify && (
+            <iframe
+              src="https://open.spotify.com/embed/show/3VjnTbbEDaFjd8fddfxWy6?utm_source=generator&theme=0"
+              width="100%"
+              height="152"
+              frameBorder="0"
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              style={{ display: 'block' }}
+              loading="lazy"
+            />
+          )}
         </div>
       </div>
 
@@ -212,4 +230,5 @@ const Home: React.FC = () => {
   );
 };
 
-export default Home;
+export default React.memo(Home);
+
