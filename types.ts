@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 
 export interface FileItem {
   id: string;
@@ -11,6 +12,6 @@ export interface FileItem {
 export interface SocialLink {
   name: string;
   url: string;
-  icon: any;
+  icon: ReactNode;
   color: string;
 }
