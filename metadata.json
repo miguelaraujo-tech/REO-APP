@@ -1,5 +1,5 @@
 {
   "name": "REO - Rádio Escolar Online",
-  "description": "The official web app for REO school radio, featuring latest podcasts, social media links, and a Google Drive-powered audio archive.",
+  "description": "Aplicação oficial da Rádio Escolar Online (REO), com acesso a podcasts, redes sociais e arquivo áudio digital do Agrupamento de Escolas de S. Bento de Vizela.",
   "requestFramePermissions": []
 }
