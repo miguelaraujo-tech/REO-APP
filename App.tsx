@@ -8,7 +8,6 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Logo from './Logo';
 import ScrollToTop from './src/ScrollToTop';
-
 /* ======================================================
    TYPE SAFE beforeinstallprompt
 ====================================================== */
