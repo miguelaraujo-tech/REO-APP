@@ -7,7 +7,7 @@ import Archive from './pages/Archive';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Logo from './Logo';
-import ScrollToTop from './src/ScrollToTop';
+import ScrollToTop from './ScrollToTop';
 /* ======================================================
    TYPE SAFE beforeinstallprompt
 ====================================================== */
