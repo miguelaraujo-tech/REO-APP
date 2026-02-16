@@ -82,7 +82,7 @@ const Home: React.FC = () => {
       <div className="mb-10 sm:mb-20 text-center relative w-full flex flex-col items-center">
         <div className="absolute inset-0 bg-blue-600/10 blur-[120px] rounded-full -z-10 mx-auto w-3/4 h-full opacity-40" />
 
-        <div className="relative animate-float">
+        <div className="relative animate-float will-change-transform">
           <div
             onClick={handleTap}
             onTouchStart={handleTouchStart}
@@ -138,16 +138,15 @@ const Home: React.FC = () => {
           </h2>
         </div>
 
-        <div className="rounded-3xl overflow-hidden bg-black/60 border border-white/5 shadow-inner">
+        <div className="rounded-3xl overflow-hidden bg-black/60 border border-white/5 shadow-inner h-[152px]">
           <iframe
             src="https://open.spotify.com/embed/show/3VjnTbbEDaFjd8fddfxWy6?utm_source=generator&theme=0"
             width="100%"
             height="152"
             frameBorder="0"
-            allowFullScreen
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
             style={{ display: 'block' }}
-            className="opacity-95 grayscale-[0.3] transition-all duration-500"
+            loading="lazy"
           />
         </div>
       </div>
