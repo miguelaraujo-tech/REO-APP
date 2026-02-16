@@ -76,10 +76,10 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center animate-in fade-in duration-700 max-w-full overflow-hidden">
+    <div className="flex flex-col items-center max-w-full overflow-hidden">
 
       {/* HERO */}
-      <div className="mb-10 sm:mb-20 text-center relative w-full flex flex-col items-center">
+      <div className="mb-10 sm:mb-20 text-center relative w-full flex flex-col items-center min-h-[520px]">
         <div className="absolute inset-0 bg-blue-600/10 blur-[120px] rounded-full -z-10 mx-auto w-3/4 h-full opacity-40" />
 
         <div className="relative animate-float">
@@ -149,6 +149,7 @@ const Home: React.FC = () => {
             allowFullScreen
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
             loading="lazy"
+            style={{ display: 'block' }}
             className="opacity-95 grayscale-[0.3] transition-all duration-500"
           />
         </div>
