@@ -106,8 +106,11 @@ const App: React.FC = () => {
     <Router>
       <ScrollToTop />
       <div className="min-h-screen bg-[#0b0b13] text-slate-200 flex flex-col selection:bg-amber-900/30">
+
         <header className="sticky top-0 z-50 bg-[#0b0b13]/95 backdrop-blur-md border-b border-white/5">
-          <div className="max-w-4xl mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
+
+          {/* Top row: REO + Home */}
+          <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3 group">
               <Logo className="w-12 h-12 sm:w-14 sm:h-14 border border-white/10 transition-transform group-hover:scale-110 duration-500" />
               <div className="flex flex-col">
@@ -119,6 +122,7 @@ const App: React.FC = () => {
                 </span>
               </div>
             </Link>
+
             <nav className="flex items-center">
               <Link
                 to="/"
@@ -129,7 +133,16 @@ const App: React.FC = () => {
               </Link>
             </nav>
           </div>
+
+          {/* Institutional Banner */}
+          <img
+            src="/escolalogo.png"
+            alt=""
+            className="w-full h-auto"
+          />
+
         </header>
+
         <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-6 sm:py-10">
           <Routes>
             <Route path="/" element={<Home />} />
@@ -139,6 +152,7 @@ const App: React.FC = () => {
             <Route path="/contactar" element={<Contact />} />
           </Routes>
         </main>
+
         <footer className="py-12 border-t border-white/5 bg-[#08080d]">
           <div className="max-w-4xl mx-auto px-4 flex flex-col items-center gap-4">
             <div className="flex items-center gap-3 opacity-20 hover:opacity-40 transition-all duration-700">
@@ -162,9 +176,11 @@ const App: React.FC = () => {
             </div>
           </div>
         </footer>
+
       </div>
     </Router>
   );
 };
 
 export default App;
+
