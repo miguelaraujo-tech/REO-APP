@@ -107,8 +107,9 @@ const App: React.FC = () => {
       <ScrollToTop />
       <div className="min-h-screen bg-[#0b0b13] text-slate-200 flex flex-col selection:bg-amber-900/30">
 
-        <header className="sticky top-0 z-50 bg-[#0b0b13]/95 backdrop-blur-md border-b border-amber-500/20 shadow-[0_2px_30px_rgba(245,158,11,0.08)]">
+        <header className="sticky top-0 z-50 bg-[#0b0b13]/95 backdrop-blur-md">
 
+          {/* Top Row */}
           <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3 group">
               <Logo className="w-12 h-12 sm:w-14 sm:h-14 border border-white/10 transition-transform group-hover:scale-110 duration-500" />
@@ -133,10 +134,11 @@ const App: React.FC = () => {
             </nav>
           </div>
 
+          {/* Institutional Banner with Amber Divider */}
           <img
             src="/escolalogo.png"
             alt=""
-            className="w-full h-auto"
+            className="w-full h-auto border-b border-amber-500/40"
           />
 
         </header>
