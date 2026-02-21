@@ -19,7 +19,6 @@ const Home: React.FC = () => {
   const MAX_SPINS = 7;
   const MIN_SPINS = 3;
 
-  // Render Spotify after first paint (não bloqueia conteúdo)
   useEffect(() => {
     const id = requestAnimationFrame(() => {
       setShowSpotify(true);
@@ -89,7 +88,6 @@ const Home: React.FC = () => {
       {/* HERO */}
       <div className="mb-10 sm:mb-20 text-center relative w-full flex flex-col items-center">
 
-        {/* Substitui blur pesado por gradient equivalente */}
         <div
           className="absolute inset-0 rounded-full -z-10 mx-auto w-3/4 h-full opacity-40"
           style={{
@@ -146,7 +144,7 @@ const Home: React.FC = () => {
       </div>
 
       {/* SPOTIFY */}
-      <div className="w-full max-w-2xl bg-[#12121c]/60 backdrop-blur-md p-4 sm:p-5 rounded-[2.5rem] shadow-2xl mb-12 sm:mb-20 border border-white/5">
+      <div className="w-full max-w-2xl bg-[#12121c]/60 backdrop-blur-md p-4 sm:p-5 rounded-[2.5rem] shadow-2xl mb-12 sm:mb-20 border border-amber-500/25 shadow-[0_0_40px_rgba(245,158,11,0.08)]">
         <div className="flex items-center gap-3 mb-4 px-3">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.6)]" />
           <h2 className="font-black text-slate-400 text-[10px] uppercase tracking-[0.4em]">
@@ -170,60 +168,62 @@ const Home: React.FC = () => {
       </div>
 
       {/* NAV GRID */}
-      <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full max-w-2xl px-2 pb-20">
-        {NAV_LINKS.map((link) => (
-          <Link
-            key={link.path}
-            to={link.path}
-            className="
-              group flex flex-col items-center
-              p-6 sm:p-8
-              bg-white/[0.02]
-              border border-white/5
-              rounded-[2.5rem]
-              shadow-xl
-              transition-all duration-300
-              active:scale-95
-              active:border-amber-500/40
-              active:bg-white/[0.04]
-              active:shadow-amber-500/20
-            "
-          >
-            <div
+      <div className="w-full max-w-2xl px-2 pb-20 border border-amber-500/20 rounded-[2.5rem] shadow-[0_0_50px_rgba(245,158,11,0.05)] p-4 sm:p-6">
+        <div className="grid grid-cols-2 gap-4 sm:gap-6">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
               className="
-                w-14 h-14 sm:w-16 sm:h-16
-                rounded-2xl
-                bg-[#0b0b13]
+                group flex flex-col items-center
+                p-6 sm:p-8
+                bg-white/[0.02]
                 border border-white/5
-                text-slate-500
-                flex items-center justify-center
+                rounded-[2.5rem]
+                shadow-xl
                 transition-all duration-300
-                shadow-2xl
-                mb-4
-                group-active:bg-amber-500
-                group-active:text-black
-                group-active:scale-110
+                active:scale-95
+                active:border-amber-500/40
+                active:bg-white/[0.04]
+                active:shadow-amber-500/20
               "
             >
-              {React.cloneElement(link.icon as React.ReactElement<any>, {
-                className: 'w-7 h-7',
-              })}
-            </div>
+              <div
+                className="
+                  w-14 h-14 sm:w-16 sm:h-16
+                  rounded-2xl
+                  bg-[#0b0b13]
+                  border border-white/5
+                  text-slate-500
+                  flex items-center justify-center
+                  transition-all duration-300
+                  shadow-2xl
+                  mb-4
+                  group-active:bg-amber-500
+                  group-active:text-black
+                  group-active:scale-110
+                "
+              >
+                {React.cloneElement(link.icon as React.ReactElement<any>, {
+                  className: 'w-7 h-7',
+                })}
+              </div>
 
-            <span
-              className="
-                block font-black text-xs sm:text-lg
-                text-white
-                tracking-tight uppercase italic
-                text-center leading-tight
-                transition-colors duration-300
-                group-active:text-amber-500
-              "
-            >
-              {link.name}
-            </span>
-          </Link>
-        ))}
+              <span
+                className="
+                  block font-black text-xs sm:text-lg
+                  text-white
+                  tracking-tight uppercase italic
+                  text-center leading-tight
+                  transition-colors duration-300
+                  group-active:text-amber-500
+                "
+              >
+                {link.name}
+              </span>
+            </Link>
+          ))}
+        </div>
       </div>
 
     </div>
