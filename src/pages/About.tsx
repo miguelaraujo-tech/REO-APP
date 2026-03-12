@@ -5,18 +5,16 @@ import Logo from '../Logo';
 
 const About: React.FC = () => {
   useLayoutEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    
-    // Backup: força no elemento main (flex-1 no teu App.tsx)
-    const main = document.querySelector('main');
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+
+    const main = document.querySelector<HTMLElement>('main');
     if (main) {
       main.scrollTop = 0;
     }
-    
-    // Reforço extra para PWAs/mobile que às vezes ignoram o window
+
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
-  }, []); // só ao montar o componente
+  }, []);
 
   return (
     <div className="pt-2">
