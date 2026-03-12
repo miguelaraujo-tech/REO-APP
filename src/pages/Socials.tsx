@@ -13,7 +13,7 @@ const Socials: React.FC = () => {
         <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
         Voltar para o Início
       </Link>
-      
+
       <div className="bg-slate-900/40 backdrop-blur-md rounded-[3rem] p-10 shadow-2xl border border-white/5">
         <h1 className="text-4xl font-black text-white mb-3 tracking-tighter">
           Redes Sociais
@@ -21,7 +21,7 @@ const Socials: React.FC = () => {
         <p className="text-slate-400 mb-10 font-medium">
           Fica ligado à REO nas nossas plataformas oficiais.
         </p>
-        
+
         <div className="space-y-4">
           {SOCIAL_LINKS.map((social) => (
             <a
@@ -65,5 +65,4 @@ const Socials: React.FC = () => {
   );
 };
 
-export default Socials;
-
+export default React.memo(Socials);
