@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ArrowLeft,
   Folder,
@@ -42,6 +42,7 @@ const Archive: React.FC = () => {
   const [activeEpisode, setActiveEpisode] = useState<Episode | null>(null);
   const [playbackError, setPlaybackError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const copyTimeoutRef = useRef<number | null>(null);
 
   const normalize = (str: string) => {
     if (!str) return '';
@@ -52,17 +53,13 @@ const Archive: React.FC = () => {
       .replace(/[^a-z0-9]/g, '');
   };
 
-  // If the CSV contains formula text like =HYPERLINK("url","label"),
-  // extract the URL portion so we can grab the Drive ID.
   const extractUrlFromCell = (value: string): string => {
     if (!value) return '';
     const v = value.trim();
 
-    // =HYPERLINK("url","label")  or  HYPERLINK("url","label")
     const m1 = v.match(/HYPERLINK\(\s*"([^"]+)"\s*,/i);
     if (m1?.[1]) return m1[1];
 
-    // HYPERLINK('url','label')
     const m2 = v.match(/HYPERLINK\(\s*'([^']+)'\s*,/i);
     if (m2?.[1]) return m2[1];
 
@@ -72,7 +69,6 @@ const Archive: React.FC = () => {
   const extractDriveFileId = (url: string): string | null => {
     if (!url) return null;
 
-    // Some cells may include the whole formula, so normalize first
     const clean = extractUrlFromCell(url);
 
     const patterns = [
@@ -93,7 +89,6 @@ const Archive: React.FC = () => {
     return null;
   };
 
-  // More reliable than uc?export=view for public images
   const driveThumb = (id: string, size = 1200) =>
     `https://drive.google.com/thumbnail?id=${id}&sz=w${size}`;
 
@@ -118,20 +113,28 @@ const Archive: React.FC = () => {
 
     return () => {
       document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
       window.removeEventListener('keydown', handleEsc);
     };
   }, [activeEpisode]);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        window.clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const loadData = () => {
     setLoading(true);
     setPlaybackError(null);
 
-    // Note: CSV_URL already includes ?output=csv, so cache-busters should use &...
     fetch(`${CSV_URL}&t=${Date.now()}&nocache=${Math.random()}`, { cache: 'no-store' })
       .then(async (res) => {
         const text = await res.text();
 
-        // Detect when Google returns an HTML page (permissions/login) instead of CSV.
         const looksLikeHtml =
           /<!doctype html>/i.test(text) ||
           /<html/i.test(text) ||
@@ -158,7 +161,6 @@ const Archive: React.FC = () => {
 
         let headerIndex = 0;
 
-        // Support "sep=;"
         if (lines[0].toLowerCase().trim().startsWith('sep=')) {
           headerIndex = 1;
         }
@@ -179,7 +181,9 @@ const Archive: React.FC = () => {
             else if (char === d && !inQuotes) {
               result.push(current.trim());
               current = '';
-            } else current += char;
+            } else {
+              current += char;
+            }
           }
           result.push(current.trim());
 
@@ -193,12 +197,12 @@ const Archive: React.FC = () => {
           headers.findIndex((h) => needles.some((n) => h.includes(normalize(n))));
 
         const idxs = {
-  year: findIdx(['year']),
-  program: findIdx(['program']),
-  title: findIdx(['title', 'file name', 'filename']),
-  audioId: findIdx(['audiofileid']),
-  coverId: findIdx(['coverfileid']),
-};
+          year: findIdx(['year']),
+          program: findIdx(['program']),
+          title: findIdx(['title', 'file name', 'filename']),
+          audioId: findIdx(['audiofileid']),
+          coverId: findIdx(['coverfileid']),
+        };
 
         console.log('[CSV DEBUG] Header:', headerRow);
         console.log('[CSV DEBUG] Column indices:', idxs);
@@ -207,8 +211,8 @@ const Archive: React.FC = () => {
           idxs.year === -1 &&
           idxs.program === -1 &&
           idxs.title === -1 &&
-          idxs.audio === -1 &&
-          idxs.cover === -1;
+          idxs.audioId === -1 &&
+          idxs.coverId === -1;
 
         if (nothingMatched) {
           setArchiveTree({});
@@ -229,8 +233,11 @@ const Archive: React.FC = () => {
           const program = (idxs.program !== -1 ? row[idxs.program] : '') || 'Geral';
           const title = (idxs.title !== -1 ? row[idxs.title] : '') || `Emissão ${i}`;
 
-         const fileId = idxs.audioId !== -1 ? row[idxs.audioId].trim() : '';
-const coverId = idxs.coverId !== -1 ? row[idxs.coverId].trim() : '';
+          const rawFileValue = idxs.audioId !== -1 ? row[idxs.audioId]?.trim() || '' : '';
+          const rawCoverValue = idxs.coverId !== -1 ? row[idxs.coverId]?.trim() || '' : '';
+
+          const fileId = extractDriveFileId(rawFileValue) || rawFileValue;
+          const coverId = extractDriveFileId(rawCoverValue) || rawCoverValue;
 
           if (!tree[year]) tree[year] = {};
           if (!tree[year][program]) tree[year][program] = [];
@@ -260,7 +267,6 @@ const coverId = idxs.coverId !== -1 ? row[idxs.coverId].trim() : '';
 
   useEffect(() => {
     loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const openPlayer = (episode: Episode) => {
@@ -276,7 +282,12 @@ const coverId = idxs.coverId !== -1 ? row[idxs.coverId].trim() : '';
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+
+      if (copyTimeoutRef.current) {
+        window.clearTimeout(copyTimeoutRef.current);
+      }
+
+      copyTimeoutRef.current = window.setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Falha ao copiar:', err);
     }
@@ -296,7 +307,7 @@ const coverId = idxs.coverId !== -1 ? row[idxs.coverId].trim() : '';
       return Object.keys(archiveTree)
         .sort((a, b) => b.localeCompare(a))
         .map((y) => ({
-          type: 'folder',
+          type: 'folder' as const,
           name: y,
           id: y,
         }));
@@ -309,7 +320,7 @@ const coverId = idxs.coverId !== -1 ? row[idxs.coverId].trim() : '';
         .map((p) => {
           const firstEp = archiveTree[year][p]?.[0];
           return {
-            type: 'folder',
+            type: 'folder' as const,
             name: p,
             id: p,
             coverId: firstEp?.coverId || '',
@@ -319,7 +330,7 @@ const coverId = idxs.coverId !== -1 ? row[idxs.coverId].trim() : '';
 
     const [year, program] = currentPath;
     return (archiveTree[year]?.[program] || []).map((ep) => ({
-      type: 'file',
+      type: 'file' as const,
       name: ep.title,
       id: ep.id,
       data: ep,
@@ -328,7 +339,6 @@ const coverId = idxs.coverId !== -1 ? row[idxs.coverId].trim() : '';
 
   const breadcrumbs = ['Arquivo', ...currentPath];
 
-  // Cover for program header: first non-empty coverId inside that program
   const programCoverId =
     currentPath.length === 2
       ? archiveTree[currentPath[0]]?.[currentPath[1]]?.find((ep) => !!ep.coverId)?.coverId || ''
@@ -377,41 +387,40 @@ const coverId = idxs.coverId !== -1 ? row[idxs.coverId].trim() : '';
 
       <div className="bg-slate-900/40 backdrop-blur-md rounded-[2.5rem] shadow-2xl border border-white/5 overflow-hidden">
         <div className="p-6 sm:p-8 border-b border-white/5 bg-white/[0.02]">
+          <div className="flex items-center gap-2 flex-wrap mb-4">
             {breadcrumbs.map((crumb, idx) => {
-  const isLast = idx === breadcrumbs.length - 1;
+              const isLast = idx === breadcrumbs.length - 1;
 
-  return (
-    <React.Fragment key={idx}>
-      <button
-        disabled={isLast}
-        onClick={() => {
-          if (!isLast) {
-            // idx 0 = Arquivo → []
-            // idx 1 = Year → [year]
-            setPlaybackError(null);
-            setCurrentPath(currentPath.slice(0, idx));
-          }
-        }}
-        className={`text-[10px] font-black uppercase tracking-widest transition-colors
-          ${isLast
-            ? 'text-amber-500 cursor-default'
-            : 'text-slate-500 hover:text-white cursor-pointer'}
-        `}
-      >
-        {crumb}
-      </button>
+              return (
+                <React.Fragment key={idx}>
+                  <button
+                    disabled={isLast}
+                    onClick={() => {
+                      if (!isLast) {
+                        setPlaybackError(null);
+                        setCurrentPath(currentPath.slice(0, idx));
+                      }
+                    }}
+                    className={`text-[10px] font-black uppercase tracking-widest transition-colors ${
+                      isLast
+                        ? 'text-amber-500 cursor-default'
+                        : 'text-slate-500 hover:text-white cursor-pointer'
+                    }`}
+                  >
+                    {crumb}
+                  </button>
 
-      {!isLast && <ChevronRight className="w-3 h-3 opacity-30" />}
-    </React.Fragment>
-  );
-})}
+                  {!isLast && <ChevronRight className="w-3 h-3 opacity-30" />}
+                </React.Fragment>
+              );
+            })}
+          </div>
 
           <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-3 tracking-tighter italic uppercase leading-none">
             <Folder className="text-amber-500 w-6 h-6 sm:w-8 sm:h-8" />
             {currentPath.length === 0 ? 'Arquivo' : currentPath[currentPath.length - 1]}
           </h1>
 
-          {/* Cover ONLY on program pages */}
           {currentPath.length === 2 && items.length > 0 && (
             <>
               {!programCoverId ? (
@@ -500,7 +509,7 @@ const coverId = idxs.coverId !== -1 ? row[idxs.coverId].trim() : '';
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        openPlayer(item.data!);
+                        openPlayer(item.data);
                       }}
                       aria-label={`Ouvir ${item.name}`}
                       className="w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-xl shrink-0 bg-white/5 text-white hover:bg-amber-500 hover:text-black"
@@ -572,9 +581,13 @@ const coverId = idxs.coverId !== -1 ? row[idxs.coverId].trim() : '';
                 </a>
 
                 <button
-                  onClick={() => copyToClipboard(`https://drive.google.com/file/d/${activeEpisode.fileId}/view`)}
+                  onClick={() =>
+                    copyToClipboard(`https://drive.google.com/file/d/${activeEpisode.fileId}/view`)
+                  }
                   className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-white/5 active:scale-95 ${
-                    copied ? 'bg-green-500 text-black border-transparent' : 'bg-white/5 hover:bg-white/10 text-white'
+                    copied
+                      ? 'bg-green-500 text-black border-transparent'
+                      : 'bg-white/5 hover:bg-white/10 text-white'
                   }`}
                 >
                   {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
