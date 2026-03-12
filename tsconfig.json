@@ -13,9 +13,10 @@
     "jsx": "react-jsx",
     "skipLibCheck": true,
     "noEmit": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": [
-        "./*"
+        "./src/*"
       ]
     }
   }
