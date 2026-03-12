@@ -3,6 +3,11 @@ import { Link } from 'react-router-dom';
 import { NAV_LINKS } from '../constants';
 import Logo from '../Logo';
 
+const TAP_STEP = 30;
+const SWIPE_THRESHOLD = 50;
+const MAX_SPINS = 7;
+const MIN_SPINS = 3;
+
 const Home: React.FC = () => {
   const [rotation, setRotation] = useState(0);
   const [transitionOn, setTransitionOn] = useState(true);
@@ -14,16 +19,17 @@ const Home: React.FC = () => {
   const touchStartTime = useRef<number | null>(null);
   const didSwipe = useRef(false);
 
-  const TAP_STEP = 30;
-  const SWIPE_THRESHOLD = 50;
-  const MAX_SPINS = 7;
-  const MIN_SPINS = 3;
-
   useEffect(() => {
     const id = requestAnimationFrame(() => {
       setShowSpotify(true);
     });
     return () => cancelAnimationFrame(id);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, []);
 
   const handleTap = () => {
@@ -84,15 +90,13 @@ const Home: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center max-w-full overflow-hidden">
-
       {/* HERO */}
       <div className="mb-10 sm:mb-20 text-center relative w-full flex flex-col items-center">
-
         <div
           className="absolute inset-0 rounded-full -z-10 mx-auto w-3/4 h-full opacity-40"
           style={{
             background:
-              'radial-gradient(circle at center, rgba(59,130,246,0.18), rgba(59,130,246,0.08) 45%, transparent 70%)'
+              'radial-gradient(circle at center, rgba(59,130,246,0.18), rgba(59,130,246,0.08) 45%, transparent 70%)',
           }}
         />
 
@@ -112,7 +116,6 @@ const Home: React.FC = () => {
             ].join(' ')}
           >
             <div className="relative w-full h-full rounded-full p-4 isolate">
-
               <div
                 className={[
                   'absolute inset-0 rounded-full -z-10',
@@ -225,10 +228,8 @@ const Home: React.FC = () => {
           ))}
         </div>
       </div>
-
     </div>
   );
 };
 
 export default React.memo(Home);
-
