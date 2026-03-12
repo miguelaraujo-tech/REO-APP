@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import React from 'react';
 
 export interface FileItem {
   id: string;
@@ -12,6 +12,6 @@ export interface FileItem {
 export interface SocialLink {
   name: string;
   url: string;
-  icon: ReactNode;
+  icon: React.ReactElement;
   color: string;
 }
