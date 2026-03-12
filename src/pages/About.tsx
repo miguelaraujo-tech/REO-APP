@@ -103,7 +103,7 @@ const About: React.FC = () => {
                 <h3 className="text-white font-black uppercase tracking-wider text-sm">Coordenação</h3>
               </div>
               <p className="text-slate-400 text-sm leading-relaxed">
-                O projeto conta com a liderança do professor Miguel Araújo, responsável pela visão técnica e pedagógica da REO, assegurando a
+                O projeto conta com a liderança do professor Miguel Araújo, responsável pela visão técnica e pedagógica do clube/projeto REO, assegurando a
                 articulação entre inovação tecnológica, objetivos educativos e envolvimento da comunidade escolar, garantindo a identidade,
                 qualidade e evolução contínua do projeto.
               </p>
