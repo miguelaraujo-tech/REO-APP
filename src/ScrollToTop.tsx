@@ -1,25 +1,23 @@
-import { useLayoutEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLayoutEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 export default function ScrollToTop() {
   const { pathname } = useLocation();
 
   useLayoutEffect(() => {
-    // Imediato
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
 
-    const main = document.querySelector("main");
+    const main = document.querySelector<HTMLElement>('main');
     if (main) main.scrollTop = 0;
 
-    // Reforço para conteúdo que carrega depois (imagens, fonts, animações)
-    const timer = setTimeout(() => {
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    const timer = window.setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
       if (main) main.scrollTop = 0;
-    }, 50); // 50-100ms costuma bastar
+    }, 50);
 
-    return () => clearTimeout(timer);
+    return () => window.clearTimeout(timer);
   }, [pathname]);
 
   return null;
