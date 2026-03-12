@@ -30,23 +30,26 @@ const App: React.FC = () => {
     setIsStandalone(standalone);
 
     const ua = window.navigator.userAgent;
-    setIsIOS(/iPad|iPhone|iPod/.test(ua));
+    setIsIOS(
+      /iPad|iPhone|iPod/.test(ua) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+    );
 
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall as EventListener);
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall as EventListener);
     };
   }, []);
 
   const installAndroid = async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
+    await deferredPrompt.userChoice.catch(() => {});
     setDeferredPrompt(null);
   };
 
@@ -106,10 +109,7 @@ const App: React.FC = () => {
     <Router>
       <ScrollToTop />
       <div className="min-h-screen bg-[#0b0b13] text-slate-200 flex flex-col selection:bg-amber-900/30">
-
         <header className="sticky top-0 z-50 bg-[#0b0b13]/95 backdrop-blur-md">
-
-          {/* Top Row */}
           <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3 group">
               <Logo className="w-12 h-12 sm:w-14 sm:h-14 border border-white/10 transition-transform group-hover:scale-110 duration-500" />
@@ -134,13 +134,13 @@ const App: React.FC = () => {
             </nav>
           </div>
 
-          {/* Institutional Banner with Amber Divider */}
           <img
             src="/escolalogo.png"
             alt=""
+            loading="lazy"
+            decoding="async"
             className="w-full h-auto border-b border-amber-500/40"
           />
-
         </header>
 
         <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-6 sm:py-10">
@@ -176,11 +176,9 @@ const App: React.FC = () => {
             </div>
           </div>
         </footer>
-
       </div>
     </Router>
   );
 };
 
 export default App;
-
