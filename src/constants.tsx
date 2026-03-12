@@ -1,6 +1,5 @@
 import React from 'react';
 import { Facebook, Instagram, Music2, Share2, Mail, Info, FolderArchive } from 'lucide-react';
-import type { ReactNode } from 'react';
 import type { SocialLink } from './types';
 
 export const DRIVE_ARCHIVE_URL =
@@ -30,7 +29,7 @@ export const SOCIAL_LINKS: SocialLink[] = [
 export type NavLink = {
   name: string;
   path: string;
-  icon: ReactNode;
+  icon: React.ReactElement;
 };
 
 export const NAV_LINKS: NavLink[] = [
