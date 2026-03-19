@@ -169,32 +169,9 @@ const Home: React.FC = () => {
           )}
 
           <div
-            className="absolute top-0 left-0 right-0 h-[44px] z-10"
+            className="absolute top-0 left-0 right-0 h-[44px] z-10 bg-transparent pointer-events-auto"
             aria-hidden="true"
           />
-        </div>
-
-        <div className="mt-4 flex justify-center">
-          <a
-            href="https://open.spotify.com/show/3VjnTbbEDaFjd8fddfxWy6"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="
-              inline-flex items-center justify-center
-              px-5 py-3
-              rounded-full
-              bg-amber-500
-              text-black
-              font-black
-              text-[11px] sm:text-xs
-              uppercase tracking-[0.2em]
-              transition-all duration-300
-              hover:bg-amber-400
-              active:scale-95
-            "
-          >
-            Abrir no Spotify
-          </a>
         </div>
       </div>
 
