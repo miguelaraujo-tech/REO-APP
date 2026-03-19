@@ -155,7 +155,7 @@ const Home: React.FC = () => {
           </h2>
         </div>
 
-        <div className="rounded-3xl overflow-hidden bg-black/60 border border-white/5 shadow-inner h-[152px]">
+        <div className="relative rounded-3xl overflow-hidden bg-black/60 border border-white/5 shadow-inner h-[152px]">
           {showSpotify && (
             <iframe
               src="https://open.spotify.com/embed/show/3VjnTbbEDaFjd8fddfxWy6?utm_source=generator&theme=0"
@@ -167,6 +167,11 @@ const Home: React.FC = () => {
               loading="lazy"
             />
           )}
+
+          <div
+            className="absolute top-0 left-0 right-0 h-[44px] z-10"
+            aria-hidden="true"
+          />
         </div>
 
         <div className="mt-4 flex justify-center">
