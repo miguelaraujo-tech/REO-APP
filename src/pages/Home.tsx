@@ -160,18 +160,18 @@ const Home: React.FC = () => {
             <iframe
               src="https://open.spotify.com/embed/show/3VjnTbbEDaFjd8fddfxWy6?utm_source=generator&theme=0"
               width="100%"
-              height="152"
+              height="196"
               frameBorder="0"
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              style={{ display: 'block' }}
+              style={{
+                display: 'block',
+                position: 'absolute',
+                top: '-44px',
+                left: 0,
+              }}
               loading="lazy"
             />
           )}
-
-          <div
-            className="absolute top-0 left-0 right-0 h-[44px] z-10 bg-transparent pointer-events-auto"
-            aria-hidden="true"
-          />
         </div>
       </div>
 
