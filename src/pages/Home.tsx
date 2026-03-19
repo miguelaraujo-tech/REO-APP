@@ -155,20 +155,15 @@ const Home: React.FC = () => {
           </h2>
         </div>
 
-        <div className="relative rounded-3xl overflow-hidden bg-black/60 border border-white/5 shadow-inner h-[152px]">
+        <div className="rounded-3xl overflow-hidden bg-black/60 border border-white/5 shadow-inner h-[152px]">
           {showSpotify && (
             <iframe
               src="https://open.spotify.com/embed/show/3VjnTbbEDaFjd8fddfxWy6?utm_source=generator&theme=0"
               width="100%"
-              height="196"
+              height="152"
               frameBorder="0"
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              style={{
-                display: 'block',
-                position: 'absolute',
-                top: '-44px',
-                left: 0,
-              }}
+              style={{ display: 'block' }}
               loading="lazy"
             />
           )}
