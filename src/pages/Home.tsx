@@ -151,7 +151,7 @@ const Home: React.FC = () => {
       <Link
         to="/reo-dash"
         aria-label="Jogar REO Dash"
-        className="group relative w-full max-w-2xl mb-12 sm:mb-20 overflow-hidden rounded-[2.25rem] border border-amber-500/40 bg-[#12121c]/80 p-5 sm:p-6 shadow-2xl shadow-[0_0_40px_rgba(245,158,11,0.10)] transition-all duration-300 active:scale-[0.98] active:border-amber-400/70"
+        className="group relative w-full max-w-2xl mb-12 sm:mb-20 overflow-hidden rounded-[2.25rem] border border-amber-500/40 bg-[#12121c]/80 p-5 sm:p-6 shadow-[0_0_40px_rgba(245,158,11,0.10)] transition-all duration-300 active:scale-[0.98] active:border-amber-400/70"
       >
         <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_15%_50%,rgba(245,158,11,0.18),transparent_38%)]" />
 
