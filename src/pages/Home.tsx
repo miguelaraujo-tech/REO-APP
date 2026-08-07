@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Gamepad2 } from 'lucide-react';
 import { NAV_LINKS } from '../constants';
 import Logo from '../Logo';
 
@@ -145,6 +146,35 @@ const Home: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* REO DASH */}
+      <Link
+        to="/reo-dash"
+        aria-label="Jogar REO Dash"
+        className="group relative w-full max-w-2xl mb-12 sm:mb-20 overflow-hidden rounded-[2.25rem] border border-amber-500/40 bg-[#12121c]/80 p-5 sm:p-6 shadow-2xl shadow-[0_0_40px_rgba(245,158,11,0.10)] transition-all duration-300 active:scale-[0.98] active:border-amber-400/70"
+      >
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_15%_50%,rgba(245,158,11,0.18),transparent_38%)]" />
+
+        <div className="relative flex items-center gap-4 sm:gap-5">
+          <div className="flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-500 shadow-[0_0_25px_rgba(245,158,11,0.12)] transition-transform duration-300 group-active:scale-105">
+            <Gamepad2 className="h-8 w-8 sm:h-10 sm:w-10" />
+          </div>
+
+          <div className="min-w-0 flex-1 text-left">
+            <span className="inline-flex rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.28em] text-amber-400">
+              Novo
+            </span>
+
+            <h2 className="mt-2 text-2xl sm:text-3xl font-black uppercase italic tracking-tight text-white">
+              REO Dash
+            </h2>
+          </div>
+
+          <div className="shrink-0 rounded-full bg-amber-500 px-4 py-2 text-[10px] sm:text-xs font-black uppercase tracking-[0.18em] text-black shadow-lg transition-transform duration-300 group-active:translate-x-1">
+            Jogar →
+          </div>
+        </div>
+      </Link>
 
       {/* SPOTIFY */}
       <div className="w-full max-w-2xl bg-[#12121c]/60 backdrop-blur-md p-4 sm:p-5 rounded-[2.5rem] shadow-2xl mb-12 sm:mb-20 border border-amber-500/25 shadow-[0_0_40px_rgba(245,158,11,0.08)]">
