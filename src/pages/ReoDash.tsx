@@ -1,10 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
 import reoDashHtml from '../games/reo-dash.html?raw';
+import reoDashMusic from '../games/reo-dash-background.mp3';
 
 const ReoDash: React.FC = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
-  const [mobileIframeHeight, setMobileIframeHeight] = useState<number | null>(null);
+  const signalObserverRef = useRef<MutationObserver | null>(null);
+  const musicRef = useRef<HTMLAudioElement | null>(null);
+  const cleanupGameBindingsRef = useRef<(() => void) | null>(null);
+
+  const gameActiveRef = useRef(false);
+  const gameStartedRef = useRef(false);
+
+  const [mobileIframeHeight, setMobileIframeHeight] = useState<number | null>(
+    null
+  );
 
   /*
    * Enquanto o REO DASH está aberto, impede seleção,
@@ -35,6 +45,11 @@ const ReoDash: React.FC = () => {
 
     return () => {
       resizeObserverRef.current?.disconnect();
+      signalObserverRef.current?.disconnect();
+      cleanupGameBindingsRef.current?.();
+
+      musicRef.current?.pause();
+      musicRef.current = null;
 
       document.removeEventListener(
         'selectstart',
@@ -108,7 +123,19 @@ const ReoDash: React.FC = () => {
 
     if (!gameDocument) return;
 
+    /*
+     * Limpa eventuais ligações anteriores caso o iframe
+     * volte a carregar.
+     */
     resizeObserverRef.current?.disconnect();
+    signalObserverRef.current?.disconnect();
+    cleanupGameBindingsRef.current?.();
+
+    musicRef.current?.pause();
+    musicRef.current = null;
+
+    gameActiveRef.current = false;
+    gameStartedRef.current = false;
 
     /*
      * Impede seleção, callout e drag também dentro
@@ -208,10 +235,6 @@ const ReoDash: React.FC = () => {
           box-shadow: none !important;
         }
 
-        /*
-         * Cabeçalho ligeiramente mais próximo
-         * do painel de estatísticas.
-         */
         .barra {
           gap: 8px !important;
           margin-bottom: 5px !important;
@@ -227,10 +250,6 @@ const ReoDash: React.FC = () => {
           margin-bottom: 4px !important;
         }
 
-        /*
-         * Um pouco mais legível do que a versão anterior,
-         * sem voltar a ocupar demasiado espaço.
-         */
         .mod {
           min-width: 0 !important;
           padding: 6px 5px !important;
@@ -271,10 +290,6 @@ const ReoDash: React.FC = () => {
           border-radius: 1px !important;
         }
 
-        /*
-         * Mantém o jogo na proporção original 16:9,
-         * usando toda a largura disponível.
-         */
         canvas#game {
           width: 100% !important;
           max-width: none !important;
@@ -285,10 +300,6 @@ const ReoDash: React.FC = () => {
           margin-top: 8px !important;
         }
 
-        /*
-         * As instruções de teclado não são necessárias
-         * durante a utilização mobile.
-         */
         .ajuda {
           display: none !important;
         }
@@ -298,34 +309,303 @@ const ReoDash: React.FC = () => {
     gameDocument.head.appendChild(style);
 
     /*
+     * Música de fundo.
+     *
+     * É criada dentro do próprio documento do jogo para que
+     * o gesto de tocar em "Jogar" no iPhone conte diretamente
+     * como interação do utilizador e permita iniciar áudio.
+     */
+    gameDocument
+      .getElementById('reo-dash-background-music')
+      ?.remove();
+
+    const music = gameDocument.createElement('audio');
+
+    music.id = 'reo-dash-background-music';
+    music.src = reoDashMusic;
+    music.loop = true;
+    music.preload = 'auto';
+    music.volume = 0.22;
+    music.setAttribute('playsinline', '');
+
+    gameDocument.body.appendChild(music);
+    musicRef.current = music;
+
+    const bJogar =
+      gameDocument.getElementById(
+        'bJogar'
+      ) as HTMLButtonElement | null;
+
+    const bRecomecar =
+      gameDocument.getElementById(
+        'bRecomecar'
+      ) as HTMLButtonElement | null;
+
+    const bSom =
+      gameDocument.getElementById(
+        'bSom'
+      ) as HTMLButtonElement | null;
+
+    const vSinal =
+      gameDocument.getElementById('vSinal');
+
+    const isMuted = () => {
+      return bSom?.textContent?.trim() === '✕';
+    };
+
+    const pauseMusic = (reset = false) => {
+      music.pause();
+
+      if (reset) {
+        try {
+          music.currentTime = 0;
+        } catch {
+          // Alguns browsers podem não permitir alterar
+          // currentTime antes dos metadados carregarem.
+        }
+      }
+    };
+
+    const playMusic = () => {
+      if (
+        !gameActiveRef.current ||
+        isMuted() ||
+        gameDocument.hidden
+      ) {
+        return;
+      }
+
+      music.play().catch(() => {
+        /*
+         * O iOS pode recusar play() caso não reconheça
+         * uma interação direta. O próximo toque em Jogar
+         * volta a tentar automaticamente.
+         */
+      });
+    };
+
+    /*
+     * JOGAR também funciona como pausa/continuar.
+     *
+     * Mantemos um estado apenas para a música.
+     * Não alteramos qualquer variável interna do jogo.
+     */
+    const handlePlayButton = () => {
+      if (!gameStartedRef.current) {
+        gameStartedRef.current = true;
+        gameActiveRef.current = true;
+        playMusic();
+        return;
+      }
+
+      if (gameActiveRef.current) {
+        gameActiveRef.current = false;
+        pauseMusic(false);
+      } else {
+        gameActiveRef.current = true;
+        playMusic();
+      }
+    };
+
+    /*
+     * Recomeçar volta ao ecrã inicial do jogo.
+     * A música para e regressa ao início.
+     */
+    const handleRestartButton = () => {
+      gameStartedRef.current = false;
+      gameActiveRef.current = false;
+      pauseMusic(true);
+    };
+
+    /*
+     * O botão ♪ / ✕ já existente passa a controlar
+     * também a música de fundo.
+     *
+     * Usamos capture para o play() acontecer diretamente
+     * dentro do gesto do utilizador no iPhone.
+     */
+    const handleSoundButton = () => {
+      const currentlyMuted = isMuted();
+
+      if (currentlyMuted) {
+        if (
+          gameActiveRef.current &&
+          !gameDocument.hidden
+        ) {
+          music.play().catch(() => {});
+        }
+      } else {
+        pauseMusic(false);
+      }
+    };
+
+    /*
+     * Mantém Enter e P coerentes com os controlos
+     * de teclado existentes no jogo.
+     */
+    const handleGameKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Enter') {
+        handlePlayButton();
+        return;
+      }
+
+      if (
+        (event.key === 'p' || event.key === 'P') &&
+        gameStartedRef.current
+      ) {
+        if (gameActiveRef.current) {
+          gameActiveRef.current = false;
+          pauseMusic(false);
+        } else {
+          gameActiveRef.current = true;
+          playMusic();
+        }
+      }
+    };
+
+    /*
+     * Quando a PWA vai para segundo plano, o jogo
+     * já se coloca em pausa. Fazemos o mesmo à música.
+     */
+    const handleVisibilityChange = () => {
+      if (gameDocument.hidden) {
+        gameActiveRef.current = false;
+        pauseMusic(false);
+      }
+    };
+
+    bJogar?.addEventListener(
+      'click',
+      handlePlayButton,
+      true
+    );
+
+    bRecomecar?.addEventListener(
+      'click',
+      handleRestartButton,
+      true
+    );
+
+    bSom?.addEventListener(
+      'click',
+      handleSoundButton,
+      true
+    );
+
+    gameDocument.addEventListener(
+      'keydown',
+      handleGameKeyDown,
+      true
+    );
+
+    gameDocument.addEventListener(
+      'visibilitychange',
+      handleVisibilityChange
+    );
+
+    /*
+     * Quando o sinal chega a zero, o jogo termina.
+     * Observamos apenas o mostrador já existente:
+     * não tocamos na lógica interna do jogo.
+     */
+    if (vSinal) {
+      signalObserverRef.current = new MutationObserver(
+        () => {
+          if (vSinal.textContent?.trim() === '0') {
+            gameStartedRef.current = false;
+            gameActiveRef.current = false;
+            pauseMusic(true);
+          }
+        }
+      );
+
+      signalObserverRef.current.observe(
+        vSinal,
+        {
+          childList: true,
+          subtree: true,
+          characterData: true,
+        }
+      );
+    }
+
+    cleanupGameBindingsRef.current = () => {
+      bJogar?.removeEventListener(
+        'click',
+        handlePlayButton,
+        true
+      );
+
+      bRecomecar?.removeEventListener(
+        'click',
+        handleRestartButton,
+        true
+      );
+
+      bSom?.removeEventListener(
+        'click',
+        handleSoundButton,
+        true
+      );
+
+      gameDocument.removeEventListener(
+        'keydown',
+        handleGameKeyDown,
+        true
+      );
+
+      gameDocument.removeEventListener(
+        'visibilitychange',
+        handleVisibilityChange
+      );
+
+      gameDocument.removeEventListener(
+        'selectstart',
+        preventNativeInteraction,
+        true
+      );
+
+      gameDocument.removeEventListener(
+        'contextmenu',
+        preventNativeInteraction,
+        true
+      );
+
+      gameDocument.removeEventListener(
+        'dragstart',
+        preventNativeInteraction,
+        true
+      );
+
+      signalObserverRef.current?.disconnect();
+    };
+
+    /*
      * Ajusta a altura do iframe ao tamanho verdadeiro
      * do painel REO DASH.
      */
     const mesa =
       gameDocument.querySelector<HTMLElement>('.mesa');
 
-    if (mesa && typeof ResizeObserver !== 'undefined') {
-      resizeObserverRef.current = new ResizeObserver(() => {
-        updateMobileIframeHeight();
-      });
+    if (
+      mesa &&
+      typeof ResizeObserver !== 'undefined'
+    ) {
+      resizeObserverRef.current = new ResizeObserver(
+        () => {
+          updateMobileIframeHeight();
+        }
+      );
 
       resizeObserverRef.current.observe(mesa);
     }
 
-    /*
-     * Esperamos que os estilos tenham sido aplicados
-     * antes da primeira medição.
-     */
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         updateMobileIframeHeight();
       });
     });
 
-    /*
-     * As fontes Google podem alterar alguns píxeis
-     * quando terminam de carregar.
-     */
     gameDocument.fonts?.ready
       .then(() => {
         updateMobileIframeHeight();
@@ -341,12 +621,19 @@ const ReoDash: React.FC = () => {
     event.preventDefault();
 
     try {
-      event.currentTarget.setPointerCapture(event.pointerId);
+      event.currentTarget.setPointerCapture(
+        event.pointerId
+      );
     } catch {
-      // Alguns browsers móveis não necessitam de pointer capture.
+      // Alguns browsers móveis não necessitam
+      // de pointer capture.
     }
 
-    dispatchGameKey('keydown', 'Space', ' ');
+    dispatchGameKey(
+      'keydown',
+      'Space',
+      ' '
+    );
   };
 
   const endJump = (
@@ -354,7 +641,11 @@ const ReoDash: React.FC = () => {
   ) => {
     event.preventDefault();
 
-    dispatchGameKey('keyup', 'Space', ' ');
+    dispatchGameKey(
+      'keyup',
+      'Space',
+      ' '
+    );
   };
 
   const roll = (
@@ -362,8 +653,17 @@ const ReoDash: React.FC = () => {
   ) => {
     event.preventDefault();
 
-    dispatchGameKey('keydown', 'ShiftLeft', 'Shift');
-    dispatchGameKey('keyup', 'ShiftLeft', 'Shift');
+    dispatchGameKey(
+      'keydown',
+      'ShiftLeft',
+      'Shift'
+    );
+
+    dispatchGameKey(
+      'keyup',
+      'ShiftLeft',
+      'Shift'
+    );
   };
 
   const preventReactNativeInteraction = (
@@ -388,8 +688,12 @@ const ReoDash: React.FC = () => {
 
   return (
     <section
-      onContextMenu={preventReactNativeInteraction}
-      onDragStart={preventReactNativeInteraction}
+      onContextMenu={
+        preventReactNativeInteraction
+      }
+      onDragStart={
+        preventReactNativeInteraction
+      }
       style={noSelectStyle}
       className="
         relative
@@ -461,8 +765,12 @@ const ReoDash: React.FC = () => {
           type="button"
           aria-label="Rolar"
           onPointerDown={roll}
-          onContextMenu={preventReactNativeInteraction}
-          onDragStart={preventReactNativeInteraction}
+          onContextMenu={
+            preventReactNativeInteraction
+          }
+          onDragStart={
+            preventReactNativeInteraction
+          }
           style={gameButtonStyle}
           className="
             pointer-events-auto
@@ -502,8 +810,12 @@ const ReoDash: React.FC = () => {
           onPointerUp={endJump}
           onPointerCancel={endJump}
           onPointerLeave={endJump}
-          onContextMenu={preventReactNativeInteraction}
-          onDragStart={preventReactNativeInteraction}
+          onContextMenu={
+            preventReactNativeInteraction
+          }
+          onDragStart={
+            preventReactNativeInteraction
+          }
           style={gameButtonStyle}
           className="
             pointer-events-auto
