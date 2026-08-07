@@ -114,11 +114,6 @@ const ReoDash: React.FC = () => {
           margin-top: 8px !important;
         }
 
-        /*
-         * No telemóvel os controlos ficam visíveis nos dois
-         * botões grandes, portanto estas instruções de teclado
-         * deixam de ocupar espaço útil.
-         */
         .ajuda {
           display: none !important;
         }
@@ -206,6 +201,39 @@ const ReoDash: React.FC = () => {
           bottom: 'calc(env(safe-area-inset-bottom, 0px) + 18px)',
         }}
       >
+        {/* ROLAR — esquerda */}
+        <button
+          type="button"
+          aria-label="Rolar"
+          onPointerDown={roll}
+          className="
+            pointer-events-auto
+            flex
+            h-[88px]
+            w-[88px]
+            select-none
+            items-center
+            justify-center
+            rounded-full
+            border
+            border-amber-500/60
+            bg-[#24180d]/95
+            text-[12px]
+            font-black
+            uppercase
+            tracking-[0.14em]
+            text-amber-400
+            shadow-[0_8px_30px_rgba(0,0,0,0.55)]
+            backdrop-blur-md
+            active:scale-95
+            active:bg-amber-500
+            active:text-black
+          "
+        >
+          Rolar
+        </button>
+
+        {/* SALTAR — direita */}
         <button
           type="button"
           aria-label="Saltar"
@@ -237,37 +265,6 @@ const ReoDash: React.FC = () => {
           "
         >
           Saltar
-        </button>
-
-        <button
-          type="button"
-          aria-label="Rolar"
-          onPointerDown={roll}
-          className="
-            pointer-events-auto
-            flex
-            h-[88px]
-            w-[88px]
-            select-none
-            items-center
-            justify-center
-            rounded-full
-            border
-            border-amber-500/60
-            bg-[#24180d]/95
-            text-[12px]
-            font-black
-            uppercase
-            tracking-[0.14em]
-            text-amber-400
-            shadow-[0_8px_30px_rgba(0,0,0,0.55)]
-            backdrop-blur-md
-            active:scale-95
-            active:bg-amber-500
-            active:text-black
-          "
-        >
-          Rolar
         </button>
       </div>
     </section>
