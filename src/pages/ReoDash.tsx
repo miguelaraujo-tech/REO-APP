@@ -1,13 +1,14 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import reoDashHtml from '../games/reo-dash.html?raw';
 
 const ReoDash: React.FC = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
+  const [mobileIframeHeight, setMobileIframeHeight] = useState<number | null>(null);
 
   /*
-   * Enquanto o REO DASH está aberto, impede a seleção nativa,
-   * o menu de long-press e o arrastar de elementos no documento
-   * principal da PWA.
+   * Enquanto o REO DASH está aberto, impede seleção,
+   * long-press e arrastar elementos no documento principal.
    */
   useEffect(() => {
     const preventNativeInteraction = (event: Event) => {
@@ -33,6 +34,8 @@ const ReoDash: React.FC = () => {
     );
 
     return () => {
+      resizeObserverRef.current?.disconnect();
+
       document.removeEventListener(
         'selectstart',
         preventNativeInteraction,
@@ -72,10 +75,40 @@ const ReoDash: React.FC = () => {
     );
   };
 
+  const updateMobileIframeHeight = () => {
+    const iframe = iframeRef.current;
+    const gameDocument = iframe?.contentDocument;
+
+    if (!iframe || !gameDocument) return;
+
+    /*
+     * Em tablet/desktop mantemos a altura normal.
+     * O ajuste automático é apenas para o layout mobile.
+     */
+    if (!window.matchMedia('(max-width: 639px)').matches) {
+      setMobileIframeHeight(null);
+      return;
+    }
+
+    const mesa = gameDocument.querySelector<HTMLElement>('.mesa');
+
+    if (!mesa) return;
+
+    const measuredHeight = Math.ceil(
+      mesa.getBoundingClientRect().height
+    );
+
+    if (measuredHeight > 0) {
+      setMobileIframeHeight(measuredHeight + 2);
+    }
+  };
+
   const handleGameLoad = () => {
     const gameDocument = iframeRef.current?.contentDocument;
 
     if (!gameDocument) return;
+
+    resizeObserverRef.current?.disconnect();
 
     /*
      * Impede seleção, callout e drag também dentro
@@ -104,10 +137,15 @@ const ReoDash: React.FC = () => {
     );
 
     /*
-     * Ajustes exclusivamente para a integração móvel na REO.
-     * Não altera física, pontuação, obstáculos ou lógica do jogo.
+     * Evita duplicar os estilos se o iframe voltar
+     * a executar o evento load.
      */
+    gameDocument
+      .getElementById('reo-dash-mobile-overrides')
+      ?.remove();
+
     const style = gameDocument.createElement('style');
+    style.id = 'reo-dash-mobile-overrides';
 
     style.textContent = `
       html,
@@ -126,7 +164,7 @@ const ReoDash: React.FC = () => {
 
       /*
        * No telemóvel o salto é feito pelo botão SALTAR.
-       * O canvas deixa de receber toques.
+       * O canvas fica exclusivamente como área visual.
        */
       #game {
         pointer-events: none !important;
@@ -137,7 +175,7 @@ const ReoDash: React.FC = () => {
       }
 
       /*
-       * Esconde o botão ROLAR original do HTML.
+       * O botão ROLAR original do HTML fica escondido.
        * A REO fornece os dois controlos externos.
        */
       #dash {
@@ -148,10 +186,13 @@ const ReoDash: React.FC = () => {
         html,
         body {
           width: 100% !important;
-          min-height: 100% !important;
+          height: auto !important;
+          min-height: 0 !important;
+          overflow: hidden !important;
         }
 
         body {
+          display: block !important;
           padding: 0 !important;
           align-items: flex-start !important;
           justify-content: flex-start !important;
@@ -167,33 +208,39 @@ const ReoDash: React.FC = () => {
           box-shadow: none !important;
         }
 
+        /*
+         * Cabeçalho ligeiramente mais próximo
+         * do painel de estatísticas.
+         */
         .barra {
-          margin-bottom: 7px !important;
+          gap: 8px !important;
+          margin-bottom: 5px !important;
         }
 
         /*
-         * PAINEL DE ESTATÍSTICAS MOBILE
-         *
-         * As quatro caixas passam de uma grelha 2x2
-         * para uma única linha compacta de 4 caixas.
+         * 4 estatísticas numa única linha.
          */
         .consola {
           display: grid !important;
           grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
           gap: 4px !important;
-          margin-bottom: 6px !important;
+          margin-bottom: 4px !important;
         }
 
+        /*
+         * Um pouco mais legível do que a versão anterior,
+         * sem voltar a ocupar demasiado espaço.
+         */
         .mod {
           min-width: 0 !important;
-          padding: 5px 4px !important;
+          padding: 6px 5px !important;
           border-radius: 7px !important;
         }
 
         .mod label {
           margin-bottom: 2px !important;
-          font-size: 0.38rem !important;
-          letter-spacing: 0.07em !important;
+          font-size: 0.42rem !important;
+          letter-spacing: 0.06em !important;
           line-height: 1.1 !important;
           white-space: nowrap !important;
           overflow: hidden !important;
@@ -201,13 +248,13 @@ const ReoDash: React.FC = () => {
         }
 
         .mod output {
-          font-size: 0.85rem !important;
+          font-size: 0.95rem !important;
           line-height: 1.05 !important;
         }
 
         .nota {
           margin-top: 3px !important;
-          font-size: 0.36rem !important;
+          font-size: 0.40rem !important;
           line-height: 1.1 !important;
           white-space: nowrap !important;
           overflow: hidden !important;
@@ -224,6 +271,10 @@ const ReoDash: React.FC = () => {
           border-radius: 1px !important;
         }
 
+        /*
+         * Mantém o jogo na proporção original 16:9,
+         * usando toda a largura disponível.
+         */
         canvas#game {
           width: 100% !important;
           max-width: none !important;
@@ -234,6 +285,10 @@ const ReoDash: React.FC = () => {
           margin-top: 8px !important;
         }
 
+        /*
+         * As instruções de teclado não são necessárias
+         * durante a utilização mobile.
+         */
         .ajuda {
           display: none !important;
         }
@@ -241,6 +296,43 @@ const ReoDash: React.FC = () => {
     `;
 
     gameDocument.head.appendChild(style);
+
+    /*
+     * Ajusta a altura do iframe ao tamanho verdadeiro
+     * do painel REO DASH.
+     */
+    const mesa =
+      gameDocument.querySelector<HTMLElement>('.mesa');
+
+    if (mesa && typeof ResizeObserver !== 'undefined') {
+      resizeObserverRef.current = new ResizeObserver(() => {
+        updateMobileIframeHeight();
+      });
+
+      resizeObserverRef.current.observe(mesa);
+    }
+
+    /*
+     * Esperamos que os estilos tenham sido aplicados
+     * antes da primeira medição.
+     */
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        updateMobileIframeHeight();
+      });
+    });
+
+    /*
+     * As fontes Google podem alterar alguns píxeis
+     * quando terminam de carregar.
+     */
+    gameDocument.fonts?.ready
+      .then(() => {
+        updateMobileIframeHeight();
+      })
+      .catch(() => {
+        // Não é crítico para o funcionamento do jogo.
+      });
   };
 
   const startJump = (
@@ -318,11 +410,18 @@ const ReoDash: React.FC = () => {
         srcDoc={reoDashHtml}
         onLoad={handleGameLoad}
         draggable={false}
+        style={
+          mobileIframeHeight !== null
+            ? {
+                height: `${mobileIframeHeight}px`,
+                ...noSelectStyle,
+              }
+            : noSelectStyle
+        }
         className="
           block
           w-full
           h-[700px]
-          sm:h-[700px]
           md:h-[780px]
           rounded-none
           sm:rounded-[1.75rem]
@@ -353,7 +452,8 @@ const ReoDash: React.FC = () => {
         "
         style={{
           ...noSelectStyle,
-          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 18px)',
+          bottom:
+            'calc(env(safe-area-inset-bottom, 0px) + 18px)',
         }}
       >
         {/* ROLAR — esquerda */}
