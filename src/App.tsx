@@ -6,6 +6,7 @@ import Socials from './pages/Socials';
 import Archive from './pages/Archive';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import ReoDash from './pages/ReoDash';
 import Logo from './Logo';
 import ScrollToTop from './ScrollToTop';
 
@@ -150,6 +151,7 @@ const App: React.FC = () => {
             <Route path="/arquivo" element={<Archive />} />
             <Route path="/sobre" element={<About />} />
             <Route path="/contactar" element={<Contact />} />
+            <Route path="/reo-dash" element={<ReoDash />} />
           </Routes>
         </main>
 
