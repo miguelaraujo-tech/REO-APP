@@ -1,8 +1,57 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import reoDashHtml from '../games/reo-dash.html?raw';
 
 const ReoDash: React.FC = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  /*
+   * Enquanto o REO DASH está aberto, impede a seleção nativa,
+   * o menu de long-press e o arrastar de elementos no documento
+   * principal da PWA.
+   */
+  useEffect(() => {
+    const preventNativeInteraction = (event: Event) => {
+      event.preventDefault();
+    };
+
+    document.addEventListener(
+      'selectstart',
+      preventNativeInteraction,
+      true
+    );
+
+    document.addEventListener(
+      'contextmenu',
+      preventNativeInteraction,
+      true
+    );
+
+    document.addEventListener(
+      'dragstart',
+      preventNativeInteraction,
+      true
+    );
+
+    return () => {
+      document.removeEventListener(
+        'selectstart',
+        preventNativeInteraction,
+        true
+      );
+
+      document.removeEventListener(
+        'contextmenu',
+        preventNativeInteraction,
+        true
+      );
+
+      document.removeEventListener(
+        'dragstart',
+        preventNativeInteraction,
+        true
+      );
+    };
+  }, []);
 
   const dispatchGameKey = (
     type: 'keydown' | 'keyup',
@@ -29,6 +78,32 @@ const ReoDash: React.FC = () => {
     if (!gameDocument) return;
 
     /*
+     * Impede seleção, callout e drag também dentro
+     * do documento do jogo.
+     */
+    const preventNativeInteraction = (event: Event) => {
+      event.preventDefault();
+    };
+
+    gameDocument.addEventListener(
+      'selectstart',
+      preventNativeInteraction,
+      true
+    );
+
+    gameDocument.addEventListener(
+      'contextmenu',
+      preventNativeInteraction,
+      true
+    );
+
+    gameDocument.addEventListener(
+      'dragstart',
+      preventNativeInteraction,
+      true
+    );
+
+    /*
      * Ajustes exclusivamente para a integração móvel na REO.
      * Não altera física, pontuação, obstáculos ou lógica do jogo.
      */
@@ -41,6 +116,7 @@ const ReoDash: React.FC = () => {
         -webkit-user-select: none !important;
         user-select: none !important;
         -webkit-touch-callout: none !important;
+        -webkit-tap-highlight-color: transparent !important;
       }
 
       html,
@@ -49,20 +125,20 @@ const ReoDash: React.FC = () => {
       }
 
       /*
-       * No telemóvel o salto passa a ser feito pelo botão SALTAR.
-       * O canvas deixa de receber toques, evitando seleção/interação
-       * acidental com a página.
+       * No telemóvel o salto é feito pelo botão SALTAR.
+       * O canvas deixa de receber toques.
        */
       #game {
         pointer-events: none !important;
         -webkit-user-drag: none !important;
         user-drag: none !important;
+        -webkit-touch-callout: none !important;
+        -webkit-tap-highlight-color: transparent !important;
       }
 
       /*
-       * Escondemos o botão móvel ROLAR original do HTML.
-       * A interface REO apresenta agora os dois controlos
-       * SALTAR e ROLAR de forma consistente.
+       * Esconde o botão ROLAR original do HTML.
+       * A REO fornece os dois controlos externos.
        */
       #dash {
         display: none !important;
@@ -92,16 +168,60 @@ const ReoDash: React.FC = () => {
         }
 
         .barra {
-          margin-bottom: 8px !important;
+          margin-bottom: 7px !important;
         }
 
+        /*
+         * PAINEL DE ESTATÍSTICAS MOBILE
+         *
+         * As quatro caixas passam de uma grelha 2x2
+         * para uma única linha compacta de 4 caixas.
+         */
         .consola {
-          gap: 6px !important;
-          margin-bottom: 8px !important;
+          display: grid !important;
+          grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+          gap: 4px !important;
+          margin-bottom: 6px !important;
         }
 
         .mod {
-          padding: 7px 8px !important;
+          min-width: 0 !important;
+          padding: 5px 4px !important;
+          border-radius: 7px !important;
+        }
+
+        .mod label {
+          margin-bottom: 2px !important;
+          font-size: 0.38rem !important;
+          letter-spacing: 0.07em !important;
+          line-height: 1.1 !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+        }
+
+        .mod output {
+          font-size: 0.85rem !important;
+          line-height: 1.05 !important;
+        }
+
+        .nota {
+          margin-top: 3px !important;
+          font-size: 0.36rem !important;
+          line-height: 1.1 !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+        }
+
+        .vu {
+          gap: 2px !important;
+          margin-top: 4px !important;
+        }
+
+        .vu i {
+          height: 4px !important;
+          border-radius: 1px !important;
         }
 
         canvas#game {
@@ -123,7 +243,9 @@ const ReoDash: React.FC = () => {
     gameDocument.head.appendChild(style);
   };
 
-  const startJump = (event: React.PointerEvent<HTMLButtonElement>) => {
+  const startJump = (
+    event: React.PointerEvent<HTMLButtonElement>
+  ) => {
     event.preventDefault();
 
     try {
@@ -135,26 +257,55 @@ const ReoDash: React.FC = () => {
     dispatchGameKey('keydown', 'Space', ' ');
   };
 
-  const endJump = (event: React.PointerEvent<HTMLButtonElement>) => {
+  const endJump = (
+    event: React.PointerEvent<HTMLButtonElement>
+  ) => {
     event.preventDefault();
+
     dispatchGameKey('keyup', 'Space', ' ');
   };
 
-  const roll = (event: React.PointerEvent<HTMLButtonElement>) => {
+  const roll = (
+    event: React.PointerEvent<HTMLButtonElement>
+  ) => {
     event.preventDefault();
 
     dispatchGameKey('keydown', 'ShiftLeft', 'Shift');
     dispatchGameKey('keyup', 'ShiftLeft', 'Shift');
   };
 
+  const preventReactNativeInteraction = (
+    event: React.SyntheticEvent
+  ) => {
+    event.preventDefault();
+  };
+
+  const noSelectStyle = {
+    WebkitUserSelect: 'none',
+    userSelect: 'none',
+    WebkitTouchCallout: 'none',
+  } as React.CSSProperties;
+
+  const gameButtonStyle = {
+    WebkitUserSelect: 'none',
+    userSelect: 'none',
+    WebkitTouchCallout: 'none',
+    WebkitTapHighlightColor: 'transparent',
+    touchAction: 'none',
+  } as React.CSSProperties;
+
   return (
     <section
+      onContextMenu={preventReactNativeInteraction}
+      onDragStart={preventReactNativeInteraction}
+      style={noSelectStyle}
       className="
         relative
         -mx-4
         -mt-6
         -mb-6
         w-[calc(100%+2rem)]
+        select-none
         sm:mx-0
         sm:mt-0
         sm:mb-0
@@ -166,6 +317,7 @@ const ReoDash: React.FC = () => {
         title="REO Dash"
         srcDoc={reoDashHtml}
         onLoad={handleGameLoad}
+        draggable={false}
         className="
           block
           w-full
@@ -179,6 +331,7 @@ const ReoDash: React.FC = () => {
           sm:border
           bg-[#0b0908]
           shadow-[0_0_40px_rgba(245,158,11,0.08)]
+          select-none
         "
         allow="autoplay"
       />
@@ -195,9 +348,11 @@ const ReoDash: React.FC = () => {
           justify-between
           px-5
           pointer-events-none
+          select-none
           sm:hidden
         "
         style={{
+          ...noSelectStyle,
           bottom: 'calc(env(safe-area-inset-bottom, 0px) + 18px)',
         }}
       >
@@ -206,11 +361,15 @@ const ReoDash: React.FC = () => {
           type="button"
           aria-label="Rolar"
           onPointerDown={roll}
+          onContextMenu={preventReactNativeInteraction}
+          onDragStart={preventReactNativeInteraction}
+          style={gameButtonStyle}
           className="
             pointer-events-auto
             flex
             h-[88px]
             w-[88px]
+            touch-none
             select-none
             items-center
             justify-center
@@ -230,7 +389,9 @@ const ReoDash: React.FC = () => {
             active:text-black
           "
         >
-          Rolar
+          <span className="pointer-events-none select-none">
+            Rolar
+          </span>
         </button>
 
         {/* SALTAR — direita */}
@@ -240,11 +401,16 @@ const ReoDash: React.FC = () => {
           onPointerDown={startJump}
           onPointerUp={endJump}
           onPointerCancel={endJump}
+          onPointerLeave={endJump}
+          onContextMenu={preventReactNativeInteraction}
+          onDragStart={preventReactNativeInteraction}
+          style={gameButtonStyle}
           className="
             pointer-events-auto
             flex
             h-[88px]
             w-[88px]
+            touch-none
             select-none
             items-center
             justify-center
@@ -264,7 +430,9 @@ const ReoDash: React.FC = () => {
             active:text-black
           "
         >
-          Saltar
+          <span className="pointer-events-none select-none">
+            Saltar
+          </span>
         </button>
       </div>
     </section>
