@@ -1,25 +1,76 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+
 import reoDashHtml from '../games/reo-dash.html?raw';
 import reoDashMusic from '../games/reo-dash-background.mp3';
 
-type GameUiState = 'ready' | 'playing' | 'paused' | 'ended';
+type GameUiState =
+  | 'ready'
+  | 'playing'
+  | 'paused'
+  | 'ended';
+
+const TUTORIAL_STORAGE_KEY =
+  'reoDashTutorialVisto';
 
 const ReoDash: React.FC = () => {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const resizeObserverRef = useRef<ResizeObserver | null>(null);
-  const signalObserverRef = useRef<MutationObserver | null>(null);
-  const musicRef = useRef<HTMLAudioElement | null>(null);
-  const cleanupGameBindingsRef = useRef<(() => void) | null>(null);
+  const iframeRef =
+    useRef<HTMLIFrameElement>(null);
 
-  const gameActiveRef = useRef(false);
-  const gameStartedRef = useRef(false);
-  const gameUiStateRef = useRef<GameUiState>('ready');
+  const resizeObserverRef =
+    useRef<ResizeObserver | null>(null);
+
+  const signalObserverRef =
+    useRef<MutationObserver | null>(null);
+
+  const musicRef =
+    useRef<HTMLAudioElement | null>(null);
+
+  const cleanupGameBindingsRef =
+    useRef<(() => void) | null>(null);
+
+  const newRecordTimerRef =
+    useRef<number | null>(null);
+
+  const gameActiveRef =
+    useRef(false);
+
+  const gameStartedRef =
+    useRef(false);
+
+  const gameUiStateRef =
+    useRef<GameUiState>('ready');
 
   const [gameUiState, setGameUiState] =
     useState<GameUiState>('ready');
 
-  const [mobileIframeHeight, setMobileIframeHeight] =
-    useState<number | null>(null);
+  const [
+    mobileIframeHeight,
+    setMobileIframeHeight,
+  ] = useState<number | null>(null);
+
+  const [
+    showTutorial,
+    setShowTutorial,
+  ] = useState(() => {
+    try {
+      return (
+        localStorage.getItem(
+          TUTORIAL_STORAGE_KEY
+        ) !== '1'
+      );
+    } catch {
+      return true;
+    }
+  });
+
+  const [
+    newRecord,
+    setNewRecord,
+  ] = useState<number | null>(null);
 
   /*
    * Enquanto o REO DASH está aberto, impede seleção,
@@ -29,12 +80,17 @@ const ReoDash: React.FC = () => {
    * Ao sair do REO DASH, estes estilos são removidos.
    */
   useEffect(() => {
-    const preventNativeInteraction = (event: Event) => {
+    const preventNativeInteraction = (
+      event: Event
+    ) => {
       event.preventDefault();
     };
 
-    const globalStyle = document.createElement('style');
-    globalStyle.id = 'reo-dash-global-no-select';
+    const globalStyle =
+      document.createElement('style');
+
+    globalStyle.id =
+      'reo-dash-global-no-select';
 
     globalStyle.textContent = `
       html,
@@ -54,7 +110,9 @@ const ReoDash: React.FC = () => {
       }
     `;
 
-    document.head.appendChild(globalStyle);
+    document.head.appendChild(
+      globalStyle
+    );
 
     document.addEventListener(
       'selectstart',
@@ -75,12 +133,28 @@ const ReoDash: React.FC = () => {
     );
 
     return () => {
-      resizeObserverRef.current?.disconnect();
-      signalObserverRef.current?.disconnect();
-      cleanupGameBindingsRef.current?.();
+      resizeObserverRef.current
+        ?.disconnect();
+
+      signalObserverRef.current
+        ?.disconnect();
+
+      cleanupGameBindingsRef.current
+        ?.();
 
       musicRef.current?.pause();
       musicRef.current = null;
+
+      if (
+        newRecordTimerRef.current !== null
+      ) {
+        window.clearTimeout(
+          newRecordTimerRef.current
+        );
+
+        newRecordTimerRef.current =
+          null;
+      }
 
       globalStyle.remove();
 
@@ -104,13 +178,28 @@ const ReoDash: React.FC = () => {
     };
   }, []);
 
+  const dismissTutorial = () => {
+    setShowTutorial(false);
+
+    try {
+      localStorage.setItem(
+        TUTORIAL_STORAGE_KEY,
+        '1'
+      );
+    } catch {
+      // O tutorial continua funcional mesmo
+      // se localStorage não estiver disponível.
+    }
+  };
+
   const dispatchGameKey = (
     type: 'keydown' | 'keyup',
     code: string,
     key: string
   ) => {
     const gameDocument =
-      iframeRef.current?.contentDocument;
+      iframeRef.current
+        ?.contentDocument;
 
     if (!gameDocument) return;
 
@@ -130,46 +219,89 @@ const ReoDash: React.FC = () => {
    * Se o dispositivo/browser não suportar vibration,
    * simplesmente não acontece nada.
    */
-  const vibrate = (duration: number) => {
+  const vibrate = (
+    duration: number
+  ) => {
     if ('vibrate' in navigator) {
       navigator.vibrate(duration);
     }
   };
 
-  const updateMobileIframeHeight = () => {
-    const iframe = iframeRef.current;
-    const gameDocument = iframe?.contentDocument;
+  const showNewRecord = (
+    record: number
+  ) => {
+    setNewRecord(record);
 
-    if (!iframe || !gameDocument) return;
-
-    /*
-     * Em tablet/desktop mantemos a altura normal.
-     * O ajuste automático é apenas mobile.
-     */
     if (
-      !window.matchMedia('(max-width: 639px)').matches
+      newRecordTimerRef.current !== null
     ) {
-      setMobileIframeHeight(null);
-      return;
+      window.clearTimeout(
+        newRecordTimerRef.current
+      );
     }
 
-    const mesa =
-      gameDocument.querySelector<HTMLElement>('.mesa');
+    newRecordTimerRef.current =
+      window.setTimeout(() => {
+        setNewRecord(null);
 
-    if (!mesa) return;
-
-    const measuredHeight = Math.ceil(
-      mesa.getBoundingClientRect().height
-    );
-
-    if (measuredHeight > 0) {
-      setMobileIframeHeight(measuredHeight + 2);
-    }
+        newRecordTimerRef.current =
+          null;
+      }, 4500);
   };
+
+  const updateMobileIframeHeight =
+    () => {
+      const iframe =
+        iframeRef.current;
+
+      const gameDocument =
+        iframe?.contentDocument;
+
+      if (
+        !iframe ||
+        !gameDocument
+      ) {
+        return;
+      }
+
+      /*
+       * Em tablet/desktop mantemos a altura normal.
+       * O ajuste automático é apenas mobile.
+       */
+      if (
+        !window.matchMedia(
+          '(max-width: 639px)'
+        ).matches
+      ) {
+        setMobileIframeHeight(null);
+        return;
+      }
+
+      const mesa =
+        gameDocument.querySelector<HTMLElement>(
+          '.mesa'
+        );
+
+      if (!mesa) return;
+
+      const measuredHeight =
+        Math.ceil(
+          mesa
+            .getBoundingClientRect()
+            .height
+        );
+
+      if (measuredHeight > 0) {
+        setMobileIframeHeight(
+          measuredHeight + 2
+        );
+      }
+    };
 
   const handleGameLoad = () => {
     const gameDocument =
-      iframeRef.current?.contentDocument;
+      iframeRef.current
+        ?.contentDocument;
 
     if (!gameDocument) return;
 
@@ -177,23 +309,45 @@ const ReoDash: React.FC = () => {
      * Limpa eventuais ligações anteriores caso
      * o iframe volte a carregar.
      */
-    resizeObserverRef.current?.disconnect();
-    signalObserverRef.current?.disconnect();
-    cleanupGameBindingsRef.current?.();
+    resizeObserverRef.current
+      ?.disconnect();
+
+    signalObserverRef.current
+      ?.disconnect();
+
+    cleanupGameBindingsRef.current
+      ?.();
 
     musicRef.current?.pause();
     musicRef.current = null;
 
     gameActiveRef.current = false;
     gameStartedRef.current = false;
-    gameUiStateRef.current = 'ready';
+
+    gameUiStateRef.current =
+      'ready';
+
     setGameUiState('ready');
+    setNewRecord(null);
+
+    if (
+      newRecordTimerRef.current !== null
+    ) {
+      window.clearTimeout(
+        newRecordTimerRef.current
+      );
+
+      newRecordTimerRef.current =
+        null;
+    }
 
     /*
      * Impede seleção, callout e drag também
      * dentro do próprio documento do jogo.
      */
-    const preventNativeInteraction = (event: Event) => {
+    const preventNativeInteraction = (
+      event: Event
+    ) => {
       event.preventDefault();
     };
 
@@ -220,13 +374,18 @@ const ReoDash: React.FC = () => {
      * executar novamente o evento load.
      */
     gameDocument
-      .getElementById('reo-dash-mobile-overrides')
+      .getElementById(
+        'reo-dash-mobile-overrides'
+      )
       ?.remove();
 
     const style =
-      gameDocument.createElement('style');
+      gameDocument.createElement(
+        'style'
+      );
 
-    style.id = 'reo-dash-mobile-overrides';
+    style.id =
+      'reo-dash-mobile-overrides';
 
     style.textContent = `
       html,
@@ -301,7 +460,10 @@ const ReoDash: React.FC = () => {
         .consola {
           display: grid !important;
           grid-template-columns:
-            repeat(4, minmax(0, 1fr)) !important;
+            repeat(
+              4,
+              minmax(0, 1fr)
+            ) !important;
           gap: 4px !important;
           margin-bottom: 4px !important;
         }
@@ -362,7 +524,8 @@ const ReoDash: React.FC = () => {
       }
     `;
 
-    gameDocument.head.appendChild(style);
+    gameDocument.head
+      .appendChild(style);
 
     /*
      * Música de fundo.
@@ -378,17 +541,30 @@ const ReoDash: React.FC = () => {
       ?.remove();
 
     const music =
-      gameDocument.createElement('audio');
+      gameDocument.createElement(
+        'audio'
+      );
 
-    music.id = 'reo-dash-background-music';
-    music.src = reoDashMusic;
+    music.id =
+      'reo-dash-background-music';
+
+    music.src =
+      reoDashMusic;
+
     music.loop = true;
     music.preload = 'auto';
     music.volume = 0.22;
-    music.setAttribute('playsinline', '');
 
-    gameDocument.body.appendChild(music);
-    musicRef.current = music;
+    music.setAttribute(
+      'playsinline',
+      ''
+    );
+
+    gameDocument.body
+      .appendChild(music);
+
+    musicRef.current =
+      music;
 
     const bJogar =
       gameDocument.getElementById(
@@ -406,7 +582,22 @@ const ReoDash: React.FC = () => {
       ) as HTMLButtonElement | null;
 
     const vSinal =
-      gameDocument.getElementById('vSinal');
+      gameDocument.getElementById(
+        'vSinal'
+      );
+
+    const vRecorde =
+      gameDocument.getElementById(
+        'vRecorde'
+      );
+
+    let previousRecord =
+      parseInt(
+        vRecorde
+          ?.textContent
+          ?.trim() || '0',
+        10
+      ) || 0;
 
     /*
      * Sincroniza o estado da camada React
@@ -415,39 +606,67 @@ const ReoDash: React.FC = () => {
     const updateGameUiState = (
       nextState: GameUiState
     ) => {
-      gameUiStateRef.current = nextState;
-      setGameUiState(nextState);
+      gameUiStateRef.current =
+        nextState;
 
-      if (nextState === 'playing') {
-        gameStartedRef.current = true;
-        gameActiveRef.current = true;
-      } else if (nextState === 'paused') {
-        gameStartedRef.current = true;
-        gameActiveRef.current = false;
+      setGameUiState(
+        nextState
+      );
+
+      if (
+        nextState === 'playing'
+      ) {
+        gameStartedRef.current =
+          true;
+
+        gameActiveRef.current =
+          true;
+      } else if (
+        nextState === 'paused'
+      ) {
+        gameStartedRef.current =
+          true;
+
+        gameActiveRef.current =
+          false;
       } else {
-        gameStartedRef.current = false;
-        gameActiveRef.current = false;
+        gameStartedRef.current =
+          false;
+
+        gameActiveRef.current =
+          false;
       }
 
       if (!bJogar) return;
 
-      if (nextState === 'playing') {
-        bJogar.textContent = 'Pausar';
-      } else if (nextState === 'paused') {
-        bJogar.textContent = 'Continuar';
+      if (
+        nextState === 'playing'
+      ) {
+        bJogar.textContent =
+          'Pausar';
+      } else if (
+        nextState === 'paused'
+      ) {
+        bJogar.textContent =
+          'Continuar';
       } else {
-        bJogar.textContent = 'Jogar';
+        bJogar.textContent =
+          'Jogar';
       }
     };
 
     /*
      * Estado inicial.
      */
-    updateGameUiState('ready');
+    updateGameUiState(
+      'ready'
+    );
 
     const isMuted = () => {
       return (
-        bSom?.textContent?.trim() === '✕'
+        bSom
+          ?.textContent
+          ?.trim() === '✕'
       );
     };
 
@@ -458,7 +677,8 @@ const ReoDash: React.FC = () => {
 
       if (reset) {
         try {
-          music.currentTime = 0;
+          music.currentTime =
+            0;
         } catch {
           /*
            * Alguns browsers podem não permitir
@@ -478,13 +698,15 @@ const ReoDash: React.FC = () => {
         return;
       }
 
-      music.play().catch(() => {
-        /*
-         * O iOS pode recusar play() se não
-         * reconhecer uma interação direta.
-         * Um novo toque volta a tentar.
-         */
-      });
+      music
+        .play()
+        .catch(() => {
+          /*
+           * O iOS pode recusar play() se não
+           * reconhecer uma interação direta.
+           * Um novo toque volta a tentar.
+           */
+        });
     };
 
     /*
@@ -497,36 +719,54 @@ const ReoDash: React.FC = () => {
      * Aqui apenas sincronizamos o texto e a música.
      * A lógica original do jogo não é substituída.
      */
-    const handlePlayButton = () => {
-      const current =
-        gameUiStateRef.current;
+    const handlePlayButton =
+      () => {
+        const current =
+          gameUiStateRef.current;
 
-      if (
-        current === 'ready' ||
-        current === 'ended'
-      ) {
-        updateGameUiState('playing');
+        if (
+          current === 'ready' ||
+          current === 'ended'
+        ) {
+          updateGameUiState(
+            'playing'
+          );
+
+          playMusic();
+
+          return;
+        }
+
+        if (
+          current === 'playing'
+        ) {
+          updateGameUiState(
+            'paused'
+          );
+
+          pauseMusic(false);
+
+          return;
+        }
+
+        updateGameUiState(
+          'playing'
+        );
+
         playMusic();
-        return;
-      }
-
-      if (current === 'playing') {
-        updateGameUiState('paused');
-        pauseMusic(false);
-        return;
-      }
-
-      updateGameUiState('playing');
-      playMusic();
-    };
+      };
 
     /*
      * Recomeçar volta ao estado inicial.
      */
-    const handleRestartButton = () => {
-      updateGameUiState('ready');
-      pauseMusic(true);
-    };
+    const handleRestartButton =
+      () => {
+        updateGameUiState(
+          'ready'
+        );
+
+        pauseMusic(true);
+      };
 
     /*
      * O botão ♪ / ✕ existente controla
@@ -535,20 +775,24 @@ const ReoDash: React.FC = () => {
      * Este listener executa em capture, antes
      * de o botão original trocar ♪ por ✕.
      */
-    const handleSoundButton = () => {
-      const currentlyMuted = isMuted();
+    const handleSoundButton =
+      () => {
+        const currentlyMuted =
+          isMuted();
 
-      if (currentlyMuted) {
-        if (
-          gameActiveRef.current &&
-          !gameDocument.hidden
-        ) {
-          music.play().catch(() => {});
+        if (currentlyMuted) {
+          if (
+            gameActiveRef.current &&
+            !gameDocument.hidden
+          ) {
+            music
+              .play()
+              .catch(() => {});
+          }
+        } else {
+          pauseMusic(false);
         }
-      } else {
-        pauseMusic(false);
-      }
-    };
+      };
 
     /*
      * Mantém Enter e P coerentes
@@ -557,26 +801,40 @@ const ReoDash: React.FC = () => {
     const handleGameKeyDown = (
       event: KeyboardEvent
     ) => {
-      if (event.key === 'Enter') {
+      if (
+        event.key === 'Enter'
+      ) {
         handlePlayButton();
+
         return;
       }
 
       if (
-        (event.key === 'p' ||
-          event.key === 'P') &&
         (
-          gameUiStateRef.current === 'playing' ||
-          gameUiStateRef.current === 'paused'
+          event.key === 'p' ||
+          event.key === 'P'
+        ) &&
+        (
+          gameUiStateRef.current ===
+            'playing' ||
+          gameUiStateRef.current ===
+            'paused'
         )
       ) {
         if (
-          gameUiStateRef.current === 'playing'
+          gameUiStateRef.current ===
+          'playing'
         ) {
-          updateGameUiState('paused');
+          updateGameUiState(
+            'paused'
+          );
+
           pauseMusic(false);
         } else {
-          updateGameUiState('playing');
+          updateGameUiState(
+            'playing'
+          );
+
           playMusic();
         }
       }
@@ -588,15 +846,20 @@ const ReoDash: React.FC = () => {
      *
      * Sincronizamos o botão e a música.
      */
-    const handleVisibilityChange = () => {
-      if (
-        gameDocument.hidden &&
-        gameUiStateRef.current === 'playing'
-      ) {
-        updateGameUiState('paused');
-        pauseMusic(false);
-      }
-    };
+    const handleVisibilityChange =
+      () => {
+        if (
+          gameDocument.hidden &&
+          gameUiStateRef.current ===
+            'playing'
+        ) {
+          updateGameUiState(
+            'paused'
+          );
+
+          pauseMusic(false);
+        }
+      };
 
     bJogar?.addEventListener(
       'click',
@@ -631,19 +894,48 @@ const ReoDash: React.FC = () => {
      * Quando o sinal chega a zero,
      * o próprio jogo termina.
      *
-     * Apenas observamos o mostrador existente
-     * para atualizar os controlos externos.
+     * O jogo atualiza o recorde antes de o
+     * MutationObserver executar, por isso podemos
+     * verificar aqui se houve um novo recorde.
      */
     if (vSinal) {
       signalObserverRef.current =
-        new MutationObserver(() => {
-          if (
-            vSinal.textContent?.trim() === '0'
-          ) {
-            updateGameUiState('ended');
-            pauseMusic(true);
+        new MutationObserver(
+          () => {
+            if (
+              vSinal
+                .textContent
+                ?.trim() === '0'
+            ) {
+              const latestRecord =
+                parseInt(
+                  vRecorde
+                    ?.textContent
+                    ?.trim() ||
+                    '0',
+                  10
+                ) || 0;
+
+              if (
+                latestRecord >
+                previousRecord
+              ) {
+                previousRecord =
+                  latestRecord;
+
+                showNewRecord(
+                  latestRecord
+                );
+              }
+
+              updateGameUiState(
+                'ended'
+              );
+
+              pauseMusic(true);
+            }
           }
-        });
+        );
 
       signalObserverRef.current.observe(
         vSinal,
@@ -655,56 +947,58 @@ const ReoDash: React.FC = () => {
       );
     }
 
-    cleanupGameBindingsRef.current = () => {
-      bJogar?.removeEventListener(
-        'click',
-        handlePlayButton,
-        true
-      );
+    cleanupGameBindingsRef.current =
+      () => {
+        bJogar?.removeEventListener(
+          'click',
+          handlePlayButton,
+          true
+        );
 
-      bRecomecar?.removeEventListener(
-        'click',
-        handleRestartButton,
-        true
-      );
+        bRecomecar?.removeEventListener(
+          'click',
+          handleRestartButton,
+          true
+        );
 
-      bSom?.removeEventListener(
-        'click',
-        handleSoundButton,
-        true
-      );
+        bSom?.removeEventListener(
+          'click',
+          handleSoundButton,
+          true
+        );
 
-      gameDocument.removeEventListener(
-        'keydown',
-        handleGameKeyDown,
-        true
-      );
+        gameDocument.removeEventListener(
+          'keydown',
+          handleGameKeyDown,
+          true
+        );
 
-      gameDocument.removeEventListener(
-        'visibilitychange',
-        handleVisibilityChange
-      );
+        gameDocument.removeEventListener(
+          'visibilitychange',
+          handleVisibilityChange
+        );
 
-      gameDocument.removeEventListener(
-        'selectstart',
-        preventNativeInteraction,
-        true
-      );
+        gameDocument.removeEventListener(
+          'selectstart',
+          preventNativeInteraction,
+          true
+        );
 
-      gameDocument.removeEventListener(
-        'contextmenu',
-        preventNativeInteraction,
-        true
-      );
+        gameDocument.removeEventListener(
+          'contextmenu',
+          preventNativeInteraction,
+          true
+        );
 
-      gameDocument.removeEventListener(
-        'dragstart',
-        preventNativeInteraction,
-        true
-      );
+        gameDocument.removeEventListener(
+          'dragstart',
+          preventNativeInteraction,
+          true
+        );
 
-      signalObserverRef.current?.disconnect();
-    };
+        signalObserverRef.current
+          ?.disconnect();
+      };
 
     /*
      * Ajusta automaticamente a altura do iframe
@@ -717,14 +1011,16 @@ const ReoDash: React.FC = () => {
 
     if (
       mesa &&
-      typeof ResizeObserver !== 'undefined'
+      typeof ResizeObserver !==
+        'undefined'
     ) {
       resizeObserverRef.current =
         new ResizeObserver(() => {
           updateMobileIframeHeight();
         });
 
-      resizeObserverRef.current.observe(mesa);
+      resizeObserverRef.current
+        .observe(mesa);
     }
 
     requestAnimationFrame(() => {
@@ -733,7 +1029,9 @@ const ReoDash: React.FC = () => {
       });
     });
 
-    gameDocument.fonts?.ready
+    gameDocument
+      .fonts
+      ?.ready
       .then(() => {
         updateMobileIframeHeight();
       })
@@ -751,22 +1049,29 @@ const ReoDash: React.FC = () => {
    * Só é executado quando o botão está ativo.
    */
   const startJump = (
-    event: React.PointerEvent<HTMLButtonElement>
+    event:
+      React.PointerEvent<HTMLButtonElement>
   ) => {
     event.preventDefault();
 
     if (
-      gameUiStateRef.current !== 'playing'
+      gameUiStateRef.current !==
+      'playing'
     ) {
       return;
+    }
+
+    if (showTutorial) {
+      dismissTutorial();
     }
 
     vibrate(10);
 
     try {
-      event.currentTarget.setPointerCapture(
-        event.pointerId
-      );
+      event.currentTarget
+        .setPointerCapture(
+          event.pointerId
+        );
     } catch {
       /*
        * Alguns browsers móveis
@@ -782,12 +1087,14 @@ const ReoDash: React.FC = () => {
   };
 
   const endJump = (
-    event: React.PointerEvent<HTMLButtonElement>
+    event:
+      React.PointerEvent<HTMLButtonElement>
   ) => {
     event.preventDefault();
 
     if (
-      gameUiStateRef.current !== 'playing'
+      gameUiStateRef.current !==
+      'playing'
     ) {
       return;
     }
@@ -803,14 +1110,20 @@ const ReoDash: React.FC = () => {
    * ROLAR
    */
   const roll = (
-    event: React.PointerEvent<HTMLButtonElement>
+    event:
+      React.PointerEvent<HTMLButtonElement>
   ) => {
     event.preventDefault();
 
     if (
-      gameUiStateRef.current !== 'playing'
+      gameUiStateRef.current !==
+      'playing'
     ) {
       return;
+    }
+
+    if (showTutorial) {
+      dismissTutorial();
     }
 
     vibrate(14);
@@ -828,24 +1141,34 @@ const ReoDash: React.FC = () => {
     );
   };
 
-  const preventReactNativeInteraction = (
-    event: React.SyntheticEvent
-  ) => {
-    event.preventDefault();
-  };
+  const preventReactNativeInteraction =
+    (
+      event:
+        React.SyntheticEvent
+    ) => {
+      event.preventDefault();
+    };
 
   const noSelectStyle = {
-    WebkitUserSelect: 'none',
-    userSelect: 'none',
-    WebkitTouchCallout: 'none',
+    WebkitUserSelect:
+      'none',
+    userSelect:
+      'none',
+    WebkitTouchCallout:
+      'none',
   } as React.CSSProperties;
 
   const gameButtonStyle = {
-    WebkitUserSelect: 'none',
-    userSelect: 'none',
-    WebkitTouchCallout: 'none',
-    WebkitTapHighlightColor: 'transparent',
-    touchAction: 'none',
+    WebkitUserSelect:
+      'none',
+    userSelect:
+      'none',
+    WebkitTouchCallout:
+      'none',
+    WebkitTapHighlightColor:
+      'transparent',
+    touchAction:
+      'none',
   } as React.CSSProperties;
 
   const controlsEnabled =
@@ -880,7 +1203,8 @@ const ReoDash: React.FC = () => {
         onLoad={handleGameLoad}
         draggable={false}
         style={
-          mobileIframeHeight !== null
+          mobileIframeHeight !==
+          null
             ? {
                 height:
                   `${mobileIframeHeight}px`,
@@ -905,6 +1229,38 @@ const ReoDash: React.FC = () => {
         allow="autoplay"
       />
 
+      {newRecord !== null && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="
+            relative
+            z-30
+            mx-auto
+            mt-4
+            w-fit
+            max-w-[calc(100%-2rem)]
+            rounded-full
+            border
+            border-amber-400/60
+            bg-amber-500
+            px-5
+            py-3
+            text-center
+            text-[11px]
+            font-black
+            uppercase
+            tracking-[0.16em]
+            text-black
+            shadow-[0_0_35px_rgba(245,158,11,0.35)]
+            animate-pulse
+          "
+        >
+          🏆 Novo recorde! ·{' '}
+          {newRecord} ouvintes
+        </div>
+      )}
+
       {/*
         CONTROLOS MÓVEIS
 
@@ -925,131 +1281,209 @@ const ReoDash: React.FC = () => {
           z-20
           flex
           w-full
-          items-center
-          justify-between
+          flex-col
+          bg-[#0b0b13]
           px-10
           pt-8
           pb-10
-          bg-[#0b0b13]
           border-b
           border-amber-500/20
           select-none
           sm:hidden
         "
       >
-        {/* ROLAR — esquerda */}
-        <button
-          type="button"
-          aria-label="Rolar"
-          disabled={!controlsEnabled}
-          onPointerDown={roll}
-          onContextMenu={
-            preventReactNativeInteraction
-          }
-          onDragStart={
-            preventReactNativeInteraction
-          }
-          style={gameButtonStyle}
-          className="
-            flex
-            h-[88px]
-            w-[88px]
-            shrink-0
-            touch-none
-            select-none
-            items-center
-            justify-center
-            rounded-full
-            border
-            border-amber-500/60
-            bg-[#24180d]/95
-            text-[12px]
-            font-black
-            uppercase
-            tracking-[0.14em]
-            text-amber-400
-            shadow-[0_8px_30px_rgba(0,0,0,0.55)]
-            backdrop-blur-md
-            transition-all
-            duration-100
-            active:scale-90
-            active:border-amber-300
-            active:bg-amber-500
-            active:text-black
-            disabled:opacity-30
-            disabled:shadow-none
-            disabled:cursor-default
-          "
-        >
-          <span
+        {showTutorial && (
+          <div
             className="
-              pointer-events-none
-              select-none
+              mb-6
+              w-full
+              rounded-2xl
+              border
+              border-amber-500/25
+              bg-amber-500/[0.06]
+              px-4
+              py-3
+              text-center
             "
           >
-            Rolar
-          </span>
-        </button>
+            <div
+              className="
+                flex
+                items-center
+                justify-between
+                text-[10px]
+                font-black
+                uppercase
+                tracking-[0.12em]
+                text-amber-400
+              "
+            >
+              <span>
+                ← Rolar
+              </span>
 
-        {/* SALTAR — direita */}
-        <button
-          type="button"
-          aria-label="Saltar"
-          disabled={!controlsEnabled}
-          onPointerDown={startJump}
-          onPointerUp={endJump}
-          onPointerCancel={endJump}
-          onPointerLeave={endJump}
-          onContextMenu={
-            preventReactNativeInteraction
-          }
-          onDragStart={
-            preventReactNativeInteraction
-          }
-          style={gameButtonStyle}
+              <span>
+                Saltar →
+              </span>
+            </div>
+
+            <p
+              className="
+                mt-2
+                text-[9px]
+                font-bold
+                uppercase
+                tracking-[0.08em]
+                text-slate-500
+              "
+            >
+              Mantém SALTAR pressionado para saltar mais alto
+            </p>
+          </div>
+        )}
+
+        <div
           className="
             flex
-            h-[88px]
-            w-[88px]
-            shrink-0
-            touch-none
-            select-none
+            w-full
             items-center
-            justify-center
-            rounded-full
-            border
-            border-amber-500/60
-            bg-[#24180d]/95
-            text-[12px]
-            font-black
-            uppercase
-            tracking-[0.14em]
-            text-amber-400
-            shadow-[0_8px_30px_rgba(0,0,0,0.55)]
-            backdrop-blur-md
-            transition-all
-            duration-100
-            active:scale-90
-            active:border-amber-300
-            active:bg-amber-500
-            active:text-black
-            disabled:opacity-30
-            disabled:shadow-none
-            disabled:cursor-default
+            justify-between
           "
         >
-          <span
+          {/* ROLAR — esquerda */}
+          <button
+            type="button"
+            aria-label="Rolar"
+            disabled={
+              !controlsEnabled
+            }
+            onPointerDown={
+              roll
+            }
+            onContextMenu={
+              preventReactNativeInteraction
+            }
+            onDragStart={
+              preventReactNativeInteraction
+            }
+            style={
+              gameButtonStyle
+            }
             className="
-              pointer-events-none
+              flex
+              h-[88px]
+              w-[88px]
+              shrink-0
+              touch-none
               select-none
+              items-center
+              justify-center
+              rounded-full
+              border
+              border-amber-500/60
+              bg-[#24180d]/95
+              text-[12px]
+              font-black
+              uppercase
+              tracking-[0.14em]
+              text-amber-400
+              shadow-[0_8px_30px_rgba(0,0,0,0.55)]
+              backdrop-blur-md
+              transition-all
+              duration-100
+              active:scale-90
+              active:border-amber-300
+              active:bg-amber-500
+              active:text-black
+              disabled:opacity-30
+              disabled:shadow-none
+              disabled:cursor-default
             "
           >
-            Saltar
-          </span>
-        </button>
+            <span
+              className="
+                pointer-events-none
+                select-none
+              "
+            >
+              Rolar
+            </span>
+          </button>
+
+          {/* SALTAR — direita */}
+          <button
+            type="button"
+            aria-label="Saltar"
+            disabled={
+              !controlsEnabled
+            }
+            onPointerDown={
+              startJump
+            }
+            onPointerUp={
+              endJump
+            }
+            onPointerCancel={
+              endJump
+            }
+            onPointerLeave={
+              endJump
+            }
+            onContextMenu={
+              preventReactNativeInteraction
+            }
+            onDragStart={
+              preventReactNativeInteraction
+            }
+            style={
+              gameButtonStyle
+            }
+            className="
+              flex
+              h-[88px]
+              w-[88px]
+              shrink-0
+              touch-none
+              select-none
+              items-center
+              justify-center
+              rounded-full
+              border
+              border-amber-500/60
+              bg-[#24180d]/95
+              text-[12px]
+              font-black
+              uppercase
+              tracking-[0.14em]
+              text-amber-400
+              shadow-[0_8px_30px_rgba(0,0,0,0.55)]
+              backdrop-blur-md
+              transition-all
+              duration-100
+              active:scale-90
+              active:border-amber-300
+              active:bg-amber-500
+              active:text-black
+              disabled:opacity-30
+              disabled:shadow-none
+              disabled:cursor-default
+            "
+          >
+            <span
+              className="
+                pointer-events-none
+                select-none
+              "
+            >
+              Saltar
+            </span>
+          </button>
+        </div>
       </div>
     </section>
   );
 };
 
-export default React.memo(ReoDash);
+export default React.memo(
+  ReoDash
+);
