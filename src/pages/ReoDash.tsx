@@ -19,11 +19,38 @@ const ReoDash: React.FC = () => {
   /*
    * Enquanto o REO DASH está aberto, impede seleção,
    * long-press e arrastar elementos no documento principal.
+   *
+   * O CSS global é necessário sobretudo no iPhone,
+   * que pode ignorar o evento selectstart em alguns
+   * gestos de pressão prolongada.
    */
   useEffect(() => {
     const preventNativeInteraction = (event: Event) => {
       event.preventDefault();
     };
+
+    const globalStyle = document.createElement('style');
+    globalStyle.id = 'reo-dash-global-no-select';
+
+    globalStyle.textContent = `
+      html,
+      body,
+      #root,
+      #root * {
+        -webkit-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+      }
+
+      img,
+      svg {
+        -webkit-user-drag: none !important;
+        user-drag: none !important;
+      }
+    `;
+
+    document.head.appendChild(globalStyle);
 
     document.addEventListener(
       'selectstart',
@@ -50,6 +77,8 @@ const ReoDash: React.FC = () => {
 
       musicRef.current?.pause();
       musicRef.current = null;
+
+      globalStyle.remove();
 
       document.removeEventListener(
         'selectstart',
@@ -739,26 +768,39 @@ const ReoDash: React.FC = () => {
         allow="autoplay"
       />
 
-      {/* CONTROLOS MÓVEIS */}
+      {/*
+        CONTROLOS MÓVEIS
+
+        Agora fazem parte do fluxo normal da página:
+        ficam imediatamente abaixo do jogo e antes do footer.
+
+        Deixam portanto de estar fixed sobre outros
+        elementos da aplicação.
+      */}
       <div
+        onContextMenu={
+          preventReactNativeInteraction
+        }
+        onDragStart={
+          preventReactNativeInteraction
+        }
+        style={noSelectStyle}
         className="
-          fixed
-          left-0
-          right-0
-          z-[70]
+          relative
+          z-20
           flex
-          items-end
+          w-full
+          items-center
           justify-between
-          px-5
-          pointer-events-none
+          px-10
+          pt-8
+          pb-10
+          bg-[#0b0b13]
+          border-b
+          border-amber-500/20
           select-none
           sm:hidden
         "
-        style={{
-          ...noSelectStyle,
-          bottom:
-            'calc(env(safe-area-inset-bottom, 0px) + 18px)',
-        }}
       >
         {/* ROLAR — esquerda */}
         <button
@@ -773,10 +815,10 @@ const ReoDash: React.FC = () => {
           }
           style={gameButtonStyle}
           className="
-            pointer-events-auto
             flex
             h-[88px]
             w-[88px]
+            shrink-0
             touch-none
             select-none
             items-center
@@ -818,10 +860,10 @@ const ReoDash: React.FC = () => {
           }
           style={gameButtonStyle}
           className="
-            pointer-events-auto
             flex
             h-[88px]
             w-[88px]
+            shrink-0
             touch-none
             select-none
             items-center
