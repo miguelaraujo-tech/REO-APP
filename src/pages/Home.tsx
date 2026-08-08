@@ -15,6 +15,7 @@ const Home: React.FC = () => {
   const [isFastSpinning, setIsFastSpinning] = useState(false);
   const [glow, setGlow] = useState(false);
   const [showSpotify, setShowSpotify] = useState(false);
+  const [reoDashRecord, setReoDashRecord] = useState(0);
 
   const touchStartY = useRef<number | null>(null);
   const touchStartTime = useRef<number | null>(null);
@@ -24,7 +25,38 @@ const Home: React.FC = () => {
     const id = requestAnimationFrame(() => {
       setShowSpotify(true);
     });
+
     return () => cancelAnimationFrame(id);
+  }, []);
+
+  useEffect(() => {
+    const loadReoDashRecord = () => {
+      try {
+        const storedRecord =
+          parseInt(
+            localStorage.getItem('reoRecorde') || '0',
+            10
+          ) || 0;
+
+        setReoDashRecord(storedRecord);
+      } catch {
+        setReoDashRecord(0);
+      }
+    };
+
+    loadReoDashRecord();
+
+    window.addEventListener(
+      'focus',
+      loadReoDashRecord
+    );
+
+    return () => {
+      window.removeEventListener(
+        'focus',
+        loadReoDashRecord
+      );
+    };
   }, []);
 
   useEffect(() => {
@@ -38,40 +70,80 @@ const Home: React.FC = () => {
       didSwipe.current = false;
       return;
     }
+
     if (isFastSpinning) return;
+
     setRotation((prev) => prev + TAP_STEP);
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY;
-    touchStartTime.current = Date.now();
+  const handleTouchStart = (
+    e: React.TouchEvent
+  ) => {
+    touchStartY.current =
+      e.touches[0].clientY;
+
+    touchStartTime.current =
+      Date.now();
+
     didSwipe.current = false;
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartY.current === null || touchStartTime.current === null) return;
+  const handleTouchEnd = (
+    e: React.TouchEvent
+  ) => {
+    if (
+      touchStartY.current === null ||
+      touchStartTime.current === null
+    ) {
+      return;
+    }
 
-    const endY = e.changedTouches[0].clientY;
-    const diff = endY - touchStartY.current;
-    const duration = Date.now() - touchStartTime.current;
+    const endY =
+      e.changedTouches[0].clientY;
+
+    const diff =
+      endY - touchStartY.current;
+
+    const duration =
+      Date.now() - touchStartTime.current;
 
     touchStartY.current = null;
     touchStartTime.current = null;
 
-    if (diff > SWIPE_THRESHOLD && !isFastSpinning) {
+    if (
+      diff > SWIPE_THRESHOLD &&
+      !isFastSpinning
+    ) {
       didSwipe.current = true;
       setIsFastSpinning(true);
 
-      const velocity = diff / Math.max(duration, 1);
-      const spins = Math.min(MAX_SPINS, Math.max(MIN_SPINS, Math.round(velocity * 12)));
-      const totalDegrees = 360 * spins;
+      const velocity =
+        diff / Math.max(duration, 1);
 
-      if ('vibrate' in navigator) navigator.vibrate(15);
+      const spins = Math.min(
+        MAX_SPINS,
+        Math.max(
+          MIN_SPINS,
+          Math.round(velocity * 12)
+        )
+      );
+
+      const totalDegrees =
+        360 * spins;
+
+      if ('vibrate' in navigator) {
+        navigator.vibrate(15);
+      }
 
       setGlow(true);
-      document.body.style.overflow = 'hidden';
 
-      setRotation((prev) => prev + totalDegrees);
+      document.body.style.overflow =
+        'hidden';
+
+      setRotation(
+        (prev) =>
+          prev + totalDegrees
+      );
 
       window.setTimeout(() => {
         setTransitionOn(false);
@@ -82,7 +154,9 @@ const Home: React.FC = () => {
             setTransitionOn(true);
             setIsFastSpinning(false);
             setGlow(false);
-            document.body.style.overflow = '';
+
+            document.body.style.overflow =
+              '';
           });
         });
       }, 420);
@@ -106,8 +180,12 @@ const Home: React.FC = () => {
             onClick={handleTap}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
-            onContextMenu={(e) => e.preventDefault()}
-            style={{ transform: `rotate(${rotation}deg)` }}
+            onContextMenu={(e) =>
+              e.preventDefault()
+            }
+            style={{
+              transform: `rotate(${rotation}deg)`,
+            }}
             className={[
               'w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[450px] lg:h-[450px]',
               'mx-auto cursor-pointer select-none touch-none',
@@ -129,7 +207,9 @@ const Home: React.FC = () => {
               <div
                 className={[
                   'absolute inset-[10px] rounded-full pointer-events-none',
-                  glow ? 'ring-2 ring-amber-500/70' : 'ring-1 ring-amber-500/55',
+                  glow
+                    ? 'ring-2 ring-amber-500/70'
+                    : 'ring-1 ring-amber-500/55',
                 ].join(' ')}
               />
 
@@ -150,7 +230,11 @@ const Home: React.FC = () => {
       {/* REO DASH */}
       <Link
         to="/reo-dash"
-        aria-label="Jogar REO Dash"
+        aria-label={
+          reoDashRecord > 0
+            ? `Jogar REO Dash. Recorde pessoal: ${reoDashRecord}`
+            : 'Jogar REO Dash'
+        }
         className="group relative w-full max-w-2xl mb-12 sm:mb-20 overflow-hidden rounded-[2.25rem] border border-amber-500/40 bg-[#12121c]/80 p-5 sm:p-6 shadow-[0_0_40px_rgba(245,158,11,0.10)] transition-all duration-300 active:scale-[0.98] active:border-amber-400/70"
       >
         <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_15%_50%,rgba(245,158,11,0.18),transparent_38%)]" />
@@ -168,6 +252,15 @@ const Home: React.FC = () => {
             <h2 className="mt-2 text-2xl sm:text-3xl font-black uppercase italic tracking-tight text-white">
               REO Dash
             </h2>
+
+            {reoDashRecord > 0 && (
+              <p className="mt-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
+                Recorde pessoal{' '}
+                <span className="text-amber-400">
+                  {reoDashRecord}
+                </span>
+              </p>
+            )}
           </div>
 
           <div className="shrink-0 rounded-full bg-amber-500 px-4 py-2 text-[10px] sm:text-xs font-black uppercase tracking-[0.18em] text-black shadow-lg transition-transform duration-300 group-active:translate-x-1">
@@ -180,6 +273,7 @@ const Home: React.FC = () => {
       <div className="w-full max-w-2xl bg-[#12121c]/60 backdrop-blur-md p-4 sm:p-5 rounded-[2.5rem] shadow-2xl mb-12 sm:mb-20 border border-amber-500/25 shadow-[0_0_40px_rgba(245,158,11,0.08)]">
         <div className="flex items-center gap-3 mb-4 px-3">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.6)]" />
+
           <h2 className="font-black text-slate-400 text-[10px] uppercase tracking-[0.4em]">
             Emissão Recente
           </h2>
@@ -193,7 +287,9 @@ const Home: React.FC = () => {
               height="152"
               frameBorder="0"
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              style={{ display: 'block' }}
+              style={{
+                display: 'block',
+              }}
               loading="lazy"
             />
           )}
@@ -237,9 +333,13 @@ const Home: React.FC = () => {
                   group-active:scale-110
                 "
               >
-                {React.cloneElement(link.icon as React.ReactElement<any>, {
-                  className: 'w-7 h-7',
-                })}
+                {React.cloneElement(
+                  link.icon as React.ReactElement<any>,
+                  {
+                    className:
+                      'w-7 h-7',
+                  }
+                )}
               </div>
 
               <span
