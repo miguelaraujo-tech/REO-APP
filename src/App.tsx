@@ -8,6 +8,7 @@ import Archive from './pages/Archive';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import ReoDash from './pages/ReoDash';
+import TennisEducation from './pages/TennisEducation';
 import Logo from './Logo';
 import ScrollToTop from './ScrollToTop';
 
@@ -153,6 +154,7 @@ const App: React.FC = () => {
             <Route path="/sobre" element={<About />} />
             <Route path="/contactar" element={<Contact />} />
             <Route path="/reo-dash" element={<ReoDash />} />
+            <Route path="/tennis-education" element={<TennisEducation />} />
           </Routes>
         </main>
 
