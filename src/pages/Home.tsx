@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Gamepad2 } from 'lucide-react';
@@ -296,6 +297,69 @@ const Home: React.FC = () => {
         </div>
       </div>
 
+      {/* PARCERIA REO × TENNIS EDUCATION */}
+      <section
+        className="w-full max-w-2xl mb-12 sm:mb-20"
+        aria-labelledby="tennis-education-heading"
+      >
+        <div className="mb-4 flex items-center gap-3 px-3">
+          <div className="h-2 w-2 rounded-full bg-amber-500" />
+          <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">
+            Projetos e Parcerias
+          </h2>
+        </div>
+
+        <div className="relative overflow-hidden rounded-[2.25rem] border border-amber-500/30 bg-[#12121c]/80 p-5 shadow-[0_0_40px_rgba(245,158,11,0.08)] sm:p-6">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_20%,rgba(34,197,94,0.12),transparent_50%)]" />
+
+          <div className="relative">
+            <div className="mb-4 flex items-center gap-3 sm:gap-4">
+              <Logo className="h-16 w-16 shrink-0 rounded-full sm:h-20 sm:w-20" />
+              <span className="text-xl font-black text-amber-500" aria-hidden="true">
+                ×
+              </span>
+              <img
+                src="/tennis-education.png"
+                alt="Logótipo do Tennis Education"
+                className="h-16 w-16 shrink-0 rounded-full bg-white object-contain p-1 sm:h-20 sm:w-20"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+
+            <span className="inline-flex rounded-full border border-green-500/25 bg-green-500/10 px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-green-400">
+              Parceria educativa
+            </span>
+
+            <h3
+              id="tennis-education-heading"
+              className="mt-3 text-xl font-black uppercase tracking-tight text-white sm:text-2xl"
+            >
+              REO × Tennis Education
+            </h3>
+
+            <p className="mt-1 text-sm font-black uppercase tracking-[0.12em] text-amber-400 sm:text-base">
+              Desafio da Reciclagem
+            </p>
+
+            <p className="mt-3 text-sm leading-relaxed text-slate-300">
+              Ajuda a Bolacha da REO a colocar os resíduos nas eco-bags
+              certas e torna-te um ÁS da Reciclagem!
+            </p>
+
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <span className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-amber-400">
+                <Gamepad2 className="h-4 w-4" aria-hidden="true" />
+                Jogo em preparação
+              </span>
+              <span className="text-xs font-bold text-slate-400">
+                Objetivo: 1000 pontos
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* NAV GRID */}
       <div className="w-full max-w-2xl px-2 pb-20 border border-amber-500/20 rounded-[2.5rem] shadow-[0_0_50px_rgba(245,158,11,0.05)] p-4 sm:p-6">
         <div className="grid grid-cols-2 gap-4 sm:gap-6">
@@ -363,3 +427,4 @@ const Home: React.FC = () => {
 };
 
 export default React.memo(Home);
+
