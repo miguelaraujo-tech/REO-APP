@@ -348,10 +348,13 @@ const Home: React.FC = () => {
             </p>
 
             <div className="mt-5 flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-amber-400">
+              <Link
+                to="/tennis-education"
+                className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-5 py-3 text-xs font-black uppercase tracking-[0.12em] text-black transition-colors active:bg-amber-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400"
+              >
                 <Gamepad2 className="h-4 w-4" aria-hidden="true" />
-                Jogo em preparação
-              </span>
+                Jogar agora →
+              </Link>
               <span className="text-xs font-bold text-slate-400">
                 Objetivo: 1000 pontos
               </span>
@@ -427,4 +430,3 @@ const Home: React.FC = () => {
 };
 
 export default React.memo(Home);
-
