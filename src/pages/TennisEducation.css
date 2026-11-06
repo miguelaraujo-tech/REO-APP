@@ -1,0 +1,121 @@
+
+/* Estilos isolados do Desafio da Reciclagem. Não alteram o REO DASH nem a Home. */
+.reo-tennis-page { width: 100%; max-width: 920px; margin: 0 auto; color: #f8fafc; }
+.reo-tennis-page button { cursor: pointer; font: inherit; }
+.reo-tennis-page button:disabled { cursor: default; }
+.reo-tennis-back { display: inline-flex; align-items: center; gap: 7px; color: #cbd5e1; font-size: 12px; font-weight: 800; margin: 0 0 16px; text-decoration: none; }
+.reo-tennis-back:hover { color: #fbbf24; }
+.reo-tennis-title { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 17px; }
+.reo-tennis-partners { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px; }
+.reo-tennis-partners > span { font-size: 26px; color: #fbbf24; font-weight: 900; }
+.reo-tennis-partner-logo { width: 53px; height: 53px; border-radius: 50%; object-fit: contain; }
+.reo-tennis-title p { font-size: 10px; color: #fbbf24; letter-spacing: .18em; text-transform: uppercase; font-weight: 900; }
+.reo-tennis-title h1 { margin: 4px 0; color: white; font-size: clamp(23px, 4vw, 36px); font-weight: 900; line-height: 1.2; text-transform: uppercase; }
+.reo-tennis-title > span { color: #a7b1c4; font-size: 13px; }
+.reo-tennis-hud { background: #171923; border: 1px solid #353749; border-radius: 20px 20px 0 0; padding: 13px; display: flex; align-items: center; gap: 12px; position: relative; z-index: 2; }
+.reo-tennis-stat { display: flex; flex-direction: column; min-width: 76px; padding: 5px 9px; }
+.reo-tennis-stat span, .reo-tennis-progress-row { color: #cbd5e1; font-weight: 800; text-transform: uppercase; font-size: 10px; letter-spacing: .04em; }
+.reo-tennis-stat strong { font-size: clamp(19px, 3vw, 28px); line-height: 1.2; font-weight: 900; color: #fbbf24; font-variant-numeric: tabular-nums; }
+.reo-tennis-progress { min-width: 0; flex: 1; }
+.reo-tennis-progress-row { display: flex; justify-content: space-between; gap: 5px; margin-bottom: 7px; }
+.reo-tennis-progress-row strong { color: #fbbf24; }
+.reo-tennis-progress-track { height: 11px; overflow: hidden; border-radius: 99px; background: #414555; }
+.reo-tennis-progress-track > div { height: 100%; border-radius: 99px; background: linear-gradient(90deg,#3ed766,#e0b329); transition: width .2s ease-out; }
+.reo-tennis-pause { border: 2px solid #fff; background: #f5ae14; color: #171717; border-radius: 100%; flex: 0 0 43px; width: 43px; height: 43px; display: grid; place-items: center; box-shadow: 0 2px 8px #0003; }
+.reo-tennis-pause:disabled { opacity: .4; }
+.reo-tennis-court { position: relative; min-height: 500px; height: clamp(500px, 58vw, 570px); background: linear-gradient(#75c4f5 0%,#bbecff 53%,#d4c4ab 53%,#e7d6bc 100%); border: 1px solid #353749; border-top: 0; overflow: hidden; isolation: isolate; border-radius: 0 0 20px 20px; }
+.reo-tennis-sky { position: absolute; inset: 0 0 40%; background: radial-gradient(ellipse at 76% 14%,#fff 0 4%,transparent 4.3%),radial-gradient(ellipse at 81% 15%,#fff 0 5%,transparent 5.3%),radial-gradient(ellipse at 25% 15%,#f9fcff 0 7%,transparent 7.3%),linear-gradient(#69baf1,#c5eaff); z-index: -4; }
+.reo-tennis-school { position: absolute; left: 0; right: 0; height: 38%; top: 23%; z-index: -3; background: repeating-linear-gradient(90deg,transparent 0 28px,#d6b79d 28px 34px,transparent 34px 84px),repeating-linear-gradient(0deg,#719db4 0 45px,#c5ab8d 45px 56px); border-top: 17px solid #b99173; border-bottom: 20px solid #c7a68c; box-shadow: 0 12px 15px #505b4840; opacity: .65; }
+.reo-tennis-ground { position: absolute; inset: 60% 0 0; z-index: -2; background: repeating-linear-gradient(8deg,transparent 0 65px,#a7a39066 66px 67px),repeating-linear-gradient(91deg,transparent 0 70px,#a7a39055 72px 73px),linear-gradient(#eddfca,#e3d0b5); }
+.reo-tennis-tree { position: absolute; font-size: clamp(70px,12vw,140px); top: 11%; filter: drop-shadow(0 6px 7px #0003); z-index: -1; pointer-events: none; }
+.reo-tennis-tree.tree-left { left: -5%; }
+.reo-tennis-tree.tree-right { right: -5%; }
+.reo-tennis-mascot { position: absolute; width: clamp(100px, 22%, 174px); aspect-ratio: 1; left: 3%; top: 38%; transform: rotate(-7deg); z-index: 2; pointer-events: none; }
+.reo-tennis-cookie { width: 100%; height: 100%; position: absolute; inset: 0; border-radius: 50%; filter: drop-shadow(0 7px 4px #0004); }
+.reo-tennis-mascot-arm, .reo-tennis-mascot-leg { position: absolute; background: #1c1c1c; border-radius: 20px; border: 2px solid #171717; }
+.reo-tennis-mascot-arm { top: 39%; width: 33%; height: 12%; }
+.reo-tennis-mascot-arm.left-arm { left: -21%; transform: rotate(45deg); }
+.reo-tennis-mascot-arm.right-arm { right: -19%; transform: rotate(-40deg); }
+.reo-tennis-mascot-arm::after { content: ''; position: absolute; right: -10px; width: 18px; height: 19px; background: #fff; border: 2px solid #1c1c1c; border-radius: 50%; }
+.reo-tennis-mascot-leg { width: 11%; height: 33%; bottom: -23%; }
+.reo-tennis-mascot-leg.left-leg { left: 20%; transform: rotate(25deg); }
+.reo-tennis-mascot-leg.right-leg { right: 23%; transform: rotate(-25deg); }
+.reo-tennis-mascot-leg::after { content: ''; position: absolute; bottom: -4px; left: -18px; width: 38px; height: 18px; background: #fff; border: 2px solid #1c1c1c; border-radius: 10px; }
+.reo-tennis-racket { position: absolute; width: 47%; height: 110%; left: 92%; top: -79%; transform-origin: 10% 95%; transform: rotate(10deg); filter: drop-shadow(1px 3px 3px #0003); }
+.reo-tennis-racket svg { width: 100%; height: 100%; }
+.reo-tennis-mascot.is-serving .reo-tennis-racket { animation: reo-tennis-swing .42s ease-in-out; }
+@keyframes reo-tennis-swing { 0%{transform: rotate(-35deg)} 48%{transform: rotate(58deg)} 100%{transform:rotate(10deg)} }
+.reo-tennis-item { position: absolute; left: 52%; top: 29%; transform: translate(-50%,-50%); display: flex; flex-direction: column; align-items: center; min-width: min(47%,220px); max-width: 50%; background: #ffffffed; color: #142034; border: 3px solid #fff; border-radius: 20px; box-shadow: 0 8px 25px #152c4670; padding: 11px 13px; text-align: center; z-index: 3; }
+.reo-tennis-item-symbol { font-size: clamp(37px, 6vw, 64px); line-height: 1.2; }
+.reo-tennis-item strong { font-size: clamp(11px, 1.65vw, 16px); line-height: 1.3; }
+.reo-tennis-item small { font-size: clamp(9px,1.2vw,12px); color: #606b79; margin-top: 4px; }
+.reo-tennis-item.is-hidden { opacity: .15; }
+.reo-tennis-shot { position: absolute; z-index: 5; pointer-events: none; width: 0; height: 0; }
+.reo-tennis-shot-symbol { display: block; position: absolute; left: 0; top: 0; font-size: clamp(39px,5vw,65px); line-height: 1; transform: translate(-50%,-50%); animation: reo-tennis-fly 720ms ease-in forwards; filter: drop-shadow(2px 3px 2px #0003); }
+@keyframes reo-tennis-fly { 0% { transform: translate(-50%,-50%) scale(1) rotate(0deg); } 48% { transform: translate(calc(-50% + var(--mid-x)),calc(-50% + var(--mid-y))) scale(.85) rotate(165deg); } 100% { transform: translate(calc(-50% + var(--end-x)),calc(-50% + var(--end-y))) scale(.3) rotate(330deg); opacity: .15; } }
+.reo-tennis-bins { position: absolute; bottom: 18px; left: 3%; right: 3%; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); align-items: end; gap: clamp(6px,1.5vw,17px); z-index: 4; }
+.reo-tennis-bin { --bin-bg: #2989e4; min-width: 0; height: clamp(128px,20vw,181px); position: relative; padding: 0; border: 0; color: white; background: transparent; transition: transform .15s; }
+.reo-tennis-bin:hover:not(:disabled), .reo-tennis-bin:focus-visible { transform: translateY(-5px); outline: none; }
+.reo-tennis-bin:focus-visible .reo-tennis-bin-body { box-shadow: 0 0 0 4px #fff,0 0 0 8px #1c273a; }
+.reo-tennis-bin.bin-azul { --bin-bg: #2475d9; }
+.reo-tennis-bin.bin-amarelo { --bin-bg: #e9ac0c; }
+.reo-tennis-bin.bin-verde { --bin-bg: #15944d; }
+.reo-tennis-bin.bin-preto { --bin-bg: #70777e; }
+.reo-tennis-bin-body { position: absolute; inset: 15px 0 0; border: 2px solid #ffffff66; background: repeating-linear-gradient(92deg,transparent 0 5px,#ffffff09 6px 7px),linear-gradient(135deg,#ffffff36,transparent 45%),var(--bin-bg); box-shadow: inset -8px -6px 10px #0003,0 8px 12px #0003; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 10px 3px 12px; border-radius: 5px 5px 9px 9px; }
+.reo-tennis-bin:not(.bin-preto) .reo-tennis-bin-body::before, .reo-tennis-bin:not(.bin-preto) .reo-tennis-bin-body::after { content:''; position: absolute; width: 18%; height: 27px; top: -23px; border: 6px solid var(--bin-bg); border-bottom: 0; border-radius: 17px 17px 0 0; z-index: -1; }
+.reo-tennis-bin:not(.bin-preto) .reo-tennis-bin-body::before { left: 21%; }
+.reo-tennis-bin:not(.bin-preto) .reo-tennis-bin-body::after { right: 21%; }
+.reo-tennis-bin.bin-preto .reo-tennis-bin-body { border: 3px solid #45484d; border-top: 10px solid #151515; border-radius: 7px 7px 12px 12px; background: linear-gradient(110deg,#999da0,#777a7d 68%,#575c61); }
+.reo-tennis-bin.bin-preto .reo-tennis-bin-body::before { content:''; position:absolute; left:-3%; right:-3%; height:17px; top:-17px; border-radius:5px; background:linear-gradient(#202022,#09090b); border: 2px solid #515154; }
+.reo-tennis-bin-icon { font-size: clamp(28px,5vw,49px); color:white; line-height:1; text-shadow: 0 2px 3px #0003; }
+.reo-tennis-bin-label { font-size: clamp(9px,1.35vw,15px); text-align: center; font-weight: 900; line-height: 1.2; text-transform: uppercase; overflow-wrap: anywhere; }
+.reo-tennis-bin-key { position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); display: grid; place-items: center; font-size: 11px; font-weight: 900; width: 25px; height: 25px; border: 2px solid #f4f7fb; border-radius: 50%; background: #152433; color:#fff; }
+.reo-tennis-bin.is-correct .reo-tennis-bin-body { box-shadow: 0 0 0 5px #63e582,0 0 35px #43f167; }
+.reo-tennis-bin.is-wrong .reo-tennis-bin-body { box-shadow: 0 0 0 5px #ff5858,0 0 35px #f43f5e; }
+.reo-tennis-feedback { position: absolute; z-index: 9; top: 5%; left: 50%; transform: translateX(-50%); padding: 9px 17px; border: 2px solid #fff8; border-radius: 15px; box-shadow: 0 8px 22px #0005; display: flex; align-items: center; gap: 10px; text-align: center; min-width: 220px; max-width: 90%; }
+.reo-tennis-feedback.good { background: #138a43f0; }
+.reo-tennis-feedback.bad { background: #c9292cf0; }
+.reo-tennis-feedback strong { font-size: 28px; font-weight: 900; }
+.reo-tennis-feedback span { font-size: 12px; font-weight: 700; }
+.reo-tennis-overlay { position: absolute; inset: 0; z-index: 15; background: #091b2cba; display: grid; place-items: center; padding: 18px; backdrop-filter: blur(4px); }
+.reo-tennis-modal { width: min(100%,420px); max-height: 100%; overflow-y: auto; padding: clamp(16px,3vw,28px); border: 1px solid #fbbf2480; border-radius: 23px; color: #fff; background: #121a29f5; box-shadow: 0 20px 50px #0008; text-align: center; }
+.reo-tennis-modal-icon { color: #fbbf24; margin: 0 auto 12px; }
+.reo-tennis-modal h2 { margin: 0 0 11px; font-size: clamp(22px,3vw,28px); font-weight: 900; line-height: 1.15; }
+.reo-tennis-modal p { font-size: 13px; line-height: 1.5; color: #e2e8f0; margin: 0 0 12px; }
+.reo-tennis-scoring { display: grid; gap: 6px; text-align: left; background:#ffffff10; border-radius: 12px; padding: 11px 13px; margin: 15px 0; }
+.reo-tennis-scoring span { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; }
+.reo-tennis-scoring b { color: #fbbf24; }
+.reo-tennis-modal .reo-tennis-fineprint { font-size: 11px; color: #a7b1c4; }
+.reo-tennis-primary { display: inline-flex; align-items: center; justify-content: center; gap: 9px; border: 0; border-radius: 99px; background: #fbbf24; color: #171717; font-size: 13px; font-weight: 900; padding: 13px 19px; margin-top: 6px; min-height: 45px; }
+.reo-tennis-primary:hover { background: #fcd34d; }
+.reo-tennis-primary:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.reo-tennis-modal.is-win { border-color: #4ade80; background: #102b20f5; }
+.reo-tennis-modal.is-win .reo-tennis-primary { background: #4ade80; }
+.reo-tennis-modal.is-loss { border-color: #fb7185; background: #2c101af5; }
+.reo-tennis-modal.is-loss .reo-tennis-primary { background: #fb7185; }
+.reo-tennis-confetti { display:block; margin:0 auto 10px; font-size: 23px; animation: reo-tennis-celebrate 1.5s ease-in-out infinite alternate; }
+@keyframes reo-tennis-celebrate { from {transform: translateY(0) scale(1)} to {transform: translateY(-6px) scale(1.09)} }
+.reo-tennis-sad { display: block; font-size: 46px; margin-bottom: 9px; }
+.reo-tennis-controls { margin: 14px auto 6px; text-align: center; color: #d9e0e9; font-size: 12px; line-height: 1.8; }
+.reo-tennis-tip { text-align: center; color: #94a3b8; font-size: 11px; margin-bottom: 22px; line-height: 1.5; }
+@media (max-width: 580px) {
+  .reo-tennis-hud { padding: 8px; gap: 5px; }
+  .reo-tennis-stat { min-width: 55px; padding: 3px 4px; }
+  .reo-tennis-stat span,.reo-tennis-progress-row { font-size: 8px; }
+  .reo-tennis-progress-row { flex-direction: column; gap: 2px; }
+  .reo-tennis-pause { width: 37px; height: 37px; flex-basis: 37px; }
+  .reo-tennis-court { height: 510px; min-height: 510px; }
+  .reo-tennis-item { left: 59%; top: 29%; max-width: 55%; min-width: 49%; padding: 8px 6px; }
+  .reo-tennis-mascot { left: 8%; top: 44%; width: 31%; }
+  .reo-tennis-bins { gap: 6px; bottom: 23px; left: 2%; right: 2%; }
+  .reo-tennis-bin { height: 129px; }
+  .reo-tennis-bin-body { inset: 18px 0 0; }
+  .reo-tennis-bin-icon { font-size: 30px; }
+  .reo-tennis-bin-label { font-size: 9px; }
+  .reo-tennis-bin:not(.bin-preto) .reo-tennis-bin-body::before,
+  .reo-tennis-bin:not(.bin-preto) .reo-tennis-bin-body::after { height: 23px; top: -20px; border-width: 5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reo-tennis-racket, .reo-tennis-shot-symbol, .reo-tennis-confetti { animation-duration: .01ms !important; }
+  .reo-tennis-bin { transition: none; }
+}
