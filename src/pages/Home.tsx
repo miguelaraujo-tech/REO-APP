@@ -339,12 +339,12 @@ const Home: React.FC = () => {
             </h3>
 
             <p className="mt-1 text-sm font-black uppercase tracking-[0.12em] text-amber-400 sm:text-base">
-              Desafio da Reciclagem
+              Um set para o planeta
             </p>
 
             <p className="mt-3 text-sm leading-relaxed text-slate-300">
-              Ajuda a Bolacha da REO a colocar os resíduos nas eco-bags
-              certas e torna-te um ÁS da Reciclagem!
+              Uma atividade da REO em parceria com o Projeto Tennis Education.
+              Aprende a utilizar as ECOBAGS da escola para reciclar!
             </p>
 
             <div className="mt-5 flex flex-wrap items-center gap-3">
