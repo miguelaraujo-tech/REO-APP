@@ -51,7 +51,7 @@
 .reo-tennis-item small { font-size: clamp(9px,1.2vw,12px); color: #606b79; margin-top: 4px; }
 .reo-tennis-item.is-hidden { opacity: .15; }
 .reo-tennis-shot { position: absolute; z-index: 5; pointer-events: none; width: 0; height: 0; }
-.reo-tennis-shot-symbol { display: block; position: absolute; left: 0; top: 0; font-size: clamp(39px,5vw,65px); line-height: 1; transform: translate(-50%,-50%); animation: reo-tennis-fly 720ms ease-in forwards; filter: drop-shadow(2px 3px 2px #0003); }
+.reo-tennis-shot-symbol { display: block; position: absolute; left: 0; top: 0; font-size: clamp(39px,5vw,65px); line-height: 1; transform: translate(-50%,-50%); animation: reo-tennis-fly 430ms ease-in forwards; filter: drop-shadow(2px 3px 2px #0003); }
 @keyframes reo-tennis-fly { 0% { transform: translate(-50%,-50%) scale(1) rotate(0deg); } 48% { transform: translate(calc(-50% + var(--mid-x)),calc(-50% + var(--mid-y))) scale(.85) rotate(165deg); } 100% { transform: translate(calc(-50% + var(--end-x)),calc(-50% + var(--end-y))) scale(.3) rotate(330deg); opacity: .15; } }
 .reo-tennis-bins { position: absolute; bottom: 18px; left: 3%; right: 3%; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); align-items: end; gap: clamp(6px,1.5vw,17px); z-index: 4; }
 .reo-tennis-bin { --bin-bg: #2989e4; min-width: 0; height: clamp(128px,20vw,181px); position: relative; padding: 0; border: 0; color: white; background: transparent; transition: transform .15s; }
