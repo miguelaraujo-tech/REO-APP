@@ -1,9 +1,15 @@
-
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ArrowLeft, Gamepad2, Pause, Play, RotateCcw, Trophy,
-  Volume2, VolumeX, Star,
+  ArrowLeft,
+  Gamepad2,
+  Pause,
+  Play,
+  RotateCcw,
+  Trophy,
+  Volume2,
+  VolumeX,
+  Star,
 } from 'lucide-react';
 import Logo from '../Logo';
 import './TennisEducation.css';
@@ -13,7 +19,16 @@ import './TennisEducationFlight.css';
 
 type BinId = 'azul' | 'amarelo' | 'verde' | 'preto';
 type GamePhase = 'intro' | 'playing' | 'paused' | 'won' | 'lost' | 'timeup';
-type ArtKind = 'normal' | 'bolachas' | 'batatas' | 'sumo' | 'garrafa' | 'lata' | 'vidro' | 'iogurte' | 'lenco';
+type ArtKind =
+  | 'normal'
+  | 'bolachas'
+  | 'batatas'
+  | 'sumo'
+  | 'garrafa'
+  | 'lata'
+  | 'vidro'
+  | 'iogurte'
+  | 'lenco';
 
 type Waste = {
   name: string;
@@ -130,19 +145,79 @@ function WastePicture({ waste }: { waste: Waste }) {
   }
 
   if (waste.art === 'lata') {
-    return <span className="reo-tennis-can" aria-hidden="true"><span>REFRI</span><span>🥤</span></span>;
+    return (
+      <span className="reo-tennis-can" aria-hidden="true">
+        <span>REFRI</span>
+        <span>🥤</span>
+      </span>
+    );
   }
 
   if (waste.art === 'iogurte') {
-    return <span className="reo-tennis-yogurt" aria-hidden="true"><span>IOGURTE</span><span>🥄</span></span>;
+    return (
+      <span className="reo-tennis-yogurt" aria-hidden="true">
+        <span>IOGURTE</span>
+        <span>🥄</span>
+      </span>
+    );
   }
 
   if (waste.art === 'vidro') {
-    return <span className="reo-tennis-glass-bottle" aria-hidden="true"><span>♻</span></span>;
+    return (
+      <svg
+        className="reo-tennis-glass-bottle-art"
+        viewBox="0 0 68 132"
+        role="img"
+        aria-label="Garrafa de vidro"
+      >
+        <defs>
+          <linearGradient id="reoGlassMain" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#58c17f" />
+            <stop offset="52%" stopColor="#1f8f56" />
+            <stop offset="100%" stopColor="#146641" />
+          </linearGradient>
+          <linearGradient id="reoGlassGlow" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#dfffe9" stopOpacity="0.95" />
+            <stop offset="100%" stopColor="#dfffe9" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+
+        <rect x="26" y="4" width="16" height="14" rx="3" fill="#1a5d3f" />
+        <rect x="24" y="16" width="20" height="14" rx="4" fill="url(#reoGlassMain)" stroke="#0b5533" strokeWidth="2.2" />
+        <path
+          d="M24 30h20v13c0 5 10 11 10 28v32c0 14-9 23-20 23s-20-9-20-23V71c0-17 10-23 10-28z"
+          fill="url(#reoGlassMain)"
+          stroke="#0b5533"
+          strokeWidth="3"
+        />
+        <ellipse cx="34" cy="95" rx="16" ry="23" fill="#1b7448" opacity="0.38" />
+        <path
+          d="M24 58c0-8 5-15 10-15s10 7 10 15"
+          fill="none"
+          stroke="#2ea568"
+          strokeWidth="3"
+          opacity="0.6"
+        />
+        <path
+          d="M22 36c-5 9-6 25-6 40 0 20 7 40 18 47"
+          fill="none"
+          stroke="url(#reoGlassGlow)"
+          strokeWidth="6"
+          strokeLinecap="round"
+          opacity="0.85"
+        />
+        <rect x="19" y="69" width="30" height="18" rx="5" fill="#f5f3e8" stroke="#d9d3ba" strokeWidth="2" />
+        <text x="34" y="81" textAnchor="middle" fontSize="9" fontWeight="900" fill="#1e5c3a">VIDRO</text>
+      </svg>
+    );
   }
 
   if (waste.art === 'lenco') {
-    return <span className="reo-tennis-tissue" aria-hidden="true">{waste.name.includes('Guardanapo') ? '✘' : '◌'}</span>;
+    return (
+      <span className="reo-tennis-tissue" aria-hidden="true">
+        {waste.name.includes('Guardanapo') ? '✘' : '◌'}
+      </span>
+    );
   }
 
   if (waste.art === 'garrafa') {
@@ -176,6 +251,7 @@ const TennisEducation: React.FC = () => {
   const [record, setRecord] = useState(START_SCORE);
   const [soundOn, setSoundOn] = useState(false);
   const [waste, setWaste] = useState<Waste>(WASTE[0]);
+  const [incomingToken, setIncomingToken] = useState(0);
   const [shot, setShot] = useState<Shot | null>(null);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [lastMistake, setLastMistake] = useState<string | null>(null);
@@ -194,9 +270,9 @@ const TennisEducation: React.FC = () => {
   const impactCounterRef = useRef(0);
   const audioRef = useRef<AudioContext | null>(null);
 
-  // A faixa institucional fica mais baixa apenas nesta página.
   useEffect(() => {
     document.documentElement.classList.add('reo-tennis-compact-header');
+
     return () => {
       document.documentElement.classList.remove('reo-tennis-compact-header');
     };
@@ -251,7 +327,7 @@ const TennisEducation: React.FC = () => {
         oscillator.stop(start + 0.13);
       });
     } catch {
-      // Áudio opcional: não pode impedir o jogo.
+      // O áudio é opcional e não pode impedir o jogo.
     }
   }, [soundOn]);
 
@@ -272,6 +348,7 @@ const TennisEducation: React.FC = () => {
     };
 
     const interval = window.setInterval(updateTimer, 100);
+
     return () => {
       window.clearInterval(interval);
       remainingMsRef.current = Math.max(0, deadline - Date.now());
@@ -299,6 +376,11 @@ const TennisEducation: React.FC = () => {
     return wasteQueueRef.current.pop() ?? WASTE[0];
   }, []);
 
+  const showWaste = useCallback((nextWaste: Waste) => {
+    setWaste(nextWaste);
+    setIncomingToken((current) => current + 1);
+  }, []);
+
   const startGame = useCallback(() => {
     if (shotTimerRef.current !== null) clearTimeout(shotTimerRef.current);
     if (feedbackTimerRef.current !== null) clearTimeout(feedbackTimerRef.current);
@@ -307,7 +389,7 @@ const TennisEducation: React.FC = () => {
     busyRef.current = false;
     wasteQueueRef.current = shuffleWaste();
 
-    setWaste(getNextWaste());
+    showWaste(getNextWaste());
     setScore(START_SCORE);
     remainingMsRef.current = GAME_DURATION_MS;
     deadlineRef.current = null;
@@ -320,7 +402,7 @@ const TennisEducation: React.FC = () => {
     setShot(null);
     setFeedback(null);
     setPhase('playing');
-  }, [getNextWaste]);
+  }, [getNextWaste, showWaste]);
 
   const chooseBin = useCallback((chosen: BinId) => {
     if (
@@ -383,7 +465,7 @@ const TennisEducation: React.FC = () => {
 
       if (impactTimerRef.current !== null) clearTimeout(impactTimerRef.current);
       impactTimerRef.current = setTimeout(() => {
-        setImpact((current) => current?.id === impactId ? null : current);
+        setImpact((current) => (current?.id === impactId ? null : current));
         impactTimerRef.current = null;
       }, 760);
 
@@ -433,12 +515,12 @@ const TennisEducation: React.FC = () => {
       } else if (deadlineRef.current !== null && Date.now() >= deadlineRef.current) {
         setPhase('timeup');
       } else {
-        setWaste(getNextWaste());
+        showWaste(getNextWaste());
       }
 
       busyRef.current = false;
     }, SHOT_DURATION);
-  }, [phase, score, errors, streak, waste, getNextWaste, playTone]);
+  }, [phase, score, errors, streak, waste, getNextWaste, playTone, showWaste]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -472,6 +554,7 @@ const TennisEducation: React.FC = () => {
     100,
     Math.max(0, ((score - START_SCORE) / (WIN_SCORE - START_SCORE)) * 100)
   );
+
   const result = gradeFor(score);
 
   return (
@@ -493,6 +576,7 @@ const TennisEducation: React.FC = () => {
             alt="Logótipo do Projeto Tennis Education"
           />
         </div>
+
         <h1>Um set para o planeta <span aria-hidden="true">🎾♻️</span></h1>
         <p>Uma atividade da REO em parceria com o Projeto Tennis Education</p>
         <span>Aprende a utilizar as ECOBAGS para reciclar na escola!</span>
@@ -557,9 +641,7 @@ const TennisEducation: React.FC = () => {
             key={reward.points}
             className={`reo-tennis-reward ${score >= reward.points ? 'is-earned' : ''}`}
           >
-            <span aria-hidden="true">
-              {reward.stars === 3 ? '🏆' : '⭐'.repeat(reward.stars)}
-            </span>
+            <span aria-hidden="true">{reward.stars === 3 ? '🏆' : '⭐'.repeat(reward.stars)}</span>
             <strong>{reward.points} pts</strong>
             <small>{reward.name}</small>
           </div>
@@ -642,8 +724,9 @@ const TennisEducation: React.FC = () => {
           <span className="reo-tennis-mascot-shine">✦</span>
 
           {impact && phase === 'playing' && (
-            <React.Fragment key={impact.id}>
+            <>
               <span
+                key={impact.id}
                 className={`reo-tennis-mascot-speech ${
                   impact.correct ? 'speech-good' : 'speech-bad'
                 }`}
@@ -657,12 +740,12 @@ const TennisEducation: React.FC = () => {
               <span className="reo-tennis-reaction-emoji">
                 {impact.correct ? '🎉' : '😮'}
               </span>
-            </React.Fragment>
+            </>
           )}
         </div>
 
         <div
-          key={waste.name}
+          key={`card-${incomingToken}`}
           className="reo-tennis-item"
           aria-live="polite"
         >
@@ -670,9 +753,8 @@ const TennisEducation: React.FC = () => {
           <small>Onde colocas este resíduo?</small>
         </div>
 
-        {/* O resíduo entra a voar da direita até junto da raquete. */}
         <div
-          key={`voar-${waste.name}`}
+          key={`incoming-${incomingToken}`}
           ref={wasteRef}
           className={`reo-tennis-incoming ${shot ? 'is-hidden' : ''}`}
           aria-hidden="true"
@@ -776,14 +858,21 @@ const TennisEducation: React.FC = () => {
                 <h2 id="reo-tennis-intro-title">Um set para o planeta!</h2>
                 <p>
                   A REO e o Projeto Tennis Education precisam de ti!
-                  Escolhe a ECOBAG certa e a Bolacha da REO dá uma raquetada.
+                  O resíduo voa em direção à Bolacha da REO — clica na ECOBAG certa
+                  e ela dá a raquetada.
                 </p>
                 <div className="reo-tennis-guide">
                   {BINS.map((bin) => (
                     <div key={bin.id} className={`reo-tennis-guide-item guide-${bin.id}`}>
                       <b>
                         {bin.id === 'preto' ? 'Caixote' : 'ECOBAG'}{' '}
-                        {bin.id === 'preto' ? 'cinzento' : bin.id === 'amarelo' ? 'amarela' : bin.id === 'verde' ? 'verde' : 'azul'}
+                        {bin.id === 'preto'
+                          ? 'cinzento'
+                          : bin.id === 'amarelo'
+                            ? 'amarela'
+                            : bin.id === 'verde'
+                              ? 'verde'
+                              : 'azul'}
                       </b>
                       <span>{bin.hint}</span>
                     </div>
@@ -844,7 +933,9 @@ const TennisEducation: React.FC = () => {
                 </span>
                 <Trophy size={46} className="reo-tennis-modal-icon" aria-hidden="true" />
                 <h2 id="reo-tennis-won-title">
-                  Parabéns!<br />Super ÁS da Reciclagem!
+                  Parabéns!
+                  <br />
+                  Super ÁS da Reciclagem!
                 </h2>
                 <p>
                   Chegaste aos 200 pontos! A REO e o Projeto Tennis Education
