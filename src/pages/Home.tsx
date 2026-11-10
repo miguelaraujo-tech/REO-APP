@@ -356,7 +356,7 @@ const Home: React.FC = () => {
                 Jogar agora →
               </Link>
               <span className="text-xs font-bold text-slate-400">
-                Objetivo: 1000 pontos
+                Objetivo: 200 pontos
               </span>
             </div>
           </div>
