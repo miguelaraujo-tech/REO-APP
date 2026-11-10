@@ -1,17 +1,24 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Gamepad2, Pause, Play, RotateCcw, Trophy } from 'lucide-react';
+import {
+  ArrowLeft, Gamepad2, Pause, Play, RotateCcw, Trophy,
+  Volume2, VolumeX, Star,
+} from 'lucide-react';
 import Logo from '../Logo';
 import './TennisEducation.css';
+import './TennisEducationKids.css';
 
 type BinId = 'azul' | 'amarelo' | 'verde' | 'preto';
 type GamePhase = 'intro' | 'playing' | 'paused' | 'won' | 'lost' | 'timeup';
+type ArtKind = 'normal' | 'bolachas' | 'batatas' | 'sumo' | 'garrafa' | 'lata' | 'vidro' | 'iogurte' | 'lenco';
 
 type Waste = {
   name: string;
   symbol: string;
   bin: BinId;
+  reason: string;
+  art?: ArtKind;
 };
 
 type Shot = {
@@ -21,60 +28,125 @@ type Shot = {
   middleY: number;
   endX: number;
   endY: number;
-  symbol: string;
+  waste: Waste;
   bin: BinId;
   correct: boolean;
 };
 
+type Feedback = {
+  points: number;
+  message: string;
+  detail: string;
+  correct: boolean;
+  achievement?: 100 | 130;
+};
+
 const START_SCORE = 60;
-const MAX_ERRORS = 1; // O segundo erro termina o jogo.
 const WIN_SCORE = 200;
 const GAME_DURATION_MS = 30_000;
 const SHOT_DURATION = 430;
+const MAX_ERRORS = 1; // A segunda resposta errada termina a partida.
+const RECORD_KEY = 'reoTennisRecorde';
 
-// Separação adaptada à realidade da escola: restos alimentares vão para o indiferenciado.
+const BINS: { id: BinId; label: string; short: string; hint: string; key: string }[] = [
+  { id: 'azul', label: 'Papel e cartão', short: 'ECOBAG azul', hint: 'Papel e cartão limpos', key: '1' },
+  { id: 'amarelo', label: 'Plástico e metal', short: 'ECOBAG amarela', hint: 'Embalagens e pacotes de bebidas', key: '2' },
+  { id: 'verde', label: 'Vidro', short: 'ECOBAG verde', hint: 'Garrafas e frascos de vidro', key: '3' },
+  { id: 'preto', label: 'Indiferenciado', short: 'Caixote cinzento', hint: 'Restos de comida e papel sujo', key: '4' },
+];
+
+// Resíduos do quotidiano escolar. Os restos alimentares vão para o indiferenciado,
+// pois a escola não dispõe de recolha de resíduos orgânicos.
 const WASTE: Waste[] = [
-  { name: 'Folha de papel limpa', symbol: '📄', bin: 'azul' },
-  { name: 'Caixa de cartão', symbol: '📦', bin: 'azul' },
-  { name: 'Jornal velho', symbol: '📰', bin: 'azul' },
-  { name: 'Envelope de papel', symbol: '✉️', bin: 'azul' },
-  { name: 'Cartolina limpa', symbol: '📃', bin: 'azul' },
-  { name: 'Garrafa de água de plástico', symbol: '🧴', bin: 'amarelo' },
-  { name: 'Lata de refrigerante', symbol: '🥫', bin: 'amarelo' },
-  { name: 'Pacote vazio de bolachas', symbol: '🍪', bin: 'amarelo' },
-  { name: 'Embalagem de batatas fritas', symbol: '🍟', bin: 'amarelo' },
-  { name: 'Pacote de sumo vazio', symbol: '🧃', bin: 'amarelo' },
-  { name: 'Saco de plástico', symbol: '🛍️', bin: 'amarelo' },
-  { name: 'Frasco de vidro', symbol: '🫙', bin: 'verde' },
-  { name: 'Garrafa de vidro', symbol: '🍾', bin: 'verde' },
-  { name: 'Frasco de compota vazio', symbol: '🫙', bin: 'verde' },
-  { name: 'Casca de banana', symbol: '🍌', bin: 'preto' },
-  { name: 'Casca de laranja', symbol: '🍊', bin: 'preto' },
-  { name: 'Restos de maçã', symbol: '🍎', bin: 'preto' },
-  { name: 'Lenço de papel usado', symbol: '🧻', bin: 'preto' },
-  { name: 'Guardanapo sujo', symbol: '🧻', bin: 'preto' },
-  { name: 'Lápis partido', symbol: '✏️', bin: 'preto' },
+  { name: 'Folha de papel limpa', symbol: '📄', bin: 'azul', reason: 'Uma folha limpa é papel e pode ser reciclada na ECOBAG azul.' },
+  { name: 'Caixa de cartão', symbol: '📦', bin: 'azul', reason: 'As caixas de cartão devem ser espalmadas e colocadas na ECOBAG azul.' },
+  { name: 'Jornal antigo', symbol: '📰', bin: 'azul', reason: 'O jornal é feito de papel e pertence à ECOBAG azul.' },
+  { name: 'Envelope de papel', symbol: '✉️', bin: 'azul', reason: 'Os envelopes de papel vão para a ECOBAG azul.' },
+  { name: 'Cartolina limpa', symbol: '📃', bin: 'azul', reason: 'A cartolina limpa é reciclável com o papel, na ECOBAG azul.' },
+  { name: 'Caixa de cereais de cartão', symbol: '📦', bin: 'azul', reason: 'As caixas de cartão vazias vão para a ECOBAG azul.' },
+  { name: 'Caderno usado sem espiral', symbol: '📓', bin: 'azul', reason: 'As folhas e capas de papel do caderno vão para a ECOBAG azul.' },
+  { name: 'Garrafa de água de plástico', symbol: '🧴', bin: 'amarelo', art: 'garrafa', reason: 'As garrafas de plástico vazias vão para a ECOBAG amarela.' },
+  { name: 'Lata de refrigerante vazia', symbol: '🥫', bin: 'amarelo', art: 'lata', reason: 'As embalagens de metal, como as latas, vão para a ECOBAG amarela.' },
+  { name: 'Pacote vazio de bolachas', symbol: '🍪', bin: 'amarelo', art: 'bolachas', reason: 'O pacote de plástico das bolachas é uma embalagem: vai para a ECOBAG amarela.' },
+  { name: 'Embalagem de batatas fritas', symbol: '🍟', bin: 'amarelo', art: 'batatas', reason: 'O pacote de batatas fritas é uma embalagem e vai para a ECOBAG amarela.' },
+  { name: 'Pacote de sumo vazio', symbol: '🧃', bin: 'amarelo', art: 'sumo', reason: 'Os pacotes de bebidas vazios vão para a ECOBAG amarela, não para a azul.' },
+  { name: 'Pacote de leite vazio', symbol: '🥛', bin: 'amarelo', art: 'sumo', reason: 'Os pacotes de leite e de sumo vão para a ECOBAG amarela.' },
+  { name: 'Saco de plástico', symbol: '🛍️', bin: 'amarelo', reason: 'Os sacos de plástico usados como embalagem vão para a ECOBAG amarela.' },
+  { name: 'Embalagem de iogurte vazia', symbol: '🥛', bin: 'amarelo', art: 'iogurte', reason: 'As embalagens de plástico de iogurte vão para a ECOBAG amarela.' },
+  { name: 'Frasco de vidro vazio', symbol: '🫙', bin: 'verde', reason: 'Os frascos de vidro vazios pertencem à ECOBAG verde.' },
+  { name: 'Garrafa de vidro vazia', symbol: '🍾', bin: 'verde', art: 'vidro', reason: 'As garrafas de vidro vazias vão para a ECOBAG verde.' },
+  { name: 'Frasco de compota vazio', symbol: '🫙', bin: 'verde', reason: 'Os frascos de compota feitos de vidro vão para a ECOBAG verde.' },
+  { name: 'Frasco de azeitonas vazio', symbol: '🫙', bin: 'verde', reason: 'As embalagens de vidro vão para a ECOBAG verde.' },
+  { name: 'Casca de banana', symbol: '🍌', bin: 'preto', reason: 'Na nossa escola não há recolha de orgânicos: as cascas vão para o caixote cinzento.' },
+  { name: 'Casca de laranja', symbol: '🍊', bin: 'preto', reason: 'As cascas de fruta vão para o caixote cinzento, pois não temos recolha de orgânicos.' },
+  { name: 'Restos de maçã', symbol: '🍎', bin: 'preto', reason: 'Os restos de fruta vão para o caixote cinzento da escola.' },
+  { name: 'Lenço de papel usado', symbol: '🧻', bin: 'preto', art: 'lenco', reason: 'Os lenços de papel usados não vão para a ECOBAG azul: vão para o indiferenciado.' },
+  { name: 'Guardanapo sujo', symbol: '🧻', bin: 'preto', art: 'lenco', reason: 'Os guardanapos sujos pertencem ao caixote cinzento.' },
+  { name: 'Lápis partido', symbol: '✏️', bin: 'preto', reason: 'Um lápis partido não é uma embalagem nem papel reciclável: vai para o indiferenciado.' },
+  { name: 'Restos da sandes', symbol: '🥪', bin: 'preto', reason: 'Os restos de comida vão para o caixote cinzento da nossa escola.' },
 ];
 
-const BINS: { id: BinId; label: string; subtitle: string; key: string }[] = [
-  { id: 'azul', label: 'Papel e cartão', subtitle: '+10 pontos', key: '1' },
-  { id: 'amarelo', label: 'Plástico e metal', subtitle: '+10 pontos', key: '2' },
-  { id: 'verde', label: 'Vidro', subtitle: '+10 pontos', key: '3' },
-  { id: 'preto', label: 'Indiferenciado', subtitle: '+5 pontos', key: '4' },
-];
-
-function nextWaste(previous?: Waste): Waste {
-  // Escolher categorias de modo equilibrado, sem repetir a pergunta consecutiva.
-  const categories: BinId[] = ['azul', 'amarelo', 'verde', 'preto'];
-  const category = categories[Math.floor(Math.random() * categories.length)];
-  const options = WASTE.filter((waste) => waste.bin === category && waste !== previous);
-  const alternatives = options.length ? options : WASTE.filter((waste) => waste !== previous);
-  return alternatives[Math.floor(Math.random() * alternatives.length)];
+function shuffleWaste(): Waste[] {
+  const items = [...WASTE];
+  for (let index = items.length - 1; index > 0; index--) {
+    const random = Math.floor(Math.random() * (index + 1));
+    [items[index], items[random]] = [items[random], items[index]];
+  }
+  return items;
 }
 
-function formatTime(seconds: number) {
-  const minutes = Math.floor(seconds / 60);
-  return `${String(minutes).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+function formatTime(milliseconds: number): string {
+  return `00:${String(Math.ceil(milliseconds / 1000)).padStart(2, '0')}`;
+}
+
+function WastePicture({ waste }: { waste: Waste }) {
+  if (waste.art === 'bolachas' || waste.art === 'batatas') {
+    return (
+      <span className={`reo-tennis-package package-${waste.art}`} aria-hidden="true">
+        <span>{waste.art === 'bolachas' ? 'BOLACHAS' : 'BATATAS'}</span>
+        <span>{waste.art === 'bolachas' ? '🍪 🍪' : '🥔 🥔'}</span>
+      </span>
+    );
+  }
+  if (waste.art === 'sumo') {
+    return (
+      <span className="reo-tennis-juicebox" aria-hidden="true">
+        <span className="reo-tennis-juicebox-straw" />
+        <b>{waste.name.includes('leite') ? 'LEITE' : 'SUMO'}</b>
+        <span>{waste.name.includes('leite') ? '🥛' : '🍊'}</span>
+      </span>
+    );
+  }
+  if (waste.art === 'lata') {
+    return <span className="reo-tennis-can" aria-hidden="true"><span>REFRI</span><span>🥤</span></span>;
+  }
+  if (waste.art === 'iogurte') {
+    return <span className="reo-tennis-yogurt" aria-hidden="true"><span>IOGURTE</span><span>🥄</span></span>;
+  }
+  if (waste.art === 'vidro') {
+    return <span className="reo-tennis-glass-bottle" aria-hidden="true"><span>♻</span></span>;
+  }
+  if (waste.art === 'lenco') {
+    return <span className="reo-tennis-tissue" aria-hidden="true">{waste.name.includes('Guardanapo') ? '✘' : '◌'}</span>;
+  }
+  if (waste.art === 'garrafa') {
+    return (
+      <svg className="reo-tennis-bottle" viewBox="0 0 66 96" role="img" aria-label="Garrafa de plástico">
+        <rect x="25" y="3" width="16" height="11" rx="2" fill="#1d85df" stroke="#15568f" strokeWidth="2" />
+        <path d="M26 15h14v9c0 4 11 8 11 19v37c0 8-6 12-18 12s-18-4-18-12V43c0-11 11-15 11-19z" fill="#a8e5ff" stroke="#266b9e" strokeWidth="3" />
+        <path d="M20 48h26M20 57h26M20 66h26M20 75h26" stroke="#60b7ec" strokeWidth="3" />
+        <path d="M24 30c-3 5-4 14-4 21" stroke="white" strokeWidth="4" strokeLinecap="round" opacity=".8" />
+      </svg>
+    );
+  }
+  return <span className="reo-tennis-emoji" aria-hidden="true">{waste.symbol}</span>;
+}
+
+function gradeFor(score: number) {
+  if (score >= 200) return { stars: 3, title: 'Super ÁS da Reciclagem!', detail: 'Missão cumprida! A escola está mais limpa!' };
+  if (score >= 130) return { stars: 2, title: 'És um ÁS da Reciclagem!', detail: 'Já sabes usar muito bem as ECOBAGS!' };
+  if (score >= 100) return { stars: 1, title: 'Bom trabalho!', detail: 'Estás a tornar a escola mais sustentável!' };
+  return { stars: 0, title: 'Boa tentativa!', detail: 'Cada jogada ajuda-te a aprender a reciclar.' };
 }
 
 const TennisEducation: React.FC = () => {
@@ -83,36 +155,79 @@ const TennisEducation: React.FC = () => {
   const [remainingMs, setRemainingMs] = useState(GAME_DURATION_MS);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [errors, setErrors] = useState(0);
-  const [waste, setWaste] = useState<Waste>(() => nextWaste());
+  const [streak, setStreak] = useState(0);
+  const [record, setRecord] = useState(START_SCORE);
+  const [soundOn, setSoundOn] = useState(false);
+  const [waste, setWaste] = useState<Waste>(WASTE[0]);
   const [shot, setShot] = useState<Shot | null>(null);
-  const [feedback, setFeedback] = useState<{ message: string; points: number; correct: boolean } | null>(null);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [lastMistake, setLastMistake] = useState<string | null>(null);
 
   const courtRef = useRef<HTMLDivElement>(null);
   const wasteRef = useRef<HTMLDivElement>(null);
   const binRefs = useRef<Partial<Record<BinId, HTMLButtonElement | null>>>({});
+  const wasteQueueRef = useRef<Waste[]>([]);
   const busyRef = useRef(false);
   const remainingMsRef = useRef(GAME_DURATION_MS);
   const deadlineRef = useRef<number | null>(null);
   const shotTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const audioRef = useRef<AudioContext | null>(null);
+
+  useEffect(() => {
+    try {
+      const stored = Number(localStorage.getItem(RECORD_KEY));
+      if (Number.isFinite(stored) && stored > START_SCORE) setRecord(stored);
+    } catch {
+      // O jogo funciona mesmo quando o armazenamento local não está disponível.
+    }
+    return () => {
+      if (shotTimerRef.current !== null) clearTimeout(shotTimerRef.current);
+      if (feedbackTimerRef.current !== null) clearTimeout(feedbackTimerRef.current);
+      if (audioRef.current) void audioRef.current.close();
+    };
+  }, []);
+
+  const playTone = useCallback((type: 'hit' | 'good' | 'bad' | 'star' | 'win') => {
+    if (!soundOn || typeof window === 'undefined' || !window.AudioContext) return;
+    try {
+      if (!audioRef.current) audioRef.current = new window.AudioContext();
+      const context = audioRef.current;
+      if (context.state === 'suspended') void context.resume();
+      const notes: Record<typeof type, number[]> = {
+        hit: [220], good: [510, 680], bad: [260, 180], star: [510, 650, 820], win: [520, 660, 790, 1040],
+      };
+      notes[type].forEach((frequency, index) => {
+        const oscillator = context.createOscillator();
+        const volume = context.createGain();
+        const start = context.currentTime + index * 0.075;
+        oscillator.type = type === 'hit' ? 'triangle' : 'sine';
+        oscillator.frequency.setValueAtTime(frequency, start);
+        volume.gain.setValueAtTime(0.001, start);
+        volume.gain.exponentialRampToValueAtTime(0.055, start + 0.015);
+        volume.gain.exponentialRampToValueAtTime(0.001, start + 0.12);
+        oscillator.connect(volume);
+        volume.connect(context.destination);
+        oscillator.start(start);
+        oscillator.stop(start + 0.13);
+      });
+    } catch {
+      // Áudio opcional: não pode impedir o jogo.
+    }
+  }, [soundOn]);
 
   useEffect(() => {
     if (phase !== 'playing') return;
-
-    // Contagem real de 30 segundos; quando pausado, o tempo fica congelado.
     const deadline = Date.now() + remainingMsRef.current;
     deadlineRef.current = deadline;
-
     const updateTimer = () => {
       const timeLeft = Math.max(0, deadline - Date.now());
       remainingMsRef.current = timeLeft;
       setRemainingMs(timeLeft);
-      // Se já foi lançada uma raquetada, aguardamos pelo resultado antes de terminar.
       if (timeLeft === 0 && !busyRef.current) {
         setPhase((current) => current === 'playing' ? 'timeup' : current);
       }
     };
-
     const interval = window.setInterval(updateTimer, 100);
     return () => {
       window.clearInterval(interval);
@@ -122,27 +237,36 @@ const TennisEducation: React.FC = () => {
   }, [phase]);
 
   useEffect(() => {
-    return () => {
-      if (shotTimerRef.current !== null) clearTimeout(shotTimerRef.current);
-      if (feedbackTimerRef.current !== null) clearTimeout(feedbackTimerRef.current);
-    };
+    if (phase !== 'won' && phase !== 'lost' && phase !== 'timeup') return;
+    if (score > record) {
+      setRecord(score);
+      try { localStorage.setItem(RECORD_KEY, String(score)); } catch { /* Opcional. */ }
+    }
+  }, [phase, score, record]);
+
+  const getNextWaste = useCallback((): Waste => {
+    if (wasteQueueRef.current.length === 0) wasteQueueRef.current = shuffleWaste();
+    return wasteQueueRef.current.pop() ?? WASTE[0];
   }, []);
 
   const startGame = useCallback(() => {
     if (shotTimerRef.current !== null) clearTimeout(shotTimerRef.current);
     if (feedbackTimerRef.current !== null) clearTimeout(feedbackTimerRef.current);
     busyRef.current = false;
+    wasteQueueRef.current = shuffleWaste();
+    setWaste(getNextWaste());
     setScore(START_SCORE);
     remainingMsRef.current = GAME_DURATION_MS;
     deadlineRef.current = null;
     setRemainingMs(GAME_DURATION_MS);
     setCorrectAnswers(0);
     setErrors(0);
-    setWaste(nextWaste());
+    setStreak(0);
+    setLastMistake(null);
     setShot(null);
     setFeedback(null);
     setPhase('playing');
-  }, []);
+  }, [getNextWaste]);
 
   const chooseBin = useCallback((chosen: BinId) => {
     if (phase !== 'playing' || busyRef.current || remainingMsRef.current <= 0 ||
@@ -162,34 +286,39 @@ const TennisEducation: React.FC = () => {
     const endY = targetBox.top + targetBox.height / 2 - courtBox.top - originY;
     const correct = waste.bin === chosen;
     const points = correct ? (chosen === 'preto' ? 5 : 10) : -20;
+    playTone('hit');
 
-    setShot({
-      originX,
-      originY,
-      middleX: endX / 2,
-      middleY: endY / 2 - 85,
-      endX,
-      endY,
-      symbol: waste.symbol,
-      bin: chosen,
-      correct,
-    });
+    setShot({ originX, originY, middleX: endX / 2, middleY: endY / 2 - 85,
+      endX, endY, waste, bin: chosen, correct });
 
     shotTimerRef.current = setTimeout(() => {
       shotTimerRef.current = null;
       const newScore = Math.max(0, score + points);
       const newErrors = errors + (correct ? 0 : 1);
+      const newStreak = correct ? streak + 1 : 0;
       setScore(newScore);
-      if (!correct) setErrors(newErrors);
+      setErrors(newErrors);
+      setStreak(newStreak);
+      if (correct) setCorrectAnswers((current) => current + 1);
       setShot(null);
+
+      const milestone: 100 | 130 | undefined = correct && score < 100 && newScore >= 100 ? 100
+        : correct && score < 130 && newScore >= 130 ? 130 : undefined;
+      const destinationName = BINS.find((bin) => bin.id === waste.bin)?.short ?? 'recipiente certo';
+      const detail = correct ? `${waste.name}: ${destinationName}.` : waste.reason;
+      if (!correct) setLastMistake(detail);
       setFeedback({
-        message: correct ? 'Muito bem! Resíduo no sítio certo.' : 'Ops! Esse resíduo não é para aqui.',
         points,
         correct,
+        message: milestone === 130 ? 'És um ÁS da Reciclagem! ⭐⭐'
+          : milestone === 100 ? 'Bom trabalho! ⭐'
+            : correct ? (newStreak >= 3 ? 'Grande sequência! 🎾' : 'Boa raquetada! 🎾') : 'Ops! Vamos aprender.',
+        detail,
+        achievement: milestone,
       });
       if (feedbackTimerRef.current !== null) clearTimeout(feedbackTimerRef.current);
-      feedbackTimerRef.current = setTimeout(() => setFeedback(null), 1400);
-      if (correct) setCorrectAnswers((value) => value + 1);
+      feedbackTimerRef.current = setTimeout(() => setFeedback(null), 1500);
+      playTone(!correct ? 'bad' : newScore >= WIN_SCORE ? 'win' : milestone ? 'star' : 'good');
 
       if (newScore >= WIN_SCORE) {
         setPhase('won');
@@ -198,11 +327,11 @@ const TennisEducation: React.FC = () => {
       } else if (deadlineRef.current !== null && Date.now() >= deadlineRef.current) {
         setPhase('timeup');
       } else {
-        setWaste(nextWaste(waste));
+        setWaste(getNextWaste());
       }
       busyRef.current = false;
     }, SHOT_DURATION);
-  }, [phase, score, waste, errors]);
+  }, [phase, score, errors, streak, waste, getNextWaste, playTone]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -219,49 +348,56 @@ const TennisEducation: React.FC = () => {
   }, [chooseBin]);
 
   const shotStyle = shot ? ({
-    left: `${shot.originX}px`,
-    top: `${shot.originY}px`,
-    '--mid-x': `${shot.middleX}px`,
-    '--mid-y': `${shot.middleY}px`,
-    '--end-x': `${shot.endX}px`,
-    '--end-y': `${shot.endY}px`,
+    left: `${shot.originX}px`, top: `${shot.originY}px`,
+    '--mid-x': `${shot.middleX}px`, '--mid-y': `${shot.middleY}px`,
+    '--end-x': `${shot.endX}px`, '--end-y': `${shot.endY}px`,
   } as React.CSSProperties) : undefined;
 
   const percent = Math.min(100, Math.max(0, ((score - START_SCORE) / (WIN_SCORE - START_SCORE)) * 100));
+  const result = gradeFor(score);
 
   return (
     <section className="reo-tennis-page">
-      <Link to="/" className="reo-tennis-back">
-        <ArrowLeft size={17} aria-hidden="true" /> Voltar à REO
-      </Link>
+      <Link to="/" className="reo-tennis-back"><ArrowLeft size={17} aria-hidden="true" /> Voltar à REO</Link>
 
       <div className="reo-tennis-title">
-        <div className="reo-tennis-partners" aria-label="Parceria REO e Tennis Education">
+        <div className="reo-tennis-partners" aria-label="Atividade da REO em parceria com o Projeto Tennis Education">
           <Logo className="reo-tennis-partner-logo" />
           <span aria-hidden="true">×</span>
-          <img src="/tennis-education.png" className="reo-tennis-partner-logo" alt="Tennis Education" />
+          <img src="/tennis-education.png" className="reo-tennis-partner-logo" alt="Logótipo do Projeto Tennis Education" />
         </div>
-        <p>REO × Tennis Education</p>
-        <h1>Desafio da Reciclagem <span aria-hidden="true">♻️</span></h1>
-        <span>Ajuda a nossa escola a reciclar melhor!</span>
+        <h1>Um set para o planeta <span aria-hidden="true">🎾♻️</span></h1>
+        <p>Uma atividade da REO em parceria com o Projeto Tennis Education</p>
+        <span>Aprende a utilizar as ECOBAGS para reciclar na escola!</span>
       </div>
 
       <div className="reo-tennis-hud" aria-label="Informações do jogo">
         <div className="reo-tennis-stat"><span>Pontos</span><strong>{score}</strong></div>
-        <div className="reo-tennis-stat"><span>Tempo restante</span><strong>{formatTime(Math.ceil(remainingMs / 1000))}</strong></div>
+        <div className="reo-tennis-stat"><span>Tempo</span><strong>{formatTime(remainingMs)}</strong></div>
         <div className="reo-tennis-progress">
-          <div className="reo-tennis-progress-row"><span>200 pontos · Erros: {errors}/{MAX_ERRORS}</span><strong>{Math.round(percent)}%</strong></div>
+          <div className="reo-tennis-progress-row"><span>200 pts · Erros: {errors}/{MAX_ERRORS}</span><strong>{Math.round(percent)}%</strong></div>
           <div className="reo-tennis-progress-track"><div style={{ width: `${percent}%` }} /></div>
         </div>
-        <button
-          type="button"
-          className="reo-tennis-pause"
-          onClick={() => setPhase(phase === 'paused' ? 'playing' : 'paused')}
+        <button type="button" className="reo-tennis-sound" onClick={() => setSoundOn((on) => !on)} aria-label={soundOn ? 'Desligar som' : 'Ligar som'} title={soundOn ? 'Desligar som' : 'Ligar som'}>
+          {soundOn ? <Volume2 size={19} /> : <VolumeX size={19} />}
+        </button>
+        <button type="button" className="reo-tennis-pause" onClick={() => setPhase(phase === 'paused' ? 'playing' : 'paused')}
           disabled={busyRef.current || (phase !== 'playing' && phase !== 'paused')}
-          aria-label={phase === 'paused' ? 'Retomar jogo' : 'Pausar jogo'}
-        >
+          aria-label={phase === 'paused' ? 'Retomar jogo' : 'Pausar jogo'}>
           {phase === 'paused' ? <Play size={21} fill="currentColor" /> : <Pause size={21} fill="currentColor" />}
         </button>
+      </div>
+
+      <div className="reo-tennis-rewards" aria-label="Objetivos de pontos">
+        {[{ points: 100, name: 'Bom trabalho!', stars: 1 },
+          { points: 130, name: 'ÁS da Reciclagem!', stars: 2 },
+          { points: 200, name: 'Super ÁS!', stars: 3 }].map((reward) => (
+          <div key={reward.points} className={`reo-tennis-reward ${score >= reward.points ? 'is-earned' : ''}`}>
+            <span aria-hidden="true">{reward.stars === 3 ? '🏆' : '⭐'.repeat(reward.stars)}</span>
+            <strong>{reward.points} pts</strong>
+            <small>{reward.name}</small>
+          </div>
+        ))}
       </div>
 
       <div className="reo-tennis-court" ref={courtRef}>
@@ -289,31 +425,25 @@ const TennisEducation: React.FC = () => {
               </g>
             </svg>
           </div>
+          {shot && <span className="reo-tennis-impact">✨</span>}
         </div>
 
         <div className={`reo-tennis-item ${shot ? 'is-hidden' : ''}`} ref={wasteRef} aria-live="polite">
-          <span className="reo-tennis-item-symbol" aria-hidden="true">{waste.symbol}</span>
+          <WastePicture waste={waste} />
           <strong>{waste.name}</strong>
           <small>Onde colocas este resíduo?</small>
         </div>
 
-        {shot && (
-          <div className="reo-tennis-shot" style={shotStyle} aria-hidden="true">
-            <span className="reo-tennis-shot-symbol">{shot.symbol}</span>
-          </div>
-        )}
+        {shot && <div className="reo-tennis-shot" style={shotStyle} aria-hidden="true">
+          <span className="reo-tennis-shot-symbol"><WastePicture waste={shot.waste} /></span>
+        </div>}
 
         <div className="reo-tennis-bins" role="group" aria-label="Escolhe o recipiente correto">
           {BINS.map((bin) => (
-            <button
-              key={bin.id}
-              ref={(element) => { binRefs.current[bin.id] = element; }}
-              type="button"
+            <button key={bin.id} ref={(element) => { binRefs.current[bin.id] = element; }} type="button"
               className={`reo-tennis-bin bin-${bin.id}${shot?.bin === bin.id ? (shot.correct ? ' is-correct' : ' is-wrong') : ''}`}
-              onClick={() => chooseBin(bin.id)}
-              disabled={phase !== 'playing' || shot !== null}
-              aria-label={`${bin.label}. Tecla ${bin.key}. ${bin.subtitle} se estiver correto.`}
-            >
+              onClick={() => chooseBin(bin.id)} disabled={phase !== 'playing' || shot !== null}
+              aria-label={`${bin.label}. Tecla ${bin.key}.`}>
               <span className="reo-tennis-bin-body">
                 <span className="reo-tennis-bin-icon" aria-hidden="true">{bin.id === 'preto' ? '🚮' : '♻'}</span>
                 <span className="reo-tennis-bin-label">{bin.label}</span>
@@ -324,68 +454,67 @@ const TennisEducation: React.FC = () => {
         </div>
 
         {feedback && phase === 'playing' && (
-          <div className={`reo-tennis-feedback ${feedback.correct ? 'good' : 'bad'}`} role="status">
+          <div className={`reo-tennis-feedback ${feedback.correct ? 'good' : 'bad'} ${feedback.achievement ? 'is-achievement' : ''}`} role="status">
             <strong>{feedback.points > 0 ? '+' : ''}{feedback.points}</strong>
-            <span>{feedback.message}</span>
+            <span><b>{feedback.message}</b><small>{feedback.detail}</small></span>
           </div>
         )}
 
         {phase !== 'playing' && (
           <div className="reo-tennis-overlay">
-            {phase === 'intro' && (
-              <div className="reo-tennis-modal">
-                <Gamepad2 size={38} className="reo-tennis-modal-icon" aria-hidden="true" />
-                <h2>Preparado para reciclar?</h2>
-                <p>Clica na eco-bag ou no caixote certo. A Bolacha da REO dá a raquetada!</p>
-                <div className="reo-tennis-scoring">
-                  <span>Azul, amarelo, verde <b>+10</b></span>
-                  <span>Indiferenciado <b>+5</b></span>
-                  <span>Recipiente errado <b>−20</b></span>
-                </div>
-                <p className="reo-tennis-fineprint">Tens 30 segundos! Começas com 60 pontos. Podes errar uma vez; ao segundo erro, perdes. Chega aos 200 pontos antes de o tempo terminar!</p>
-                <button className="reo-tennis-primary" type="button" onClick={startGame}><Play size={18} fill="currentColor" /> Começar missão</button>
+            {phase === 'intro' && <div className="reo-tennis-modal reo-tennis-intro" role="dialog" aria-labelledby="reo-tennis-intro-title">
+              <Gamepad2 size={32} className="reo-tennis-modal-icon" aria-hidden="true" />
+              <h2 id="reo-tennis-intro-title">Um set para o planeta!</h2>
+              <p>A REO e o Projeto Tennis Education precisam de ti! Escolhe a ECOBAG certa e a Bolacha da REO dá uma raquetada.</p>
+              <div className="reo-tennis-guide">
+                {BINS.map((bin) => <div key={bin.id} className={`reo-tennis-guide-item guide-${bin.id}`}>
+                  <b>{bin.id === 'preto' ? 'Caixote' : 'ECOBAG'} {bin.id === 'preto' ? 'cinzento' : bin.id === 'amarelo' ? 'amarela' : bin.id === 'verde' ? 'verde' : 'azul'}</b>
+                  <span>{bin.hint}</span>
+                </div>)}
               </div>
-            )}
-            {phase === 'paused' && (
-              <div className="reo-tennis-modal">
-                <Pause size={40} className="reo-tennis-modal-icon" aria-hidden="true" />
-                <h2>Jogo em pausa</h2>
-                <p>Quando estiveres pronto, continua a ajudar a REO e o Tennis Education.</p>
-                <button className="reo-tennis-primary" type="button" onClick={() => setPhase('playing')}><Play size={18} fill="currentColor" /> Continuar</button>
+              <p className="reo-tennis-fineprint">30 segundos · Começas com 60 pontos · Podes errar uma vez. Azul/amarelo/verde: +10; indiferenciado: +5; erro: −20.</p>
+              <button className="reo-tennis-primary" type="button" onClick={startGame}><Play size={18} fill="currentColor" /> Começar!</button>
+            </div>}
+            {phase === 'paused' && <div className="reo-tennis-modal" role="dialog" aria-labelledby="reo-tennis-paused-title">
+              <Pause size={36} className="reo-tennis-modal-icon" aria-hidden="true" />
+              <h2 id="reo-tennis-paused-title">Jogo em pausa</h2>
+              <p>Vê a cor de cada ECOBAG e pensa onde deve ir o resíduo.</p>
+              <div className="reo-tennis-guide compact">
+                {BINS.map((bin) => <div key={bin.id} className={`reo-tennis-guide-item guide-${bin.id}`}><b>{bin.short}</b><span>{bin.hint}</span></div>)}
               </div>
-            )}
-            {phase === 'won' && (
-              <div className="reo-tennis-modal is-win" role="alertdialog" aria-labelledby="reo-tennis-won-title">
-                <span className="reo-tennis-confetti" aria-hidden="true">🎉 🏆 🎾 ♻️ 🎉</span>
-                <Trophy size={46} className="reo-tennis-modal-icon" aria-hidden="true" />
-                <h2 id="reo-tennis-won-title">Parabéns!<br />És um ÁS da Reciclagem!</h2>
-                <p>Alcançaste os 200 pontos! A REO e o Tennis Education agradecem a tua ajuda para tornar a nossa escola mais sustentável!</p>
-                <button className="reo-tennis-primary" type="button" onClick={startGame}><RotateCcw size={18} /> Jogar novamente</button>
-              </div>
-            )}
-            {phase === 'timeup' && (
-              <div className="reo-tennis-modal is-loss" role="alertdialog" aria-labelledby="reo-tennis-timeup-title">
-                <span aria-hidden="true" className="reo-tennis-sad">⏱️</span>
-                <h2 id="reo-tennis-timeup-title">Tempo esgotado!</h2>
-                <p>Terminaste com {score} pontos e {correctAnswers} respostas certas. Tenta chegar aos 200 pontos para seres um ÁS da Reciclagem!</p>
-                <button className="reo-tennis-primary" type="button" onClick={startGame}><RotateCcw size={18} /> Tentar novamente</button>
-              </div>
-            )}
-            {phase === 'lost' && (
-              <div className="reo-tennis-modal is-loss" role="alertdialog" aria-labelledby="reo-tennis-lost-title">
-                <span aria-hidden="true" className="reo-tennis-sad">😔</span>
-                <h2 id="reo-tennis-lost-title">Fim de jogo!</h2>
-                <p>A REO e o Tennis Education precisam da tua ajuda para reciclar melhor!</p>
-                <p className="reo-tennis-fineprint">{errors > MAX_ERRORS ? 'Cometeste dois erros. Só é permitido um erro por partida.' : 'Chegaste aos 0 pontos.'} Podes tentar novamente.</p>
-                <button className="reo-tennis-primary" type="button" onClick={startGame}><RotateCcw size={18} /> Tentar novamente</button>
-              </div>
-            )}
+              <button className="reo-tennis-primary" type="button" onClick={() => setPhase('playing')}><Play size={18} fill="currentColor" /> Continuar</button>
+            </div>}
+            {phase === 'won' && <div className="reo-tennis-modal is-win" role="alertdialog" aria-labelledby="reo-tennis-won-title">
+              <span className="reo-tennis-confetti" aria-hidden="true">🎉 ⭐ 🏆 🎾 ♻️ 🎉</span>
+              <Trophy size={46} className="reo-tennis-modal-icon" aria-hidden="true" />
+              <h2 id="reo-tennis-won-title">Parabéns!<br />Super ÁS da Reciclagem!</h2>
+              <p>Chegaste aos 200 pontos! A REO e o Projeto Tennis Education agradecem a tua ajuda para usar bem as ECOBAGS.</p>
+              <div className="reo-tennis-result">🏆 {score} pontos · {correctAnswers} acertos</div>
+              <button className="reo-tennis-primary" type="button" onClick={startGame}><RotateCcw size={18} /> Jogar outra vez</button>
+            </div>}
+            {phase === 'timeup' && <div className="reo-tennis-modal" role="alertdialog" aria-labelledby="reo-tennis-timeup-title">
+              <div className="reo-tennis-result-stars" aria-label={`${result.stars} estrelas`}>{'⭐'.repeat(result.stars) || '🎾'}</div>
+              <h2 id="reo-tennis-timeup-title">{result.title}</h2>
+              <p>{result.detail}</p>
+              <div className="reo-tennis-result">⏱️ 30 segundos · {score} pontos · {correctAnswers} acertos</div>
+              <p className="reo-tennis-fineprint">Queres tentar chegar aos 200 pontos?</p>
+              <button className="reo-tennis-primary" type="button" onClick={startGame}><RotateCcw size={18} /> Jogar outra vez</button>
+            </div>}
+            {phase === 'lost' && <div className="reo-tennis-modal is-loss" role="alertdialog" aria-labelledby="reo-tennis-lost-title">
+              <span aria-hidden="true" className="reo-tennis-sad">🎾</span>
+              <h2 id="reo-tennis-lost-title">Fim de jogo!</h2>
+              <p>A REO e o Projeto Tennis Education precisam da tua ajuda para reciclar melhor!</p>
+              {lastMistake && <p className="reo-tennis-learning"><strong>Aprendemos uma coisa:</strong> {lastMistake}</p>}
+              <p className="reo-tennis-fineprint">{errors > MAX_ERRORS ? 'Só podes errar uma vez por partida.' : 'Chegaste aos zero pontos.'} Tenta novamente!</p>
+              <button className="reo-tennis-primary" type="button" onClick={startGame}><RotateCcw size={18} /> Tentar novamente</button>
+            </div>}
           </div>
         )}
       </div>
 
-      <p className="reo-tennis-controls">🖱️ <strong>Rato:</strong> clica no recipiente · 📱 <strong>Telemóvel:</strong> toca · ⌨️ <strong>Teclado:</strong> 1, 2, 3 ou 4</p>
-      <p className="reo-tennis-tip">Na nossa escola, as cascas de fruta e os restos de comida vão para o indiferenciado.</p>
+      <p className="reo-tennis-controls">🖱️ <strong>Rato:</strong> clicar · 📱 <strong>Telemóvel:</strong> tocar · ⌨️ <strong>Teclado:</strong> 1–4 · <Star size={13} aria-hidden="true" /> Sequência: {streak}</p>
+      <p className="reo-tennis-tip">Na nossa escola, as cascas de fruta e os restos de comida vão para o caixote cinzento (indiferenciado).</p>
+      <p className="reo-tennis-record">Recorde pessoal neste dispositivo: <strong>{Math.max(record, score)} pontos</strong></p>
     </section>
   );
 };
