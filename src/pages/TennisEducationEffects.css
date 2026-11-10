@@ -1,0 +1,1064 @@
+
+/* Efeitos visuais — Um set para o planeta.
+   Mantém o cabeçalho institucional da REO. */
+
+.reo-tennis-page {
+  --reo-yellow: #ffc928;
+  --reo-navy: #10254d;
+}
+
+/* Painel de pontuação */
+
+.reo-tennis-hud {
+  background: linear-gradient(110deg,#172d53,#102039 70%);
+  border-color: #7fbaff;
+  box-shadow: 0 5px 0 #0b172b, 0 9px 22px #0004;
+  gap: 10px;
+}
+
+.reo-tennis-stat {
+  border: 2px solid #ffffff50;
+  border-radius: 14px;
+  background: linear-gradient(155deg,#284f89,#102746);
+  min-width: 88px;
+  padding: 7px 12px;
+  text-align: center;
+}
+
+.reo-tennis-stat span {
+  color: #e4f2ff;
+  font-size: 11px;
+}
+
+.reo-tennis-stat strong {
+  color: #ffe55b;
+  font-size: clamp(22px,3vw,31px);
+  text-shadow: 0 2px 0 #4e3906;
+}
+
+.reo-tennis-time strong {
+  color: #fff;
+}
+
+.reo-tennis-score-pop {
+  display: inline-block;
+  animation: reo-tennis-score-pop 350ms ease-out;
+}
+
+@keyframes reo-tennis-score-pop {
+  0% { transform: scale(.6); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+.reo-tennis-hud.is-countdown .reo-tennis-time {
+  border-color: #ffbf54;
+  animation: reo-countdown 1s ease-in-out infinite;
+}
+
+.reo-tennis-hud.is-countdown .reo-tennis-time strong {
+  color: #ffda6a;
+}
+
+@keyframes reo-countdown {
+  0%,100% { box-shadow: 0 0 0 transparent; }
+  50% { box-shadow: 0 0 19px #ff8324bb; }
+}
+
+.reo-tennis-progress-row {
+  font-size: 11px;
+  color: #fff;
+}
+
+.reo-tennis-progress-track {
+  height: 14px;
+  background: #09172a;
+  border: 2px solid #64748b;
+}
+
+.reo-tennis-progress-track > div {
+  background: linear-gradient(90deg,#36e3bb,#f5c13e);
+}
+
+/* Recompensas */
+
+.reo-tennis-rewards {
+  background: linear-gradient(180deg,#fff0b3,#ffdf7b);
+  border: 2px solid #f5b338;
+  border-top: 0;
+  padding: 9px;
+  box-shadow: 0 5px 0 #af7d27;
+}
+
+.reo-tennis-reward {
+  background: #fff9e9;
+  border: 2px solid #f2d08d;
+  border-radius: 15px;
+  min-height: 68px;
+  transition: background .2s, transform .2s, box-shadow .2s;
+}
+
+.reo-tennis-reward > span {
+  font-size: 23px;
+  filter: drop-shadow(0 2px 1px #6c491d66);
+}
+
+.reo-tennis-reward strong {
+  color: #7b490c;
+  font-size: 15px;
+}
+
+.reo-tennis-reward small {
+  color: #784812;
+  font-size: 11px;
+}
+
+.reo-tennis-reward.is-earned {
+  background: linear-gradient(#fff7b0,#ffdf62);
+  border-color: #e99813;
+  box-shadow: 0 0 20px #f6cf59b7;
+  transform: translateY(-2px);
+}
+
+/* Cenário do jogo */
+
+.reo-tennis-court {
+  height: clamp(525px,62vw,590px);
+  min-height: 525px;
+  border: 3px solid #ffce62;
+  border-top: 0;
+  border-radius: 0 0 26px 26px;
+  background: linear-gradient(
+    180deg,
+    #5dbdfe 0%,
+    #ccf0ff 57%,
+    #eed7a5 57%,
+    #f6dbac
+  );
+  box-shadow: inset 0 -14px 26px #7e552933, 0 14px 24px #0004;
+}
+
+.reo-tennis-sky {
+  inset: 0 0 43%;
+  background: linear-gradient(180deg,#38a9f4,#9cdefa 85%,#daf6ff);
+}
+
+.reo-tennis-school {
+  top: 33%;
+  height: 29%;
+  opacity: 1;
+  border-top: 15px solid #efb47b;
+  border-bottom: 13px solid #deb487;
+  background:
+    linear-gradient(90deg,#d8a66a 0 9%,transparent 9% 91%,#d8a66a 91% 100%),
+    repeating-linear-gradient(90deg,#f7e5c2 0 10px,#a2d6ec 11px 70px,#fef4e2 71px 81px,#deb48d 82px 87px),
+    linear-gradient(#ffdfaa,#b7dff3);
+  box-shadow: 0 -9px 0 #e88f5f,0 12px 15px #3d7c7e30;
+}
+
+.reo-tennis-school::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 49%;
+  height: 10px;
+  background: #f5dcab;
+  box-shadow: 0 3px 0 #c69b6f;
+}
+
+.reo-tennis-ground {
+  inset: 59% 0 0;
+  background:
+    repeating-linear-gradient(85deg,transparent 0 75px,#e2bc846b 76px 78px),
+    repeating-linear-gradient(0deg,transparent 0 59px,#d9b28278 60px 62px),
+    linear-gradient(180deg,#f8e6bd,#ebc995);
+}
+
+.reo-tennis-ground::after {
+  content: '';
+  position: absolute;
+  inset: 18% 6% 8%;
+  border: 3px solid #ffffffb8;
+  border-radius: 4px;
+  transform: perspective(320px) rotateX(35deg);
+}
+
+.reo-tennis-tree {
+  top: 6%;
+  font-size: clamp(97px,13vw,150px);
+  filter: drop-shadow(0 5px 0 #5a952a55);
+}
+
+.reo-tennis-court.is-active .reo-tennis-tree {
+  animation: reo-tree-breeze 3.6s ease-in-out infinite alternate;
+}
+
+.reo-tennis-tree.tree-right {
+  animation-delay: -2s;
+}
+
+@keyframes reo-tree-breeze {
+  from { transform: rotate(-2deg); }
+  to { transform: rotate(2deg); }
+}
+
+.reo-tennis-scenery {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.reo-tennis-cloud {
+  position: absolute;
+  top: 8%;
+  width: 68px;
+  height: 26px;
+  background: #ffffffec;
+  border-radius: 80px;
+  box-shadow:
+    23px -10px 0 7px #ffffffec,
+    -22px -5px 0 3px #ffffffec;
+  opacity: .9;
+}
+
+.reo-tennis-cloud.cloud-a {
+  left: 28%;
+  animation: reo-cloud-move 16s ease-in-out infinite alternate;
+}
+
+.reo-tennis-cloud.cloud-b {
+  left: 76%;
+  top: 12%;
+  transform: scale(.7);
+  animation: reo-cloud-move 20s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes reo-cloud-move {
+  from { margin-left: -16px; }
+  to { margin-left: 22px; }
+}
+
+.reo-tennis-sun {
+  position: absolute;
+  right: 17%;
+  top: 3%;
+  font-size: 36px;
+  filter: drop-shadow(0 0 14px #fff2a1);
+}
+
+.reo-tennis-flower {
+  position: absolute;
+  bottom: 16%;
+  z-index: 0;
+  font-size: 20px;
+  filter: drop-shadow(0 2px 2px #0002);
+}
+
+.reo-tennis-flower.flower-a {
+  left: 13%;
+}
+
+.reo-tennis-flower.flower-b {
+  right: 6%;
+}
+
+.reo-tennis-school-sign {
+  position: absolute;
+  right: 11%;
+  top: 40%;
+  border: 3px solid #fff8b1;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: #228658;
+  font-size: 13px;
+  font-weight: 900;
+  box-shadow: 0 3px 0 #196247;
+}
+
+/* Bolacha original da REO — sem alterar o logótipo */
+
+.reo-tennis-mascot {
+  top: 24%;
+  left: 3%;
+  width: clamp(118px,23%,190px);
+  transform: rotate(-5deg);
+  transform-origin: 50% 85%;
+  filter: drop-shadow(0 5px 0 #0002);
+  animation: reo-cookie-idle 2.2s ease-in-out infinite;
+}
+
+@keyframes reo-cookie-idle {
+  0%,100% {
+    transform: rotate(-6deg) translateY(0);
+  }
+  50% {
+    transform: rotate(-1deg) translateY(-10px);
+  }
+}
+
+.reo-tennis-mascot.is-serving {
+  animation: reo-cookie-hit 390ms cubic-bezier(.2,.8,.3,1);
+}
+
+@keyframes reo-cookie-hit {
+  0% {
+    transform: rotate(-12deg) translate(-6px,4px) scale(.95);
+  }
+  42% {
+    transform: rotate(12deg) translate(18px,-8px) scale(1.08);
+  }
+  100% {
+    transform: rotate(-5deg) translate(0,0) scale(1);
+  }
+}
+
+.reo-tennis-cookie {
+  filter:
+    drop-shadow(0 6px 2px #0004)
+    drop-shadow(0 0 5px #f5ac21aa);
+}
+
+.reo-tennis-racket {
+  left: 82%;
+  top: -60%;
+  width: 56%;
+  height: 122%;
+  transform-origin: 15% 93%;
+  transform: rotate(4deg);
+  filter: drop-shadow(0 2px 2px #0008);
+}
+
+.reo-tennis-mascot.is-serving .reo-tennis-racket {
+  animation: reo-racket-power 390ms cubic-bezier(.15,.5,.3,1);
+}
+
+@keyframes reo-racket-power {
+  0% { transform: rotate(-45deg); }
+  42% { transform: rotate(75deg); }
+  68% { transform: rotate(54deg); }
+  100% { transform: rotate(4deg); }
+}
+
+.reo-tennis-mascot-shine {
+  position: absolute;
+  right: -35%;
+  top: -44%;
+  font-size: 34px;
+  color: #ffe071;
+  text-shadow: 0 0 14px #fff17d;
+  animation: reo-shine 1.4s infinite alternate ease-in-out;
+}
+
+@keyframes reo-shine {
+  from {
+    transform: scale(.7) rotate(-15deg);
+    opacity: .3;
+  }
+  to {
+    transform: scale(1.2) rotate(20deg);
+    opacity: 1;
+  }
+}
+
+.reo-tennis-impact {
+  left: 94%;
+  top: -20%;
+  font-size: 48px;
+  animation: reo-impact-pop .39s both;
+}
+
+@keyframes reo-impact-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  36% {
+    transform: scale(1.6);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(.8);
+    opacity: 0;
+  }
+}
+
+.reo-tennis-mascot-speech {
+  position: absolute;
+  left: 70%;
+  top: -30%;
+  z-index: 8;
+  min-width: 85px;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: rotate(8deg);
+  background: #ffe64d;
+  border: 3px solid #fff;
+  border-radius: 22px;
+  box-shadow: 0 4px 9px #0005;
+  padding: 7px 12px;
+  text-align: center;
+  color: #17325e;
+  font-size: 15px;
+  font-weight: 950;
+  animation: reo-tennis-speech-pop 700ms both;
+}
+
+.reo-tennis-mascot-speech.speech-bad {
+  background: #ff7385;
+  color: #fff;
+}
+
+@keyframes reo-tennis-speech-pop {
+  0% {
+    opacity: 0;
+    scale: .4;
+    transform: rotate(-8deg);
+  }
+  30% {
+    opacity: 1;
+    scale: 1.2;
+    transform: rotate(8deg);
+  }
+  70% {
+    opacity: 1;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: .9;
+    transform: translateY(-12px);
+  }
+}
+
+/* Resíduos animados */
+
+.reo-tennis-item {
+  left: 59%;
+  top: 24%;
+  width: min(39%,255px);
+  min-width: 0;
+  max-width: 43%;
+  border: 4px solid #fff;
+  border-bottom: 6px solid #afd7ee;
+  border-radius: 23px;
+  background: linear-gradient(165deg,#ffffff,#ecf9ff);
+  box-shadow:
+    0 12px 0 #1b65a558,
+    0 16px 32px #27547a65;
+  animation:
+    reo-item-entrance .3s ease-out both,
+    reo-item-hover 2s .3s ease-in-out infinite;
+}
+
+@keyframes reo-item-entrance {
+  from {
+    opacity: 0;
+    scale: .65;
+    transform: translate(-50%,-30%);
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    transform: translate(-50%,-50%);
+  }
+}
+
+@keyframes reo-item-hover {
+  0%,100% { margin-top: 0; }
+  50% { margin-top: -7px; }
+}
+
+.reo-tennis-item strong {
+  font-size: clamp(13px,1.8vw,18px);
+  font-weight: 950;
+  line-height: 1.25;
+}
+
+.reo-tennis-item small {
+  font-size: clamp(10px,1.3vw,13px);
+  font-weight: 700;
+  color: #41628c;
+}
+
+.reo-tennis-item.is-hidden {
+  opacity: .1;
+  animation: none;
+}
+
+.reo-tennis-shot-symbol {
+  animation-duration: 390ms;
+  filter: drop-shadow(0 5px 7px #05294b6b);
+}
+
+.reo-tennis-flight-glimmer {
+  position: absolute;
+  display: block;
+  left: 0;
+  top: 0;
+  color: #fff2a2;
+  font-size: 42px;
+  text-shadow: 0 0 15px #ffe04d;
+  animation: reo-tennis-fly 390ms ease-in forwards;
+}
+
+.reo-tennis-flight-glimmer.second {
+  font-size: 26px;
+  animation-delay: 55ms;
+  opacity: .7;
+}
+
+/* ECOBAGS e caixote */
+
+.reo-tennis-bins {
+  bottom: 21px;
+  left: 3%;
+  right: 3%;
+  gap: clamp(7px,1.3vw,16px);
+}
+
+.reo-tennis-bin {
+  height: clamp(146px,23vw,199px);
+  transition: transform .18s ease, filter .15s;
+}
+
+.reo-tennis-bin:not(:disabled):hover {
+  transform: translateY(-11px) scale(1.03);
+  filter: brightness(1.08);
+}
+
+.reo-tennis-bin-body {
+  inset: 18px 0 0;
+  border: 3px solid #ffffffb3;
+  border-radius: 8px 8px 14px 14px;
+  background:
+    linear-gradient(115deg,#ffffff69,transparent 38%,#1111111d 96%),
+    repeating-linear-gradient(89deg,#ffffff0c 0 3px,#ffffff05 4px 5px),
+    var(--bin-bg);
+  box-shadow:
+    inset 9px 0 14px #fff3,
+    inset -9px 0 18px #0003,
+    0 9px 0 #8f6d4060,
+    0 12px 16px #0004;
+}
+
+.reo-tennis-bin-body::before,
+.reo-tennis-bin-body::after {
+  filter: drop-shadow(0 2px 2px #0004);
+}
+
+.reo-tennis-bin-icon {
+  font-size: clamp(34px,4vw,51px);
+  filter: drop-shadow(0 2px 1px #0004);
+}
+
+.reo-tennis-bin-label {
+  font-size: clamp(11px,1.4vw,17px);
+  text-shadow: 0 2px 2px #0005;
+}
+
+.reo-tennis-bin.bin-amarelo .reo-tennis-bin-label {
+  color: #182b3c;
+  text-shadow: 0 1px 0 #fff5;
+}
+
+.reo-tennis-bin-key {
+  bottom: -10px;
+  width: 31px;
+  height: 31px;
+  font-size: 14px;
+  border-width: 3px;
+  background: #173458;
+  box-shadow: 0 4px 6px #0003;
+}
+
+.reo-tennis-bin.is-impact-good .reo-tennis-bin-body {
+  animation: reo-bag-bounce 650ms ease-in-out;
+  box-shadow:
+    0 0 0 4px #73f68b,
+    0 0 37px #37df72;
+}
+
+.reo-tennis-bin.is-impact-bad .reo-tennis-bin-body {
+  animation: reo-bag-shake 450ms ease-in-out;
+  box-shadow:
+    0 0 0 4px #ff5971,
+    0 0 37px #fa315e;
+}
+
+.reo-tennis-bin.is-answer .reo-tennis-bin-body {
+  outline: 5px solid #c9ff55;
+  outline-offset: 3px;
+}
+
+@keyframes reo-bag-bounce {
+  0%,100% {
+    transform: translateY(0) scale(1);
+  }
+  30% {
+    transform: translateY(-17px) scale(1.08,.95);
+  }
+  60% {
+    transform: translateY(3px) scale(.97,1.02);
+  }
+}
+
+@keyframes reo-bag-shake {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-8px) rotate(-3deg); }
+  50% { transform: translateX(7px) rotate(3deg); }
+  75% { transform: translateX(-4px); }
+}
+
+/* Explosão de estrelas e pontuação */
+
+.reo-tennis-bag-burst {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: block;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.reo-tennis-bag-burst > span {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  font-size: 39px;
+  color: #fff9b2;
+  text-shadow: 0 0 14px #fff173;
+  animation: reo-burst-stars 700ms both;
+}
+
+.reo-tennis-bag-burst > span:nth-child(1) {
+  --dx: 65px;
+  --dy: -65px;
+}
+
+.reo-tennis-bag-burst > span:nth-child(2) {
+  animation-delay: 50ms;
+  --dx: -70px;
+  --dy: -95px;
+}
+
+.reo-tennis-bag-burst > span:nth-child(3) {
+  --dx: 36px;
+  --dy: -112px;
+}
+
+.reo-tennis-bag-burst.burst-bad > span {
+  color: #ffe0e0;
+  text-shadow: 0 0 15px #ff3333;
+}
+
+@keyframes reo-burst-stars {
+  0% {
+    transform: translate(-50%,0) scale(.2);
+    opacity: 0;
+  }
+  20% { opacity: 1; }
+  100% {
+    transform: translate(var(--dx),var(--dy)) scale(1.4);
+    opacity: 0;
+  }
+}
+
+.reo-tennis-bag-burst strong {
+  position: absolute;
+  top: -52px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: clamp(20px,2.5vw,29px);
+  font-weight: 950;
+  color: #fff;
+  background: #10ad5a;
+  border-radius: 40px;
+  border: 3px solid white;
+  padding: 4px 13px;
+  box-shadow: 0 4px 13px #0005;
+  animation: reo-burst-score 680ms ease-out both;
+}
+
+.reo-tennis-bag-burst.burst-bad strong {
+  background: #e02d47;
+}
+
+@keyframes reo-burst-score {
+  from {
+    opacity: 0;
+    transform: translate(-50%,15px) scale(.45);
+  }
+  40% {
+    opacity: 1;
+    transform: translate(-50%,-12px) scale(1.3);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%,-35px) scale(1);
+  }
+}
+
+/* Feedback educativo */
+
+.reo-tennis-feedback {
+  top: 2%;
+  background: #14854ef2;
+  border: 3px solid #fff;
+  border-radius: 19px;
+  padding: 10px 15px;
+  box-shadow:
+    0 7px 0 #064b37ad,
+    0 12px 30px #002e304d;
+  animation: reo-feedback-arrive .26s ease-out;
+}
+
+.reo-tennis-feedback.bad {
+  background: #bc294af5;
+  border-color: #fff7e8;
+}
+
+.reo-tennis-feedback strong {
+  font-size: 31px;
+}
+
+.reo-tennis-feedback b {
+  font-size: 15px;
+}
+
+.reo-tennis-feedback small {
+  font-size: 11px;
+}
+
+@keyframes reo-feedback-arrive {
+  from {
+    transform: translate(-50%,-24px) scale(.7);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%,0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Celebração aos 100 e 130 pontos */
+
+.reo-tennis-achievement-pop {
+  position: absolute;
+  z-index: 13;
+  left: 50%;
+  top: 36%;
+  transform: translate(-50%,-50%);
+  padding: 13px 22px;
+  border: 4px solid #fff;
+  border-radius: 26px;
+  color: #1f3367;
+  text-align: center;
+  background: linear-gradient(#fffac2,#ffc334);
+  box-shadow:
+    0 0 35px #fff79f,
+    0 10px 0 #b8792b;
+  pointer-events: none;
+  animation: reo-achievement-appear 1.1s both;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  width: max-content;
+  max-width: 92%;
+}
+
+.reo-tennis-achievement-pop span {
+  font-size: 42px;
+}
+
+.reo-tennis-achievement-pop strong {
+  font-size: clamp(18px,3.1vw,31px);
+  line-height: 1.15;
+  font-weight: 950;
+}
+
+@keyframes reo-achievement-appear {
+  0% {
+    opacity: 0;
+    scale: .3;
+    transform: translate(-50%,0) rotate(-7deg);
+  }
+  28% {
+    opacity: 1;
+    scale: 1.12;
+    transform: translate(-50%,-50%) rotate(3deg);
+  }
+  65% {
+    opacity: 1;
+    scale: 1;
+    transform: translate(-50%,-50%);
+  }
+  100% {
+    opacity: 0;
+    scale: 1;
+    transform: translate(-50%,-90%);
+  }
+}
+
+/* Ecrãs de início, pausa e resultado */
+
+.reo-tennis-overlay {
+  background: #0d2845a8;
+  backdrop-filter: blur(5px);
+}
+
+.reo-tennis-modal {
+  border: 3px solid #ffcc4d;
+  border-radius: 29px;
+  box-shadow:
+    0 12px 0 #071528b5,
+    0 23px 55px #0006;
+  position: relative;
+}
+
+.reo-tennis-modal h2 {
+  font-size: clamp(23px,3.5vw,32px);
+  text-shadow: 0 2px 0 #0004;
+}
+
+.reo-tennis-primary {
+  border: 3px solid #fff5;
+  box-shadow: 0 5px 0 #b98314;
+  transition: transform .15s ease, background .15s ease;
+}
+
+.reo-tennis-primary:hover {
+  transform: translateY(-3px);
+}
+
+.reo-tennis-modal.is-win {
+  background: linear-gradient(160deg,#16572a,#0c2e2c);
+  border-color: #ffe16d;
+  overflow: hidden;
+}
+
+.reo-tennis-modal.is-win .reo-tennis-primary {
+  box-shadow: 0 5px 0 #237b47;
+}
+
+.reo-tennis-victory-fireworks {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.reo-tennis-victory-fireworks span {
+  --angle: calc(var(--piece) * 30deg);
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  color: #ffe35b;
+  font-size: 23px;
+  text-shadow: 0 0 10px #fff;
+  opacity: 0;
+  animation: reo-firework 1.3s ease-out infinite;
+  animation-delay: calc(var(--piece) * -90ms);
+}
+
+.reo-tennis-victory-fireworks span:nth-child(3n) {
+  color: #61ffc9;
+}
+
+.reo-tennis-victory-fireworks span:nth-child(4n) {
+  color: #fa80ff;
+}
+
+@keyframes reo-firework {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--angle)) translateX(0) scale(.2);
+  }
+  30% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--angle)) translateX(155px) scale(1);
+  }
+}
+
+.reo-tennis-modal.is-win > :not(.reo-tennis-victory-fireworks) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Telemóveis */
+
+@media (max-width: 580px) {
+  .reo-tennis-hud {
+    gap: 4px;
+    padding: 6px;
+  }
+
+  .reo-tennis-stat {
+    min-width: 0;
+    padding: 7px 5px;
+  }
+
+  .reo-tennis-stat span {
+    font-size: 9px;
+  }
+
+  .reo-tennis-stat strong {
+    font-size: 20px;
+  }
+
+  .reo-tennis-progress-row {
+    font-size: 9px;
+  }
+
+  .reo-tennis-reward {
+    min-height: 64px;
+  }
+
+  .reo-tennis-reward strong {
+    font-size: 12px;
+  }
+
+  .reo-tennis-reward small {
+    font-size: 10px;
+  }
+
+  .reo-tennis-reward > span {
+    font-size: 18px;
+  }
+
+  .reo-tennis-court {
+    height: 510px;
+    min-height: 510px;
+  }
+
+  .reo-tennis-mascot {
+    left: 5%;
+    top: 28%;
+    width: 32%;
+  }
+
+  .reo-tennis-racket {
+    top: -47%;
+    left: 82%;
+  }
+
+  .reo-tennis-item {
+    top: 21%;
+    left: 64%;
+    width: 52%;
+    max-width: 55%;
+    padding: 8px;
+  }
+
+  .reo-tennis-item strong {
+    font-size: 13px;
+  }
+
+  .reo-tennis-item small {
+    font-size: 10px;
+  }
+
+  .reo-tennis-bins {
+    bottom: 22px;
+    left: 2%;
+    right: 2%;
+    gap: 5px;
+  }
+
+  .reo-tennis-bin {
+    height: 143px;
+  }
+
+  .reo-tennis-bin-body {
+    inset: 17px 0 0;
+    border-width: 2px;
+  }
+
+  .reo-tennis-bin-icon {
+    font-size: 30px;
+  }
+
+  .reo-tennis-bin-label {
+    font-size: 10px;
+    line-height: 1.15;
+  }
+
+  .reo-tennis-bin-key {
+    width: 27px;
+    height: 27px;
+    font-size: 12px;
+  }
+
+  .reo-tennis-school-sign {
+    font-size: 10px;
+    top: 44%;
+  }
+
+  .reo-tennis-sun {
+    right: 6%;
+  }
+
+  .reo-tennis-feedback {
+    top: 2%;
+    max-width: 95%;
+    padding: 7px 9px;
+  }
+
+  .reo-tennis-feedback strong {
+    font-size: 23px;
+  }
+
+  .reo-tennis-feedback b {
+    font-size: 12px;
+  }
+
+  .reo-tennis-feedback small {
+    font-size: 10px;
+  }
+
+  .reo-tennis-achievement-pop {
+    top: 36%;
+    padding: 9px 13px;
+  }
+
+  .reo-tennis-achievement-pop span {
+    font-size: 31px;
+  }
+
+  .reo-tennis-achievement-pop strong {
+    font-size: 19px;
+  }
+
+  .reo-tennis-bag-burst strong {
+    font-size: 18px;
+  }
+
+  .reo-tennis-mascot-speech {
+    font-size: 12px;
+    padding: 5px 8px;
+    left: 65%;
+    min-width: 64px;
+  }
+}
+
+/* Acessibilidade: respeitar a preferência por movimento reduzido */
+
+@media (prefers-reduced-motion: reduce) {
+  .reo-tennis-page .reo-tennis-mascot,
+  .reo-tennis-page .reo-tennis-tree,
+  .reo-tennis-page .reo-tennis-item,
+  .reo-tennis-page .reo-tennis-cloud,
+  .reo-tennis-page .reo-tennis-flight-glimmer,
+  .reo-tennis-page .reo-tennis-achievement-pop,
+  .reo-tennis-page .reo-tennis-bag-burst > *,
+  .reo-tennis-page .reo-tennis-victory-fireworks span,
+  .reo-tennis-page .reo-tennis-reward,
+  .reo-tennis-score-pop,
+  .reo-tennis-mascot-speech {
+    animation: none !important;
+  }
+}
