@@ -6,7 +6,7 @@ import Logo from '../Logo';
 import './TennisEducation.css';
 
 type BinId = 'azul' | 'amarelo' | 'verde' | 'preto';
-type GamePhase = 'intro' | 'playing' | 'paused' | 'won' | 'lost';
+type GamePhase = 'intro' | 'playing' | 'paused' | 'won' | 'lost' | 'timeup';
 
 type Waste = {
   name: string;
@@ -26,9 +26,11 @@ type Shot = {
   correct: boolean;
 };
 
-const START_SCORE = 100;
-const WIN_SCORE = 1000;
-const SHOT_DURATION = 720;
+const START_SCORE = 60;
+const MAX_ERRORS = 1; // O segundo erro termina o jogo.
+const WIN_SCORE = 200;
+const GAME_DURATION_MS = 30_000;
+const SHOT_DURATION = 430;
 
 // Separação adaptada à realidade da escola: restos alimentares vão para o indiferenciado.
 const WASTE: Waste[] = [
@@ -78,8 +80,9 @@ function formatTime(seconds: number) {
 const TennisEducation: React.FC = () => {
   const [phase, setPhase] = useState<GamePhase>('intro');
   const [score, setScore] = useState(START_SCORE);
-  const [seconds, setSeconds] = useState(0);
+  const [remainingMs, setRemainingMs] = useState(GAME_DURATION_MS);
   const [correctAnswers, setCorrectAnswers] = useState(0);
+  const [errors, setErrors] = useState(0);
   const [waste, setWaste] = useState<Waste>(() => nextWaste());
   const [shot, setShot] = useState<Shot | null>(null);
   const [feedback, setFeedback] = useState<{ message: string; points: number; correct: boolean } | null>(null);
@@ -88,13 +91,34 @@ const TennisEducation: React.FC = () => {
   const wasteRef = useRef<HTMLDivElement>(null);
   const binRefs = useRef<Partial<Record<BinId, HTMLButtonElement | null>>>({});
   const busyRef = useRef(false);
+  const remainingMsRef = useRef(GAME_DURATION_MS);
+  const deadlineRef = useRef<number | null>(null);
   const shotTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (phase !== 'playing') return;
-    const interval = window.setInterval(() => setSeconds((value) => value + 1), 1000);
-    return () => window.clearInterval(interval);
+
+    // Contagem real de 30 segundos; quando pausado, o tempo fica congelado.
+    const deadline = Date.now() + remainingMsRef.current;
+    deadlineRef.current = deadline;
+
+    const updateTimer = () => {
+      const timeLeft = Math.max(0, deadline - Date.now());
+      remainingMsRef.current = timeLeft;
+      setRemainingMs(timeLeft);
+      // Se já foi lançada uma raquetada, aguardamos pelo resultado antes de terminar.
+      if (timeLeft === 0 && !busyRef.current) {
+        setPhase((current) => current === 'playing' ? 'timeup' : current);
+      }
+    };
+
+    const interval = window.setInterval(updateTimer, 100);
+    return () => {
+      window.clearInterval(interval);
+      remainingMsRef.current = Math.max(0, deadline - Date.now());
+      deadlineRef.current = null;
+    };
   }, [phase]);
 
   useEffect(() => {
@@ -109,8 +133,11 @@ const TennisEducation: React.FC = () => {
     if (feedbackTimerRef.current !== null) clearTimeout(feedbackTimerRef.current);
     busyRef.current = false;
     setScore(START_SCORE);
-    setSeconds(0);
+    remainingMsRef.current = GAME_DURATION_MS;
+    deadlineRef.current = null;
+    setRemainingMs(GAME_DURATION_MS);
     setCorrectAnswers(0);
+    setErrors(0);
     setWaste(nextWaste());
     setShot(null);
     setFeedback(null);
@@ -118,7 +145,8 @@ const TennisEducation: React.FC = () => {
   }, []);
 
   const chooseBin = useCallback((chosen: BinId) => {
-    if (phase !== 'playing' || busyRef.current) return;
+    if (phase !== 'playing' || busyRef.current || remainingMsRef.current <= 0 ||
+      (deadlineRef.current !== null && Date.now() >= deadlineRef.current)) return;
     const court = courtRef.current;
     const source = wasteRef.current;
     const destination = binRefs.current[chosen];
@@ -150,7 +178,9 @@ const TennisEducation: React.FC = () => {
     shotTimerRef.current = setTimeout(() => {
       shotTimerRef.current = null;
       const newScore = Math.max(0, score + points);
+      const newErrors = errors + (correct ? 0 : 1);
       setScore(newScore);
+      if (!correct) setErrors(newErrors);
       setShot(null);
       setFeedback({
         message: correct ? 'Muito bem! Resíduo no sítio certo.' : 'Ops! Esse resíduo não é para aqui.',
@@ -163,14 +193,16 @@ const TennisEducation: React.FC = () => {
 
       if (newScore >= WIN_SCORE) {
         setPhase('won');
-      } else if (newScore <= 0) {
+      } else if (newScore <= 0 || newErrors > MAX_ERRORS) {
         setPhase('lost');
+      } else if (deadlineRef.current !== null && Date.now() >= deadlineRef.current) {
+        setPhase('timeup');
       } else {
         setWaste(nextWaste(waste));
       }
       busyRef.current = false;
     }, SHOT_DURATION);
-  }, [phase, score, waste]);
+  }, [phase, score, waste, errors]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -195,7 +227,7 @@ const TennisEducation: React.FC = () => {
     '--end-y': `${shot.endY}px`,
   } as React.CSSProperties) : undefined;
 
-  const percent = Math.min(100, (score / WIN_SCORE) * 100);
+  const percent = Math.min(100, Math.max(0, ((score - START_SCORE) / (WIN_SCORE - START_SCORE)) * 100));
 
   return (
     <section className="reo-tennis-page">
@@ -216,9 +248,9 @@ const TennisEducation: React.FC = () => {
 
       <div className="reo-tennis-hud" aria-label="Informações do jogo">
         <div className="reo-tennis-stat"><span>Pontos</span><strong>{score}</strong></div>
-        <div className="reo-tennis-stat"><span>Tempo</span><strong>{formatTime(seconds)}</strong></div>
+        <div className="reo-tennis-stat"><span>Tempo restante</span><strong>{formatTime(Math.ceil(remainingMs / 1000))}</strong></div>
         <div className="reo-tennis-progress">
-          <div className="reo-tennis-progress-row"><span>Meta: 1000 pontos</span><strong>{Math.round(percent)}%</strong></div>
+          <div className="reo-tennis-progress-row"><span>200 pontos · Erros: {errors}/{MAX_ERRORS}</span><strong>{Math.round(percent)}%</strong></div>
           <div className="reo-tennis-progress-track"><div style={{ width: `${percent}%` }} /></div>
         </div>
         <button
@@ -310,7 +342,7 @@ const TennisEducation: React.FC = () => {
                   <span>Indiferenciado <b>+5</b></span>
                   <span>Recipiente errado <b>−20</b></span>
                 </div>
-                <p className="reo-tennis-fineprint">Começas com 100 pontos. Chega aos 1000 antes de ficares a zero.</p>
+                <p className="reo-tennis-fineprint">Tens 30 segundos! Começas com 60 pontos. Podes errar uma vez; ao segundo erro, perdes. Chega aos 200 pontos antes de o tempo terminar!</p>
                 <button className="reo-tennis-primary" type="button" onClick={startGame}><Play size={18} fill="currentColor" /> Começar missão</button>
               </div>
             )}
@@ -327,8 +359,16 @@ const TennisEducation: React.FC = () => {
                 <span className="reo-tennis-confetti" aria-hidden="true">🎉 🏆 🎾 ♻️ 🎉</span>
                 <Trophy size={46} className="reo-tennis-modal-icon" aria-hidden="true" />
                 <h2 id="reo-tennis-won-title">Parabéns!<br />És um ÁS da Reciclagem!</h2>
-                <p>Alcançaste os 1000 pontos! A REO e o Tennis Education agradecem a tua ajuda para tornar a nossa escola mais sustentável!</p>
+                <p>Alcançaste os 200 pontos! A REO e o Tennis Education agradecem a tua ajuda para tornar a nossa escola mais sustentável!</p>
                 <button className="reo-tennis-primary" type="button" onClick={startGame}><RotateCcw size={18} /> Jogar novamente</button>
+              </div>
+            )}
+            {phase === 'timeup' && (
+              <div className="reo-tennis-modal is-loss" role="alertdialog" aria-labelledby="reo-tennis-timeup-title">
+                <span aria-hidden="true" className="reo-tennis-sad">⏱️</span>
+                <h2 id="reo-tennis-timeup-title">Tempo esgotado!</h2>
+                <p>Terminaste com {score} pontos e {correctAnswers} respostas certas. Tenta chegar aos 200 pontos para seres um ÁS da Reciclagem!</p>
+                <button className="reo-tennis-primary" type="button" onClick={startGame}><RotateCcw size={18} /> Tentar novamente</button>
               </div>
             )}
             {phase === 'lost' && (
@@ -336,7 +376,7 @@ const TennisEducation: React.FC = () => {
                 <span aria-hidden="true" className="reo-tennis-sad">😔</span>
                 <h2 id="reo-tennis-lost-title">Fim de jogo!</h2>
                 <p>A REO e o Tennis Education precisam da tua ajuda para reciclar melhor!</p>
-                <p className="reo-tennis-fineprint">Chegaste aos 0 pontos, mas podes tentar novamente.</p>
+                <p className="reo-tennis-fineprint">{errors > MAX_ERRORS ? 'Cometeste dois erros. Só é permitido um erro por partida.' : 'Chegaste aos 0 pontos.'} Podes tentar novamente.</p>
                 <button className="reo-tennis-primary" type="button" onClick={startGame}><RotateCcw size={18} /> Tentar novamente</button>
               </div>
             )}
