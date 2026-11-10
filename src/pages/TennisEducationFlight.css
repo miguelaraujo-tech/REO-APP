@@ -1,8 +1,9 @@
 
-/* Um set para o planeta — entrada dos resíduos, reações da Bolacha
-   e faixa institucional compacta. */
+/* Um set para o planeta: entrada dos resíduos, reações da Bolacha
+   e faixa institucional compacta.
+   Regras, outras páginas e logótipos mantidos. */
 
-/* Faixa laranja: mais baixa apenas durante o jogo. */
+/* Faixa institucional compacta apenas no jogo. */
 html.reo-tennis-compact-header header > img {
   display: block;
   width: 100%;
@@ -16,7 +17,7 @@ html.reo-tennis-compact-header main {
   padding-top: 12px;
 }
 
-/* Cartão com a pergunta. */
+/* Painel com a pergunta. */
 .reo-tennis-page .reo-tennis-item {
   left: 69%;
   top: 20%;
@@ -36,7 +37,7 @@ html.reo-tennis-compact-header main {
   font-size: clamp(11px, 1.5vw, 13px);
 }
 
-/* Resíduo a voar até à raquete. */
+/* Resíduo a voar da direita até junto da raquete. */
 .reo-tennis-page .reo-tennis-incoming {
   position: absolute;
   left: 37%;
@@ -72,7 +73,12 @@ html.reo-tennis-compact-header main {
   width: 54px;
   height: 4px;
   border-radius: 100px;
-  background: linear-gradient(90deg, transparent, #fffbd1 65%, #f7d54b);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #fffbd1 65%,
+    #f7d54b
+  );
   box-shadow:
     0 -13px 0 -1px #fff9b9,
     0 13px 0 -1px #ffffffa6;
@@ -84,24 +90,42 @@ html.reo-tennis-compact-header main {
   from {
     opacity: .4;
     transform:
-      translate(calc(-50% + min(62vw, 460px)), calc(-50% - 100px))
-      rotate(42deg) scale(.66);
+      translate(
+        calc(-50% + min(62vw, 460px)),
+        calc(-50% - 100px)
+      )
+      rotate(42deg)
+      scale(.66);
   }
+
   67% {
     opacity: 1;
     transform:
-      translate(calc(-50% - 15px), calc(-50% + 8px))
-      rotate(-13deg) scale(1.1);
+      translate(
+        calc(-50% - 15px),
+        calc(-50% + 8px)
+      )
+      rotate(-13deg)
+      scale(1.1);
   }
+
   to {
     opacity: 1;
-    transform: translate(-50%, -50%) rotate(-5deg) scale(1);
+    transform:
+      translate(-50%, -50%)
+      rotate(-5deg)
+      scale(1);
   }
 }
 
 @keyframes reo-waste-hover {
-  0%, 100% { margin-top: 0; }
-  50% { margin-top: -8px; }
+  0%, 100% {
+    margin-top: 0;
+  }
+
+  50% {
+    margin-top: -8px;
+  }
 }
 
 @keyframes reo-waste-wind {
@@ -109,60 +133,62 @@ html.reo-tennis-compact-header main {
     opacity: 1;
     transform: scaleX(1.3);
   }
+
   85%, 100% {
     opacity: 0;
     transform: scaleX(.4);
   }
 }
 
-/* A Bolacha celebra quando acerta. */
+/* A Bolacha celebra os acertos e reage aos erros.
+   O logótipo original mantém-se intacto. */
+
 .reo-tennis-page .reo-tennis-mascot.is-celebrating {
   animation: reo-cookie-yes 750ms ease-out both;
+}
+
+.reo-tennis-page .reo-tennis-mascot.is-disappointed {
+  animation: reo-cookie-oh-no 700ms ease-in-out both;
 }
 
 @keyframes reo-cookie-yes {
   0%, 100% {
     transform: rotate(-5deg) translateY(0) scale(1);
   }
+
   30% {
     transform: rotate(10deg) translateY(-25px) scale(1.12);
   }
+
   58% {
     transform: rotate(-12deg) translateY(-8px) scale(1.05);
   }
+
   78% {
     transform: rotate(3deg) translateY(-15px) scale(1.08);
   }
-}
-
-/* A Bolacha reage quando falha. */
-.reo-tennis-page .reo-tennis-mascot.is-disappointed {
-  animation: reo-cookie-oh-no 700ms ease-in-out both;
 }
 
 @keyframes reo-cookie-oh-no {
   0%, 100% {
     transform: rotate(-5deg) translateY(0) scale(1);
   }
+
   30% {
     transform: rotate(-17deg) translateY(9px) scale(.92);
   }
+
   65% {
     transform: rotate(9deg) translateY(4px) scale(.97);
   }
 }
 
-/* A raquete também reage. */
+/* Reações da raquete. */
+
 .reo-tennis-page
 .reo-tennis-mascot.is-celebrating
 .reo-tennis-racket {
   animation: reo-racket-cheer 700ms ease-in-out both;
-}
-
-@keyframes reo-racket-cheer {
-  0%, 100% { transform: rotate(4deg); }
-  35% { transform: rotate(-42deg); }
-  66% { transform: rotate(-14deg); }
 }
 
 .reo-tennis-page
@@ -171,12 +197,32 @@ html.reo-tennis-compact-header main {
   animation: reo-racket-sad 700ms ease-in-out both;
 }
 
-@keyframes reo-racket-sad {
-  0%, 100% { transform: rotate(4deg); }
-  50% { transform: rotate(50deg); }
+@keyframes reo-racket-cheer {
+  0%, 100% {
+    transform: rotate(4deg);
+  }
+
+  35% {
+    transform: rotate(-42deg);
+  }
+
+  66% {
+    transform: rotate(-14deg);
+  }
 }
 
-/* Emoji de reação. */
+@keyframes reo-racket-sad {
+  0%, 100% {
+    transform: rotate(4deg);
+  }
+
+  50% {
+    transform: rotate(50deg);
+  }
+}
+
+/* Emojis de reação. */
+
 .reo-tennis-page .reo-tennis-reaction-emoji {
   position: absolute;
   z-index: 9;
@@ -193,21 +239,25 @@ html.reo-tennis-compact-header main {
     transform: translateY(22px) scale(.2);
     opacity: 0;
   }
+
   23% {
     transform: translateY(-13px) scale(1.25);
     opacity: 1;
   }
+
   65% {
     transform: translateY(-10px) scale(1);
     opacity: 1;
   }
+
   100% {
     transform: translateY(-28px) scale(.85);
     opacity: 0;
   }
 }
 
-/* Balão: É PONTO! / OH, NÃO! */
+/* Balões: É PONTO!, SUPER JOGADA! e OH, NÃO! */
+
 .reo-tennis-page .reo-tennis-mascot-speech {
   left: 75%;
   top: -38%;
@@ -221,7 +271,8 @@ html.reo-tennis-compact-header main {
   animation: reo-reaction-speech 850ms ease-out both;
 }
 
-.reo-tennis-page .reo-tennis-mascot-speech.speech-bad {
+.reo-tennis-page
+.reo-tennis-mascot-speech.speech-bad {
   box-shadow:
     0 0 18px #ff8383bb,
     0 6px 11px #0005;
@@ -232,21 +283,25 @@ html.reo-tennis-compact-header main {
     opacity: 0;
     transform: rotate(-12deg) scale(.45);
   }
+
   20% {
     opacity: 1;
     transform: rotate(6deg) scale(1.16);
   }
+
   67% {
     opacity: 1;
     transform: rotate(-2deg) scale(1);
   }
+
   100% {
     opacity: 0;
     transform: translateY(-20px) scale(.86);
   }
 }
 
-/* Ajustes para telemóveis. */
+/* Telemóveis: mantém as ECOBAGS fáceis de selecionar. */
+
 @media (max-width: 580px) {
   html.reo-tennis-compact-header header > img {
     height: 57px;
@@ -297,7 +352,8 @@ html.reo-tennis-compact-header main {
   }
 }
 
-/* Movimento reduzido, quando configurado no dispositivo. */
+/* Preferência de movimento reduzido. */
+
 @media (prefers-reduced-motion: reduce) {
   .reo-tennis-page .reo-tennis-incoming,
   .reo-tennis-page .reo-tennis-incoming-trail,
@@ -308,3 +364,225 @@ html.reo-tennis-compact-header main {
     animation: none !important;
   }
 }
+
+/* ============================================================
+   NOVO: LAYOUT AUTOMÁTICO PARA COMPUTADORES E PORTÁTEIS
+
+   Aplica-se apenas à página do jogo, quando o ecrã tem
+   uma altura até 1100px.
+
+   Ajusta o campo ao espaço disponível sem utilizar zoom.
+   ============================================================ */
+
+@media (min-width: 581px) and (max-height: 1100px) {
+
+  /* Cabeçalho principal mais compacto durante o jogo. */
+
+  html.reo-tennis-compact-header
+  header > div:first-child {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  html.reo-tennis-compact-header
+  header > div:first-child > a:first-child > img {
+    width: 38px;
+    height: 38px;
+  }
+
+  /* Faixa laranja sempre presente, com todos os logótipos. */
+
+  html.reo-tennis-compact-header header > img {
+    height: clamp(40px, 6vh, 58px);
+    object-fit: contain;
+  }
+
+  html.reo-tennis-compact-header main {
+    padding-top: 6px;
+    padding-bottom: 8px;
+  }
+
+  /* Título e logótipos da parceria. */
+
+  .reo-tennis-page .reo-tennis-back {
+    margin-bottom: 2px;
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  .reo-tennis-page .reo-tennis-title {
+    margin-bottom: 7px;
+  }
+
+  .reo-tennis-page .reo-tennis-partners {
+    gap: 8px;
+    margin-bottom: 0;
+  }
+
+  .reo-tennis-page .reo-tennis-partner-logo {
+    width: 28px;
+    height: 28px;
+  }
+
+  .reo-tennis-page .reo-tennis-partners > span {
+    font-size: 18px;
+  }
+
+  .reo-tennis-page .reo-tennis-title h1 {
+    margin: 1px 0 2px;
+    font-size: clamp(20px, 2vw, 23px);
+    line-height: 1.13;
+  }
+
+  .reo-tennis-page .reo-tennis-title p {
+    margin-top: 2px;
+    font-size: 10px;
+    line-height: 1.1;
+  }
+
+  .reo-tennis-page .reo-tennis-title > span {
+    margin-top: 1px;
+    font-size: 11px;
+    line-height: 1.1;
+  }
+
+  /* Pontuação e cronómetro. */
+
+  .reo-tennis-page .reo-tennis-hud {
+    padding: 6px 8px;
+    gap: 7px;
+  }
+
+  .reo-tennis-page .reo-tennis-stat {
+    min-width: 68px;
+    padding: 4px 6px;
+  }
+
+  .reo-tennis-page .reo-tennis-stat span {
+    font-size: 10px;
+  }
+
+  .reo-tennis-page .reo-tennis-stat strong {
+    font-size: 22px;
+  }
+
+  .reo-tennis-page .reo-tennis-progress-track {
+    height: 11px;
+  }
+
+  .reo-tennis-page .reo-tennis-sound,
+  .reo-tennis-page .reo-tennis-pause {
+    width: 35px;
+    height: 35px;
+    flex-basis: 35px;
+  }
+
+  /* Recompensas de 100, 130 e 200 pontos. */
+
+  .reo-tennis-page .reo-tennis-rewards {
+    padding: 5px 7px;
+    gap: 6px;
+  }
+
+  .reo-tennis-page .reo-tennis-reward {
+    height: 54px;
+    min-height: 54px;
+    padding: 2px 3px;
+    gap: 0;
+  }
+
+  .reo-tennis-page .reo-tennis-reward > span {
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .reo-tennis-page .reo-tennis-reward strong {
+    font-size: 12px;
+    line-height: 1.1;
+  }
+
+  .reo-tennis-page .reo-tennis-reward small {
+    font-size: 10px;
+    line-height: 1.1;
+  }
+
+  /* Altura adaptativa do campo.
+     É aqui que eliminamos o excesso de altura. */
+
+  .reo-tennis-page .reo-tennis-court {
+    height: clamp(320px, calc(100dvh - 412px), 535px);
+    min-height: 320px;
+  }
+
+  /* ECOBAGS mantidas grandes para as crianças. */
+
+  .reo-tennis-page .reo-tennis-bins {
+    bottom: 13px;
+  }
+
+  .reo-tennis-page .reo-tennis-bin {
+    height: clamp(122px, 17vh, 160px);
+  }
+
+  .reo-tennis-page .reo-tennis-bin-body {
+    inset: 17px 0 0;
+  }
+
+  .reo-tennis-page .reo-tennis-bin-icon {
+    font-size: clamp(30px, 3.4vw, 43px);
+  }
+
+  .reo-tennis-page .reo-tennis-bin-label {
+    font-size: clamp(11px, 1.15vw, 14px);
+  }
+
+  /* Bolacha visível, sem ficar escondida pelos sacos. */
+
+  .reo-tennis-page .reo-tennis-mascot {
+    top: 23%;
+    left: 3%;
+    width: clamp(102px, 17%, 145px);
+  }
+
+  .reo-tennis-page .reo-tennis-tree {
+    font-size: clamp(85px, 9vw, 115px);
+  }
+
+  /* Pergunta e resíduo a voar. */
+
+  .reo-tennis-page .reo-tennis-item {
+    top: 21%;
+    min-height: 74px;
+    padding: 7px 10px;
+  }
+
+  .reo-tennis-page .reo-tennis-incoming {
+    top: 36%;
+    width: 82px;
+    height: 86px;
+  }
+
+  .reo-tennis-page .reo-tennis-incoming > :first-child {
+    max-height: 78px;
+    max-width: 78px;
+  }
+
+  /* Instruções e recorde abaixo do campo. */
+
+  .reo-tennis-page .reo-tennis-controls {
+    margin: 6px auto 2px;
+    font-size: 11px;
+    line-height: 1.3;
+  }
+
+  .reo-tennis-page .reo-tennis-tip,
+  .reo-tennis-page .reo-tennis-record {
+    margin-top: 2px;
+    margin-bottom: 3px;
+    font-size: 10px;
+    line-height: 1.3;
+  }
+}
+
+/* Em janelas muito baixas, a página pode continuar a deslizar.
+   Nunca escondemos o campo, os botões ou os logótipos. */
