@@ -56,12 +56,10 @@ const WIN_SCORE = 200;
 const GAME_DURATION_MS = 90_000;
 const SHOT_DURATION = 330;
 
-// O lixo demora 5,2 segundos até à raquete.
-// O aluno pode escolher durante todo o voo.
-// Depois mantém-se próximo até aos 11,5 segundos,
-// sem penalização por não responder.
+// Sem resposta, o lixo demora 5,2 segundos até à cabeça da Bolacha.
+// Ao escolher, a Bolacha avança rapidamente e raqueta logo.
 const CONTACT_MS = 5200;
-const PASS_MS = 11500;
+const APPROACH_MS = 180;
 
 const MAX_ERRORS = 1;
 const RECORD_KEY = 'reoTennisRecorde';
@@ -345,7 +343,6 @@ const TennisEducation: React.FC = () => {
   const [incomingToken, setIncomingToken] = useState(0);
   const [aimedBin, setAimedBin] = useState<BinId | null>(null);
   const [inContact, setInContact] = useState(false);
-  const [missMessage, setMissMessage] = useState(false);
   const [shot, setShot] = useState<Shot | null>(null);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [lastMistake, setLastMistake] = useState<string | null>(null);
@@ -353,6 +350,21 @@ const TennisEducation: React.FC = () => {
 
   const courtRef = useRef<HTMLDivElement>(null);
   const wasteRef = useRef<HTMLDivElement>(null);
+  const mascotRef = useRef<HTMLDivElement>(null);
+  const racketRef = useRef<HTMLDivElement>(null);
+  const racketHeadRef = useRef<SVGEllipseElement>(null);
+  const mascotOffsetRef = useRef({ x: 0, y: 0 });
+  const approachRef = useRef<{
+    elapsed: number;
+    x: number;
+    y: number;
+    fromX: number;
+    fromY: number;
+    toX: number;
+    toY: number;
+    racketX: number;
+    racketY: number;
+  } | null>(null);
   const binRefs = useRef<
     Partial<Record<BinId, HTMLButtonElement | null>>
   >({});
@@ -490,6 +502,8 @@ const TennisEducation: React.FC = () => {
   const showWaste = useCallback((nextWaste: Waste) => {
     flightElapsedRef.current = 0;
     chosenRef.current = null;
+    approachRef.current = null;
+    if (racketRef.current) racketRef.current.style.translate = '0px 0px';
 
     setAimedBin(null);
     setInContact(false);
@@ -512,6 +526,8 @@ const TennisEducation: React.FC = () => {
     wasteQueueRef.current = shuffleWaste();
     remainingMsRef.current = GAME_DURATION_MS;
     lastFrameRef.current = null;
+    mascotOffsetRef.current = { x: 0, y: 0 };
+    if (mascotRef.current) mascotRef.current.style.translate = '0px 0px';
 
     setRemainingMs(GAME_DURATION_MS);
     setScore(START_SCORE);
@@ -522,13 +538,12 @@ const TennisEducation: React.FC = () => {
     setImpact(null);
     setShot(null);
     setFeedback(null);
-    setMissMessage(false);
 
     showWaste(getNextWaste());
     setPhase('playing');
   }, [getNextWaste, showWaste]);
 
-  // A Bolacha só raqueta quando o lixo chega à zona da raquete.
+  // A raquetada parte da posição real onde a Bolacha intercetou o lixo.
   const fireShot = useCallback((chosen: BinId) => {
     if (busyRef.current || remainingMsRef.current <= 0) {
       return;
@@ -704,22 +719,47 @@ const TennisEducation: React.FC = () => {
     if (
       !courtRef.current ||
       !wasteRef.current ||
+      !mascotRef.current ||
+      !racketRef.current ||
+      !racketHeadRef.current ||
       !binRefs.current[chosen]
     ) {
       return;
     }
 
-    selectionTimeRef.current = flightElapsedRef.current;
-    setMissMessage(false);
-
-    // O aluno pode escolher ou corrigir a sua escolha
-    // enquanto o lixo ainda está a aproximar-se.
     chosenRef.current = chosen;
     setAimedBin(chosen);
 
-    if (flightElapsedRef.current >= CONTACT_MS) {
-      fireShotRef.current(chosen);
-    }
+    // Uma segunda escolha durante o avanço muda apenas o destino.
+    if (approachRef.current) return;
+    selectionTimeRef.current = flightElapsedRef.current;
+
+    const courtBox = courtRef.current.getBoundingClientRect();
+    const itemBox = wasteRef.current.getBoundingClientRect();
+    const bodyBox = mascotRef.current.getBoundingClientRect();
+    const headBox = racketHeadRef.current.getBoundingClientRect();
+    const offset = mascotOffsetRef.current;
+    const x = itemBox.left + itemBox.width / 2 - courtBox.left;
+    const y = itemBox.top + itemBox.height / 2 - courtBox.top;
+    const desiredX = offset.x + x - (headBox.left + headBox.width / 2 - courtBox.left);
+    const desiredY = offset.y + y - (headBox.top + headBox.height / 2 - courtBox.top);
+
+    // Mantém o corpo dentro do campo. Quando o lixo está sobre a cabeça,
+    // a raquete completa o alcance por cima, sem empurrar a Bolacha para fora.
+    const toX = Math.max(
+      offset.x + 8 - (bodyBox.left - courtBox.left),
+      Math.min(desiredX, offset.x + courtBox.width - 8 - (bodyBox.right - courtBox.left))
+    );
+    const toY = Math.max(
+      offset.y + 60 - (bodyBox.top - courtBox.top),
+      Math.min(desiredY, offset.y + courtBox.height - 55 - (bodyBox.bottom - courtBox.top))
+    );
+
+    approachRef.current = {
+      elapsed: 0, x, y, fromX: offset.x, fromY: offset.y, toX, toY,
+      racketX: desiredX - toX,
+      racketY: desiredY - toY,
+    };
   }, [phase]);
 
   // Relógio partilhado pelo cronómetro e pelo movimento.
@@ -757,59 +797,52 @@ const TennisEducation: React.FC = () => {
         !busyRef.current &&
         remainingMsRef.current > 0
       ) {
-        flightElapsedRef.current += motionDt;
-
-        const progress = Math.min(
-          1,
-          flightElapsedRef.current / CONTACT_MS
-        );
-
-        const wait = Math.max(
-          0,
-          Math.min(
-            1,
-            (flightElapsedRef.current - CONTACT_MS) /
-              (PASS_MS - CONTACT_MS)
-          )
-        );
-
         const element = wasteRef.current;
+        const mascot = mascotRef.current;
+        const approach = approachRef.current;
 
-        if (element) {
-          // Movimento visível da direita para a Bolacha.
-          // Começa a 84% e aproxima-se até 34% do campo.
-          // A pequena curva simula o voo do resíduo.
-          const x = 84 - 50 * progress - 3 * wait;
+        if (approach && mascot && element && chosenRef.current) {
+          approach.elapsed += motionDt;
+          const progress = Math.min(1, approach.elapsed / APPROACH_MS);
+          const ease = 1 - Math.pow(1 - progress, 3);
+          const x = approach.fromX + (approach.toX - approach.fromX) * ease;
+          const y = approach.fromY + (approach.toY - approach.fromY) * ease;
+          mascotOffsetRef.current = { x, y };
+          mascot.style.translate = `${x}px ${y}px`;
+          if (racketRef.current) {
+            racketRef.current.style.translate = `${approach.racketX * ease}px ${approach.racketY * ease}px`;
+          }
+          // O resíduo espera apenas o avanço rápido da Bolacha, nunca o voo completo.
+          element.style.left = `${approach.x}px`;
+          element.style.top = `${approach.y}px`;
+          if (progress >= 1) fireShotRef.current(chosenRef.current);
+        } else if (mascot && element && courtRef.current) {
+          // Após cada raquetada, a Bolacha regressa suavemente à posição inicial.
+          const offset = mascotOffsetRef.current;
+          const settle = Math.exp(-motionDt / 55);
+          const x = Math.abs(offset.x) < 0.5 ? 0 : offset.x * settle;
+          const y = Math.abs(offset.y) < 0.5 ? 0 : offset.y * settle;
+          mascotOffsetRef.current = { x, y };
+          mascot.style.translate = `${x}px ${y}px`;
 
-          const y =
-            48 -
-            20 * progress -
-            5 * Math.sin(progress * Math.PI) +
-            2 * wait;
+          flightElapsedRef.current += motionDt;
+          const progress = Math.min(1, flightElapsedRef.current / CONTACT_MS);
+          const courtBox = courtRef.current.getBoundingClientRect();
+          const cookie = mascot.querySelector('.reo-tennis-cookie');
+          const cookieBox = cookie?.getBoundingClientRect() ?? mascot.getBoundingClientRect();
+          const pictureHeight = element.firstElementChild?.getBoundingClientRect().height ?? element.offsetHeight;
+          const headX = cookieBox.left + cookieBox.width / 2 - courtBox.left;
+          const headY = cookieBox.top - courtBox.top - pictureHeight / 2 + 6;
+          const startX = courtRef.current.clientWidth * 0.84;
+          const startY = courtRef.current.clientHeight * 0.48;
 
-          element.style.left = `${x}%`;
-          element.style.top = `${y}%`;
-
-          element.style.transform =
-            `translate(-50%, -50%) rotate(${18 - 24 * progress}deg)`;
-
+          // Chega à cabeça e permanece aí até o aluno escolher ou o tempo terminar.
+          element.style.left = `${startX + (headX - startX) * progress}px`;
+          element.style.top = `${startY + (headY - startY) * progress - 24 * Math.sin(progress * Math.PI)}px`;
+          element.style.transform = `translate(-50%, -50%) rotate(${18 * (1 - progress)}deg)`;
           element.style.opacity = '1';
           element.style.visibility = 'visible';
-        }
-
-        if (
-          flightElapsedRef.current >= CONTACT_MS &&
-          chosenRef.current
-        ) {
-          fireShotRef.current(chosenRef.current);
-        } else if (flightElapsedRef.current >= PASS_MS) {
-          // Não escolher a tempo não desconta pontos nem erros.
-          setMissMessage(true);
-          showWaste(getNextWaste());
-        } else if (
-          flightElapsedRef.current >= CONTACT_MS
-        ) {
-          setInContact(true);
+          if (progress >= 1) setInContact(true);
         }
       }
 
@@ -830,19 +863,7 @@ const TennisEducation: React.FC = () => {
       cancelAnimationFrame(frame);
       lastFrameRef.current = null;
     };
-  }, [phase, getNextWaste, showWaste]);
-
-  useEffect(() => {
-    if (!missMessage) {
-      return;
-    }
-
-    const timeout = setTimeout(() => {
-      setMissMessage(false);
-    }, 700);
-
-    return () => clearTimeout(timeout);
-  }, [missMessage, incomingToken]);
+  }, [phase]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -1067,6 +1088,7 @@ const TennisEducation: React.FC = () => {
         </div>
 
         <div
+          ref={mascotRef}
           className={`reo-tennis-mascot ${
             shot ? 'is-serving' : ''
           } ${
@@ -1085,7 +1107,7 @@ const TennisEducation: React.FC = () => {
 
           <Logo className="reo-tennis-cookie" />
 
-          <div className="reo-tennis-racket">
+          <div className="reo-tennis-racket" ref={racketRef}>
             <svg
               viewBox="0 0 96 162"
               xmlns="http://www.w3.org/2000/svg"
@@ -1100,6 +1122,7 @@ const TennisEducation: React.FC = () => {
                   fill="#222"
                 />
                 <ellipse
+                  ref={racketHeadRef}
                   cx="48" cy="53" rx="37" ry="51"
                   fill="#214c25" stroke="#f5b523" strokeWidth="7"
                 />
@@ -1208,19 +1231,8 @@ const TennisEducation: React.FC = () => {
           (inContact || aimedBin) && (
             <div className="reo-tennis-hit-cue" role="status">
               {inContact
-                ? '🎾 AGORA! ESCOLHE!'
-                : '🎯 ECOBAG SELECIONADA!'}
-            </div>
-          )}
-
-        {phase === 'playing' &&
-          missMessage &&
-          !shot && (
-            <div
-              className="reo-tennis-miss-cue"
-              role="status"
-            >
-              Passou! Tenta o próximo! 🎾
+                ? '🎾 ESCOLHE PARA RAQUETAR!'
+                : '🎾 A BOLACHA VAI RAQUETAR!'}
             </div>
           )}
 
@@ -1378,8 +1390,9 @@ const TennisEducation: React.FC = () => {
                 <p>
                   A REO e o Projeto Tennis Education precisam de ti!
                   O resíduo aparece à direita e voa devagar até à
-                  Bolacha. Observa-o e escolhe a ECOBAG durante o voo.
-                  A Bolacha raqueta quando ele chega à raquete!
+                  Bolacha. Assim que souberes o destino, escolhe a ECOBAG:
+                  a Bolacha avança rapidamente e raqueta logo!
+                  Se ainda não escolheres, o resíduo fica em cima da cabeça à tua espera.
                 </p>
 
                 <div className="reo-tennis-guide">
@@ -1408,8 +1421,8 @@ const TennisEducation: React.FC = () => {
 
                 <p className="reo-tennis-fineprint">
                   90 segundos · Começas com 60 pontos ·
-                  Podes errar uma vez. Se o lixo passar,
-                  não perdes pontos. Azul/amarelo/verde: +10;
+                  Podes errar uma vez. O resíduo espera pela tua escolha,
+                  sem perderes pontos por não responder. Azul/amarelo/verde: +10;
                   indiferenciado: +5; erro: −20.
                 </p>
 
