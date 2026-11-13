@@ -55,8 +55,11 @@ const START_SCORE = 60;
 const WIN_SCORE = 200;
 const GAME_DURATION_MS = 30_000;
 const SHOT_DURATION = 330;
-const CONTACT_MS = 1100;
-const PASS_MS = 1950;
+
+// Velocidade adaptada aos alunos do 1.º ao 4.º ano.
+const CONTACT_MS = 1800;
+const PASS_MS = 4800;
+
 const MAX_ERRORS = 1;
 const RECORD_KEY = 'reoTennisRecorde';
 
@@ -338,7 +341,6 @@ const TennisEducation: React.FC = () => {
   const impactCounterRef = useRef(0);
   const audioRef = useRef<AudioContext | null>(null);
 
-  // Compactar a faixa institucional apenas na página do jogo.
   useEffect(() => {
     document.documentElement.classList.add('reo-tennis-compact-header');
 
