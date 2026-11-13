@@ -1,607 +1,391 @@
 
-/*
-  Um set para o planeta
-  Voo sincronizado, raquete e apresentação adaptativa.
+/* =========================================================
+   UM SET PARA O PLANETA
+   MELHORIA VISUAL DA BOLACHA REO
 
-  Importado depois de:
-  TennisEducation.css
-  TennisEducationKids.css
-  TennisEducationEffects.css
+   O logótipo original não é alterado.
+   Apenas braços, luvas, pernas, sapatilhas,
+   raquete e pequenos efeitos exteriores.
+   ========================================================= */
 
-  Apenas altera a apresentação do jogo.
-*/
-
-/* FAIXA INSTITUCIONAL */
-
-html.reo-tennis-compact-header header > img {
-  display: block;
-  width: 100%;
-  height: clamp(64px, 8vw, 94px);
-  object-fit: contain;
-  background: #e9a23b;
-}
-
-html.reo-tennis-compact-header main {
-  padding-top: 12px;
-}
-
-/* CARTÃO DA PERGUNTA */
-
-.reo-tennis-page .reo-tennis-item {
-  left: 69%;
-  top: 20%;
-  width: min(44%, 285px);
-  max-width: 50%;
-  min-height: 90px;
-  padding: 11px 12px;
-  gap: 6px;
-  justify-content: center;
-}
-
-.reo-tennis-page .reo-tennis-item strong {
-  font-size: clamp(14px, 2vw, 19px);
-}
-
-.reo-tennis-page .reo-tennis-item small {
-  font-size: clamp(11px, 1.5vw, 13px);
-}
-
-/* RESÍDUO A VOAR
-   A posição é controlada pelo relógio do React. */
-
-.reo-tennis-page .reo-tennis-incoming {
-  position: absolute;
-  z-index: 4;
-  left: 96%;
-  top: 43%;
-  width: 78px;
-  height: 95px;
-  display: grid;
-  place-items: center;
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  animation: none;
-  transition: none;
-  will-change: left, top, transform;
-  filter: drop-shadow(0 5px 5px #19385b8a);
-}
-
-.reo-tennis-page .reo-tennis-incoming > :first-child {
-  position: relative;
-  z-index: 2;
-  max-width: 75px;
-  max-height: 88px;
-}
-
-.reo-tennis-page .reo-tennis-incoming.is-hidden {
-  opacity: 0;
-  visibility: hidden;
-}
-
-.reo-tennis-page .reo-tennis-incoming-trail {
-  position: absolute;
-  right: 78%;
-  top: 48%;
-  height: 4px;
-  width: 32px;
-  border-radius: 99px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    #fff7c0 95%
-  );
-  box-shadow: 0 11px 0 -2px #fffaf4b0;
-  opacity: .7;
-  animation: none;
-}
-
-/* GARRAFA DE VIDRO */
-
-.reo-tennis-page .reo-tennis-glass-bottle-art {
-  display: block;
-  width: 55px;
-  height: 93px;
-  overflow: visible;
-  filter: drop-shadow(1px 4px 3px #07331b55);
-}
-
-/* BOLACHA E RAQUETE */
+/* CORPO E PROFUNDIDADE */
 
 .reo-tennis-page .reo-tennis-mascot {
-  top: 25%;
-  left: 3%;
-  width: clamp(110px, 18%, 162px);
+  isolation: isolate;
+  transform-origin: 48% 72%;
+  filter: drop-shadow(
+    0 8px 4px rgba(14, 32, 45, 0.25)
+  );
 }
 
-/* A mão direita fica sobre o cabo da raquete. */
+/* Brilho atrás da Bolacha, nunca sobre o logótipo. */
 
-.reo-tennis-page .reo-tennis-mascot-arm.right-arm {
-  top: 34%;
-  right: -18%;
-  width: 40%;
-  transform: rotate(-14deg);
-  transform-origin: 0 50%;
-  z-index: 5;
+.reo-tennis-page .reo-tennis-mascot::before {
+  content: '';
+  position: absolute;
+  inset: -4%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 205, 50, 0.16) 42%,
+    rgba(255, 204, 36, 0.20) 64%,
+    transparent 76%
+  );
+  z-index: 0;
+  pointer-events: none;
 }
 
-.reo-tennis-page .reo-tennis-mascot-arm.right-arm::after {
-  right: -8px;
-  top: -2px;
-  width: 20px;
-  height: 20px;
+/* Mantém a imagem REO original sem deformações. */
+
+.reo-tennis-page .reo-tennis-cookie {
+  z-index: 3;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 3px 0 rgba(0, 0, 0, 0.40))
+    drop-shadow(0 0 8px rgba(255, 189, 36, 0.20));
 }
 
-.reo-tennis-page .reo-tennis-mascot-arm.left-arm,
+/* BRAÇOS E PERNAS */
+
+.reo-tennis-page .reo-tennis-mascot-arm,
 .reo-tennis-page .reo-tennis-mascot-leg {
+  background: linear-gradient(
+    90deg,
+    #10131c,
+    #353948 42%,
+    #171a23 100%
+  );
+  border: 2px solid #11151a;
+  box-shadow:
+    inset 2px 1px 0 rgba(255, 255, 255, 0.10),
+    0 2px 3px rgba(0, 0, 0, 0.20);
+}
+
+/* BRAÇO ESQUERDO */
+
+.reo-tennis-page .reo-tennis-mascot-arm.left-arm {
+  top: 45%;
+  left: -21%;
+  width: 36%;
+  height: 11%;
+  transform: rotate(-20deg);
+  transform-origin: 90% 50%;
   z-index: 1;
 }
 
-.reo-tennis-page .reo-tennis-cookie {
+/* Luva esquerda arredondada. */
+
+.reo-tennis-page
+.reo-tennis-mascot-arm.left-arm::after {
+  content: '';
+  position: absolute;
+  left: -25%;
+  right: auto;
+  top: -70%;
+
+  width: 23px;
+  height: 185%;
+
+  border: 2px solid #20212a;
+  border-radius: 48% 49% 46% 40%;
+
+  background: linear-gradient(
+    145deg,
+    #ffffff 5%,
+    #f5f7fb 55%,
+    #c9cfd7
+  );
+
+  box-shadow:
+    inset -3px -3px 0 #bfc7d0,
+    1px 3px 2px #0004;
+
+  transform: rotate(-13deg);
+}
+
+/* Polegar esquerdo. */
+
+.reo-tennis-page
+.reo-tennis-mascot-arm.left-arm::before {
+  content: '';
+  position: absolute;
+  left: -13%;
+  top: 55%;
+  width: 23%;
+  height: 88%;
+
+  border: 2px solid #20212a;
+  border-radius: 80% 65% 50% 50%;
+  background: #edf0f5;
+
+  transform: rotate(27deg);
   z-index: 2;
 }
 
-.reo-tennis-page .reo-tennis-racket {
-  z-index: 4;
-  left: 108%;
-  top: -64%;
-  width: 48%;
-  height: 105%;
-  transform-origin: 20% 95%;
-  transform: rotate(8deg);
+/* BRAÇO DIREITO
+   O braço sai do lado da Bolacha e termina
+   precisamente junto ao cabo da raquete. */
+
+.reo-tennis-page .reo-tennis-mascot-arm.right-arm {
+  top: 39%;
+  left: 90%;
+  right: auto;
+  width: 25%;
+  height: 11%;
+  transform: rotate(-22deg);
+  transform-origin: 0 50%;
+  z-index: 7;
 }
 
-/* PANCADA SINCRONIZADA */
+/* Luva que segura a raquete. */
+
+.reo-tennis-page
+.reo-tennis-mascot-arm.right-arm::after {
+  content: '';
+  position: absolute;
+  right: -9px;
+  top: -58%;
+
+  width: 25px;
+  height: 180%;
+
+  border: 2px solid #20212a;
+  border-radius: 42% 49% 47% 40%;
+
+  background: linear-gradient(
+    140deg,
+    #ffffff,
+    #f5f7fa 56%,
+    #d3dae2
+  );
+
+  box-shadow:
+    inset -3px -3px 0 #c1cad5,
+    2px 3px 3px #0003;
+
+  transform: rotate(7deg);
+  z-index: 2;
+}
+
+/* Polegar direito por cima do cabo. */
+
+.reo-tennis-page
+.reo-tennis-mascot-arm.right-arm::before {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: 74%;
+  width: 28%;
+  height: 100%;
+
+  border: 2px solid #20212a;
+  border-radius: 45% 45% 60% 65%;
+  background: #f2f5fa;
+
+  transform: rotate(28deg);
+  z-index: 3;
+}
+
+/* PERNAS */
+
+.reo-tennis-page .reo-tennis-mascot-leg {
+  bottom: -24%;
+  width: 12%;
+  height: 35%;
+  z-index: 1;
+}
+
+.reo-tennis-page .reo-tennis-mascot-leg.left-leg {
+  left: 21%;
+  transform: rotate(15deg);
+}
+
+.reo-tennis-page .reo-tennis-mascot-leg.right-leg {
+  right: 22%;
+  transform: rotate(-17deg);
+}
+
+/* Meias brancas. */
+
+.reo-tennis-page .reo-tennis-mascot-leg::before {
+  content: '';
+  position: absolute;
+  bottom: 13%;
+  left: -12%;
+  width: 125%;
+  height: 24%;
+
+  border: 1px solid #202127;
+  border-radius: 4px;
+
+  background: repeating-linear-gradient(
+    0deg,
+    #e6e8ee 0 3px,
+    #ffffff 3px 6px
+  );
+
+  z-index: 2;
+}
+
+/* SAPATILHAS */
+
+.reo-tennis-page .reo-tennis-mascot-leg::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: -18px;
+
+  width: clamp(33px, 4vw, 46px);
+  height: clamp(20px, 2.6vw, 26px);
+
+  border: 2px solid #151923;
+  border-radius: 16px 19px 12px 12px;
+
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #f4f5f7 53%,
+    #dfe4ea 64%,
+    #171b25 78%,
+    #171b25 100%
+  );
+
+  box-shadow:
+    inset 0 2px 0 #ffffff,
+    2px 3px 3px #0005;
+
+  transform: rotate(-7deg);
+}
+
+.reo-tennis-page
+.reo-tennis-mascot-leg.right-leg::after {
+  transform: rotate(9deg);
+}
+
+/* RAQUETE
+   Cabo alinhado com a luva direita.
+   A rotação utiliza um eixo perto da mão. */
+
+.reo-tennis-page .reo-tennis-racket {
+  left: 107%;
+  top: -61%;
+  width: 48%;
+  height: 105%;
+
+  transform-origin: 11% 92%;
+  transform: rotate(6deg);
+
+  z-index: 5;
+
+  filter: drop-shadow(
+    0 3px 2px rgba(0, 0, 0, 0.40)
+  );
+}
+
+/* PANCADA */
 
 .reo-tennis-page
 .reo-tennis-mascot.is-serving
 .reo-tennis-racket {
-  animation: reo-racket-contact 330ms
-    cubic-bezier(.18, .72, .3, 1) both;
+  animation: reo-mascot-racket-swing
+    330ms cubic-bezier(.16, .75, .3, 1) both;
 }
 
-@keyframes reo-racket-contact {
+@keyframes reo-mascot-racket-swing {
   0% {
-    transform: rotate(-33deg);
+    transform: rotate(-32deg);
   }
 
-  39% {
-    transform: rotate(54deg);
+  43% {
+    transform: rotate(48deg);
   }
 
-  69% {
-    transform: rotate(39deg);
+  70% {
+    transform: rotate(29deg);
   }
 
   100% {
-    transform: rotate(8deg);
+    transform: rotate(6deg);
   }
 }
 
-/* REAÇÃO AOS ACERTOS */
-
-.reo-tennis-page .reo-tennis-mascot.is-celebrating {
-  animation: reo-cookie-yes 750ms ease-out both;
-}
-
-@keyframes reo-cookie-yes {
-  0%, 100% {
-    transform: rotate(-5deg) translateY(0) scale(1);
-  }
-
-  30% {
-    transform: rotate(10deg) translateY(-25px) scale(1.12);
-  }
-
-  58% {
-    transform: rotate(-12deg) translateY(-8px) scale(1.05);
-  }
-
-  78% {
-    transform: rotate(3deg) translateY(-15px) scale(1.08);
-  }
-}
-
-/* REAÇÃO AOS ERROS */
-
-.reo-tennis-page .reo-tennis-mascot.is-disappointed {
-  animation: reo-cookie-oh-no 700ms ease-in-out both;
-}
-
-@keyframes reo-cookie-oh-no {
-  0%, 100% {
-    transform: rotate(-5deg) translateY(0) scale(1);
-  }
-
-  30% {
-    transform: rotate(-17deg) translateY(9px) scale(.92);
-  }
-
-  65% {
-    transform: rotate(9deg) translateY(4px) scale(.97);
-  }
-}
-
-/* RAQUETE NAS REAÇÕES */
+/* FESTEJO DE UM ACERTO */
 
 .reo-tennis-page
 .reo-tennis-mascot.is-celebrating
 .reo-tennis-racket {
-  animation: reo-racket-cheer 700ms ease-in-out both;
+  animation: reo-mascot-racket-cheer
+    700ms ease-in-out both;
 }
+
+@keyframes reo-mascot-racket-cheer {
+  0%, 100% {
+    transform: rotate(6deg);
+  }
+
+  40% {
+    transform: rotate(-31deg);
+  }
+
+  70% {
+    transform: rotate(-7deg);
+  }
+}
+
+/* REAÇÃO A UM ERRO */
 
 .reo-tennis-page
 .reo-tennis-mascot.is-disappointed
 .reo-tennis-racket {
-  animation: reo-racket-sad 700ms ease-in-out both;
+  animation: reo-mascot-racket-sad
+    700ms ease-in-out both;
 }
 
-@keyframes reo-racket-cheer {
+@keyframes reo-mascot-racket-sad {
   0%, 100% {
-    transform: rotate(8deg);
+    transform: rotate(6deg);
   }
 
-  35% {
-    transform: rotate(-42deg);
-  }
-
-  66% {
-    transform: rotate(-14deg);
+  53% {
+    transform: rotate(43deg);
   }
 }
 
-@keyframes reo-racket-sad {
-  0%, 100% {
-    transform: rotate(8deg);
-  }
-
-  50% {
-    transform: rotate(50deg);
-  }
-}
-
-/* EMOJIS DE REAÇÃO */
-
-.reo-tennis-page .reo-tennis-reaction-emoji {
-  position: absolute;
-  z-index: 9;
-  left: -2%;
-  top: -38%;
-  font-size: 41px;
-  pointer-events: none;
-  filter: drop-shadow(0 3px 2px #0005);
-  animation: reo-reaction-appear 780ms ease-out both;
-}
-
-@keyframes reo-reaction-appear {
-  0% {
-    transform: translateY(22px) scale(.2);
-    opacity: 0;
-  }
-
-  23% {
-    transform: translateY(-13px) scale(1.25);
-    opacity: 1;
-  }
-
-  65% {
-    transform: translateY(-10px) scale(1);
-    opacity: 1;
-  }
-
-  100% {
-    transform: translateY(-28px) scale(.85);
-    opacity: 0;
-  }
-}
-
-/* BALÕES DE TEXTO */
-
-.reo-tennis-page .reo-tennis-mascot-speech {
-  left: 75%;
-  top: -38%;
-  z-index: 10;
-  font-size: clamp(12px, 1.8vw, 19px);
-  padding: 9px 13px;
-  border: 4px solid white;
-  box-shadow:
-    0 0 18px #ffe994bb,
-    0 6px 11px #0005;
-  animation: reo-reaction-speech 850ms ease-out both;
-}
-
-.reo-tennis-page
-.reo-tennis-mascot-speech.speech-bad {
-  box-shadow:
-    0 0 18px #ff8383bb,
-    0 6px 11px #0005;
-}
-
-@keyframes reo-reaction-speech {
-  0% {
-    opacity: 0;
-    transform: rotate(-12deg) scale(.45);
-  }
-
-  20% {
-    opacity: 1;
-    transform: rotate(6deg) scale(1.16);
-  }
-
-  67% {
-    opacity: 1;
-    transform: rotate(-2deg) scale(1);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateY(-20px) scale(.86);
-  }
-}
-
-/* ECOBAG SELECIONADA */
-
-.reo-tennis-page
-.reo-tennis-bin.is-aimed
-.reo-tennis-bin-body {
-  outline: 4px solid #fff5a2;
-  outline-offset: 2px;
-  box-shadow: 0 0 25px #fff291;
-}
-
-/* MENSAGENS DE JOGABILIDADE */
-
-.reo-tennis-page .reo-tennis-hit-cue,
-.reo-tennis-page .reo-tennis-miss-cue {
-  position: absolute;
-  z-index: 8;
-  top: 47%;
-  left: 51%;
-  transform: translate(-50%, -50%);
-  padding: 5px 12px;
-  background: #fff7be;
-  color: #17325b;
-  border: 3px solid white;
-  border-radius: 999px;
-  font-size: clamp(11px, 1.6vw, 14px);
-  font-weight: 900;
-  text-align: center;
-  box-shadow: 0 3px 12px #0004;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-.reo-tennis-page .reo-tennis-miss-cue {
-  top: 53%;
-  background: #eaf6ff;
-  color: #23578b;
-}
-
-/* DURAÇÃO DA ANIMAÇÃO DO RESÍDUO DEVOLVIDO */
-
-.reo-tennis-page .reo-tennis-shot-symbol,
-.reo-tennis-page .reo-tennis-flight-glimmer {
-  animation-duration: 330ms;
-}
-
-/* LAYOUT ADAPTATIVO PARA PORTÁTEIS */
-
-@media (min-width: 581px) and (max-height: 1100px) {
-  html.reo-tennis-compact-header
-  header > div:first-child {
-    padding-top: 4px;
-    padding-bottom: 4px;
-  }
-
-  html.reo-tennis-compact-header header > img {
-    height: clamp(40px, 6vh, 58px);
-  }
-
-  html.reo-tennis-compact-header main {
-    padding-top: 6px;
-    padding-bottom: 8px;
-  }
-
-  .reo-tennis-page .reo-tennis-back {
-    margin-bottom: 2px;
-  }
-
-  .reo-tennis-page .reo-tennis-title {
-    margin-bottom: 7px;
-  }
-
-  .reo-tennis-page .reo-tennis-partners {
-    margin-bottom: 0;
-  }
-
-  .reo-tennis-page .reo-tennis-partner-logo {
-    width: 29px;
-    height: 29px;
-  }
-
-  .reo-tennis-page .reo-tennis-title h1 {
-    margin: 2px 0;
-    font-size: clamp(20px, 2vw, 23px);
-    line-height: 1.1;
-  }
-
-  .reo-tennis-page .reo-tennis-title p,
-  .reo-tennis-page .reo-tennis-title > span {
-    margin-top: 1px;
-    font-size: 10px;
-  }
-
-  .reo-tennis-page .reo-tennis-hud {
-    padding: 6px 8px;
-  }
-
-  .reo-tennis-page .reo-tennis-stat {
-    min-width: 65px;
-    padding: 4px 6px;
-  }
-
-  .reo-tennis-page .reo-tennis-stat strong {
-    font-size: 22px;
-  }
-
-  .reo-tennis-page .reo-tennis-sound,
-  .reo-tennis-page .reo-tennis-pause {
-    width: 35px;
-    height: 35px;
-    flex-basis: 35px;
-  }
-
-  .reo-tennis-page .reo-tennis-rewards {
-    padding: 5px 7px;
-  }
-
-  .reo-tennis-page .reo-tennis-reward {
-    height: 54px;
-    min-height: 54px;
-    padding: 2px 3px;
-  }
-
-  .reo-tennis-page .reo-tennis-reward > span {
-    font-size: 16px;
-  }
-
-  .reo-tennis-page .reo-tennis-reward strong {
-    font-size: 12px;
-  }
-
-  .reo-tennis-page .reo-tennis-reward small {
-    font-size: 10px;
-  }
-
-  .reo-tennis-page .reo-tennis-court {
-    height: clamp(320px, calc(100dvh - 408px), 535px);
-    min-height: 320px;
-  }
-
-  .reo-tennis-page .reo-tennis-bins {
-    bottom: 13px;
-  }
-
-  .reo-tennis-page .reo-tennis-bin {
-    height: clamp(122px, 17vh, 160px);
-  }
-
-  .reo-tennis-page .reo-tennis-bin-label {
-    font-size: clamp(11px, 1.15vw, 14px);
-  }
-
-  .reo-tennis-page .reo-tennis-mascot {
-    top: 22%;
-    width: clamp(102px, 17%, 145px);
-  }
-
-  .reo-tennis-page .reo-tennis-item {
-    top: 20%;
-    min-height: 74px;
-    padding: 7px 10px;
-  }
-
-  .reo-tennis-page .reo-tennis-controls {
-    margin: 6px auto 2px;
-    font-size: 11px;
-  }
-
-  .reo-tennis-page .reo-tennis-tip,
-  .reo-tennis-page .reo-tennis-record {
-    margin: 2px auto 3px;
-    font-size: 10px;
-  }
-}
-
-/* TELEMÓVEL */
+/* TELEMÓVEIS */
 
 @media (max-width: 580px) {
-  html.reo-tennis-compact-header header > img {
-    height: 57px;
+  .reo-tennis-page
+  .reo-tennis-mascot-arm.left-arm::after {
+    width: 21px;
   }
 
-  html.reo-tennis-compact-header main {
-    padding-top: 8px;
+  .reo-tennis-page
+  .reo-tennis-mascot-arm.right-arm::after {
+    width: 23px;
   }
 
-  .reo-tennis-page .reo-tennis-court {
-    min-height: 475px;
-  }
-
-  .reo-tennis-page .reo-tennis-mascot {
-    left: 6%;
-    top: 32%;
-    width: 28%;
-  }
-
-  .reo-tennis-page .reo-tennis-incoming {
-    width: 66px;
-    height: 80px;
-  }
-
-  .reo-tennis-page .reo-tennis-incoming > :first-child {
-    max-width: 62px;
-    max-height: 78px;
-  }
-
-  .reo-tennis-page .reo-tennis-glass-bottle-art {
-    width: 46px;
-    height: 74px;
-  }
-
-  .reo-tennis-page .reo-tennis-item {
-    top: 19%;
-    left: 66%;
-    width: 56%;
-    max-width: 58%;
-    min-height: 67px;
-    padding: 7px 6px;
-  }
-
-  .reo-tennis-page .reo-tennis-item strong {
-    font-size: 13px;
-  }
-
-  .reo-tennis-page .reo-tennis-item small {
-    font-size: 10px;
-  }
-
-  .reo-tennis-page .reo-tennis-hit-cue,
-  .reo-tennis-page .reo-tennis-miss-cue {
-    top: 52%;
-    font-size: 11px;
-    padding: 4px 8px;
-  }
-
-  .reo-tennis-page .reo-tennis-mascot-speech {
-    left: 66%;
-    top: -47%;
-    font-size: 12px;
-    padding: 6px 8px;
-  }
-
-  .reo-tennis-page .reo-tennis-reaction-emoji {
-    font-size: 29px;
-  }
-
-  .reo-tennis-page .reo-tennis-bin {
-    min-height: 128px;
+  .reo-tennis-page .reo-tennis-racket {
+    left: 107%;
+    top: -61%;
+    width: 48%;
+    height: 105%;
   }
 }
 
-/* ACESSIBILIDADE — MOVIMENTO REDUZIDO */
+/* ACESSIBILIDADE */
 
 @media (prefers-reduced-motion: reduce) {
-  .reo-tennis-page .reo-tennis-incoming {
-    left: 30% !important;
-    top: 23% !important;
-    transform: translate(-50%, -50%) !important;
-    will-change: auto;
-  }
+  .reo-tennis-page
+  .reo-tennis-mascot.is-serving
+  .reo-tennis-racket,
 
-  .reo-tennis-page .reo-tennis-mascot.is-celebrating,
-  .reo-tennis-page .reo-tennis-mascot.is-disappointed,
-  .reo-tennis-page .reo-tennis-mascot-speech,
-  .reo-tennis-page .reo-tennis-reaction-emoji {
+  .reo-tennis-page
+  .reo-tennis-mascot.is-celebrating
+  .reo-tennis-racket,
+
+  .reo-tennis-page
+  .reo-tennis-mascot.is-disappointed
+  .reo-tennis-racket {
     animation: none !important;
   }
 }
