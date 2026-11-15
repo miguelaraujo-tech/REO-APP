@@ -1528,7 +1528,7 @@ const TennisEducation: React.FC = () => {
                 </p>
 
                 <div className="reo-tennis-result">
-                  🏆 {score} pontos · {correctAnswers} acertos
+                  🏆 {score} pontos · {correctAnswers} Corretos
                 </div>
 
                 <button
@@ -1563,7 +1563,7 @@ const TennisEducation: React.FC = () => {
 
                 <div className="reo-tennis-result">
                   ⏱️ 90 segundos · {score} pontos ·
-                  {correctAnswers} acertos
+                  {correctAnswers} Corretos
                 </div>
 
                 <p className="reo-tennis-fineprint">
