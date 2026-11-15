@@ -1,0 +1,148 @@
+/* Ajuste à área visível, apenas enquanto a rota do ténis está aberta. */
+html.reo-tennis-screen .reo-app-shell,
+html.reo-tennis-screen .reo-app-shell * { box-sizing: border-box; }
+
+html.reo-tennis-screen .reo-app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+html.reo-tennis-screen .reo-app-header { position: relative; flex: 0 0 auto; }
+html.reo-tennis-screen .reo-app-header > div { display: flex; align-items: center; justify-content: space-between; padding: 5px 12px; }
+html.reo-tennis-screen .reo-app-header a > img { width: 34px; height: 34px; }
+html.reo-tennis-screen .reo-app-school-banner { height: 26px; object-fit: contain; }
+
+html.reo-tennis-screen .reo-app-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  max-width: none;
+  padding: 5px max(8px, env(safe-area-inset-right, 0px)) 5px max(8px, env(safe-area-inset-left, 0px));
+}
+
+html.reo-tennis-screen .reo-app-footer {
+  flex: 0 0 auto;
+  padding: 3px 8px calc(3px + env(safe-area-inset-bottom, 0px));
+}
+html.reo-tennis-screen .reo-app-footer > div { display: flex; flex-direction: row; justify-content: center; gap: 8px; padding: 0; }
+html.reo-tennis-screen .reo-app-footer > div > div { gap: 2px; }
+html.reo-tennis-screen .reo-app-footer img { width: 18px; height: 18px; }
+html.reo-tennis-screen .reo-app-footer p { margin: 0; font-size: 7px; line-height: 1.25; letter-spacing: .035em; }
+
+html.reo-tennis-screen .reo-tennis-page,
+html.reo-tennis-screen .reo-tennis-loader {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+html.reo-tennis-screen .reo-tennis-back,
+html.reo-tennis-screen .reo-tennis-loader-back {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  margin: 0 0 4px;
+  font-size: 10px;
+  line-height: 16px;
+}
+
+html.reo-tennis-screen .reo-tennis-title {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  justify-items: start;
+  flex: 0 0 auto;
+  gap: 1px 9px;
+  margin: 0 0 5px;
+  text-align: left;
+}
+html.reo-tennis-screen .reo-tennis-partners { grid-column: 1; grid-row: 1 / span 3; gap: 4px; margin: 0; }
+html.reo-tennis-screen .reo-tennis-partner-logo { width: 32px; height: 32px; }
+html.reo-tennis-screen .reo-tennis-partners > span { font-size: 16px; }
+html.reo-tennis-screen .reo-tennis-title h1 { grid-column: 2; grid-row: 1; margin: 0; font-size: clamp(14px, 2.7vw, 23px); line-height: 1.15; }
+html.reo-tennis-screen .reo-tennis-title p { grid-column: 2; grid-row: 2; margin: 0; font-size: 8px; line-height: 1.2; letter-spacing: 0; }
+html.reo-tennis-screen .reo-tennis-title > span { grid-column: 2; grid-row: 3; font-size: 9px; line-height: 1.2; }
+
+html.reo-tennis-screen .reo-tennis-hud { flex: 0 0 auto; gap: 5px; padding: 5px; border-radius: 14px 14px 0 0; }
+html.reo-tennis-screen .reo-tennis-stat { min-width: 52px; padding: 3px 5px; border-width: 1px; border-radius: 9px; }
+html.reo-tennis-screen .reo-tennis-stat span { font-size: 8px; }
+html.reo-tennis-screen .reo-tennis-stat strong { font-size: 21px; }
+html.reo-tennis-screen .reo-tennis-progress-row { margin-bottom: 4px; font-size: 8px; }
+html.reo-tennis-screen .reo-tennis-progress-track { height: 10px; }
+html.reo-tennis-screen .reo-tennis-sound,
+html.reo-tennis-screen .reo-tennis-pause { width: 40px; height: 40px; flex: 0 0 40px; }
+
+html.reo-tennis-screen .reo-tennis-rewards { flex: 0 0 auto; gap: 4px; padding: 4px; border-width: 1px; }
+html.reo-tennis-screen .reo-tennis-reward { min-height: 0; padding: 2px 3px; border-width: 1px; border-radius: 7px; gap: 0; }
+html.reo-tennis-screen .reo-tennis-reward > span { font-size: 13px; line-height: 1; }
+html.reo-tennis-screen .reo-tennis-reward strong { font-size: 9px; line-height: 1.1; }
+html.reo-tennis-screen .reo-tennis-reward small { font-size: 8px; line-height: 1.1; }
+
+html.reo-tennis-screen .reo-tennis-court {
+  container-type: size;
+  flex: 1 1 0;
+  height: auto;
+  min-height: 0;
+  border-radius: 0 0 14px 14px;
+}
+
+html.reo-tennis-screen .reo-tennis-mascot { width: clamp(72px, min(28vw, 26cqh), 172px); }
+html.reo-tennis-screen .reo-tennis-bins { bottom: 18px; }
+html.reo-tennis-screen .reo-tennis-bin { height: clamp(68px, 28cqh, 160px); }
+html.reo-tennis-screen .reo-tennis-bin-body { inset: 14px 0 0; padding: 4px 2px 8px; gap: 2px; }
+html.reo-tennis-screen .reo-tennis-bin-icon { font-size: clamp(18px, 7cqh, 38px); }
+html.reo-tennis-screen .reo-tennis-bin-label { font-size: clamp(8px, 2.5cqh, 13px); line-height: 1.15; }
+html.reo-tennis-screen .reo-tennis-bin-key { width: 24px; height: 24px; font-size: 11px; }
+html.reo-tennis-screen .reo-tennis-item { top: 18%; left: 64%; min-width: 0; max-width: 55%; padding: 5px 8px; border-radius: 12px; }
+html.reo-tennis-screen .reo-tennis-item strong { font-size: clamp(10px, 3cqh, 16px); }
+html.reo-tennis-screen .reo-tennis-item small { font-size: clamp(8px, 2cqh, 11px); }
+html.reo-tennis-screen .reo-tennis-projectile { width: clamp(48px, 20cqh, 100px) !important; height: clamp(58px, 24cqh, 105px) !important; }
+html.reo-tennis-screen .reo-tennis-shot-symbol { width: clamp(48px, 20cqh, 100px); height: clamp(58px, 24cqh, 105px); min-width: 0; min-height: 0; }
+html.reo-tennis-screen .reo-tennis-projectile > *,
+html.reo-tennis-screen .reo-tennis-shot-symbol > * { max-width: 100%; max-height: 100%; }
+html.reo-tennis-screen .reo-tennis-emoji { font-size: clamp(30px, 12cqh, 65px); }
+html.reo-tennis-screen .reo-tennis-overlay { padding: 8px; }
+html.reo-tennis-screen .reo-tennis-modal { max-height: 100%; padding: 14px; overscroll-behavior: contain; }
+html.reo-tennis-screen .reo-tennis-modal > .reo-tennis-primary { position: sticky; bottom: 0; z-index: 1; box-shadow: 0 0 0 5px #142034; }
+html.reo-tennis-screen .reo-tennis-audio-note { flex: 0 0 auto; margin: 0 0 4px; color: #fbbf24; font-size: 10px; text-align: center; }
+
+html.reo-tennis-screen .reo-tennis-help { position: relative; flex: 0 0 auto; margin-top: 4px; }
+html.reo-tennis-screen .reo-tennis-help > summary { cursor: pointer; color: #cbd5e1; font-size: 10px; font-weight: 700; line-height: 20px; text-align: center; }
+html.reo-tennis-screen .reo-tennis-help-panel { position: absolute; bottom: calc(100% + 5px); left: 0; right: 0; z-index: 40; max-height: min(50dvh, 300px); overflow-y: auto; padding: 12px; background: #102039fa; border: 1px solid #fbbf2470; border-radius: 12px; box-shadow: 0 8px 30px #0008; }
+html.reo-tennis-screen .reo-tennis-help-panel p { margin: 4px 0; }
+
+html.reo-tennis-screen .reo-tennis-loader-card { display: flex; flex-direction: column; flex: 1 1 0; min-height: 0; width: min(100%, 480px); }
+html.reo-tennis-screen .reo-tennis-loader-cover { flex: 1 1 0; width: 100%; height: 0; min-height: 0; max-height: none; object-fit: contain; }
+html.reo-tennis-screen .reo-tennis-loader-fallback { flex: 1 1 0; min-height: 0; }
+html.reo-tennis-screen .reo-tennis-loader-info { flex: 0 0 auto; padding: 12px 16px 15px; }
+
+@media (max-height: 600px) {
+  html.reo-tennis-screen .reo-app-header > div { padding-top: 3px; padding-bottom: 3px; }
+  html.reo-tennis-screen .reo-app-header a > img { width: 26px; height: 26px; }
+  html.reo-tennis-screen .reo-app-school-banner { height: 18px; }
+  html.reo-tennis-screen .reo-tennis-title { margin-bottom: 3px; }
+  html.reo-tennis-screen .reo-tennis-partner-logo { width: 25px; height: 25px; }
+  html.reo-tennis-screen .reo-tennis-title > span { display: none; }
+  html.reo-tennis-screen .reo-tennis-title h1 { font-size: 14px; }
+  html.reo-tennis-screen .reo-tennis-hud { padding: 3px 5px; }
+  html.reo-tennis-screen .reo-tennis-stat strong { font-size: 18px; }
+  html.reo-tennis-screen .reo-tennis-rewards { padding: 2px 4px; }
+  html.reo-tennis-screen .reo-tennis-reward { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; column-gap: 4px; }
+  html.reo-tennis-screen .reo-tennis-reward small { font-size: 7px; }
+  html.reo-tennis-screen .reo-tennis-loader-info { padding: 8px 12px 10px; }
+}
+
+@media (max-height: 500px) and (min-width: 600px) {
+  html.reo-tennis-screen .reo-tennis-mascot { left: 2%; top: 24%; width: clamp(50px, 26cqh, 110px); }
+  html.reo-tennis-screen .reo-tennis-bins { left: 24%; right: 2%; }
+}

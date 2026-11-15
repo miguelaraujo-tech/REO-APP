@@ -111,8 +111,8 @@ const App: React.FC = () => {
   return (
     <Router>
       <ScrollToTop />
-      <div className="min-h-screen bg-[#0b0b13] text-slate-200 flex flex-col selection:bg-amber-900/30">
-        <header className="sticky top-0 z-50 bg-[#0b0b13]/95 backdrop-blur-md">
+      <div className="reo-app-shell min-h-screen bg-[#0b0b13] text-slate-200 flex flex-col selection:bg-amber-900/30">
+        <header className="reo-app-header sticky top-0 z-50 bg-[#0b0b13]/95 backdrop-blur-md">
           <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3 group">
               <Logo className="w-12 h-12 sm:w-14 sm:h-14 border border-white/10 transition-transform group-hover:scale-110 duration-500" />
@@ -142,11 +142,11 @@ const App: React.FC = () => {
             alt=""
             loading="lazy"
             decoding="async"
-            className="w-full h-auto border-b border-amber-500/40"
+            className="reo-app-school-banner w-full h-auto border-b border-amber-500/40"
           />
         </header>
 
-        <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-6 sm:py-10">
+        <main className="reo-app-main flex-1 max-w-4xl w-full mx-auto px-4 py-6 sm:py-10">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/redes" element={<Socials />} />
@@ -158,7 +158,7 @@ const App: React.FC = () => {
           </Routes>
         </main>
 
-        <footer className="py-12 border-t border-white/5 bg-[#08080d]">
+        <footer className="reo-app-footer py-12 border-t border-white/5 bg-[#08080d]">
           <div className="max-w-4xl mx-auto px-4 flex flex-col items-center gap-4">
             <div className="flex items-center gap-3 opacity-20 hover:opacity-40 transition-all duration-700">
               <Logo className="w-8 h-8 border border-white/5" />

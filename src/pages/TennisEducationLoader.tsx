@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, RotateCcw } from 'lucide-react';
 import './TennisEducationLoader.css';
+import './TennisEducationScreen.css';
 
 const COVER_URL = '/tennis-loading.webp';
 
@@ -27,6 +28,11 @@ const TennisEducationLoader: React.FC = () => {
   const [error, setError] = useState(false);
   const [coverFailed, setCoverFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
+
+  useLayoutEffect(() => {
+    document.documentElement.classList.add('reo-tennis-screen');
+    return () => document.documentElement.classList.remove('reo-tennis-screen');
+  }, []);
 
   useEffect(() => {
     let active = true;

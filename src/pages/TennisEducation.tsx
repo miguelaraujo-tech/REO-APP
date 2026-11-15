@@ -6,6 +6,7 @@ import {
   Volume2, VolumeX, Star,
 } from 'lucide-react';
 import Logo from '../Logo';
+import { TennisAudio, type TennisCue } from '../games/tennis-audio';
 import './TennisEducation.css';
 import './TennisEducationKids.css';
 import './TennisEducationEffects.css';
@@ -338,7 +339,8 @@ const TennisEducation: React.FC = () => {
   const [errors, setErrors] = useState(0);
   const [streak, setStreak] = useState(0);
   const [record, setRecord] = useState(START_SCORE);
-  const [soundOn, setSoundOn] = useState(false);
+  const [soundOn, setSoundOn] = useState(true);
+  const [audioBlocked, setAudioBlocked] = useState(false);
   const [waste, setWaste] = useState<Waste>(WASTE[0]);
   const [incomingToken, setIncomingToken] = useState(0);
   const [aimedBin, setAimedBin] = useState<BinId | null>(null);
@@ -381,7 +383,56 @@ const TennisEducation: React.FC = () => {
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const impactTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const impactCounterRef = useRef(0);
-  const audioRef = useRef<AudioContext | null>(null);
+  const gameAudioRef = useRef<TennisAudio | null>(null);
+  const countdownSecondRef = useRef<number | null>(null);
+
+  const getGameAudio = useCallback(() => {
+    if (!gameAudioRef.current) gameAudioRef.current = new TennisAudio(setAudioBlocked);
+    return gameAudioRef.current;
+  }, []);
+
+  useEffect(() => {
+    const audio = getGameAudio();
+    audio.prepare();
+    return () => {
+      audio.dispose();
+      if (gameAudioRef.current === audio) gameAudioRef.current = null;
+    };
+  }, [getGameAudio]);
+
+  useEffect(() => { getGameAudio().setEnabled(soundOn); }, [getGameAudio, soundOn]);
+
+  useEffect(() => {
+    const audio = getGameAudio();
+    if (phase === 'playing') audio.start();
+    else if (phase === 'paused') audio.pause();
+    else audio.finish(phase === 'won' ? 'win' : phase === 'lost' ? 'lose' : phase === 'timeup' ? 'timeup' : undefined);
+  }, [getGameAudio, phase]);
+
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.hidden) getGameAudio().pause();
+      else if (phase === 'playing') getGameAudio().start();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, [getGameAudio, phase]);
+
+  const toggleSound = useCallback(() => {
+    const enabled = audioBlocked || !soundOn;
+    getGameAudio().setEnabled(enabled);
+    setSoundOn(enabled);
+  }, [audioBlocked, getGameAudio, soundOn]);
+
+  const togglePause = useCallback(() => {
+    if (phase === 'paused') {
+      getGameAudio().start();
+      setPhase('playing');
+    } else if (phase === 'playing') {
+      getGameAudio().pause();
+      setPhase('paused');
+    }
+  }, [getGameAudio, phase]);
 
   // Faixa institucional compacta apenas na página do jogo.
   useEffect(() => {
@@ -413,62 +464,12 @@ const TennisEducation: React.FC = () => {
       if (impactTimerRef.current !== null) {
         clearTimeout(impactTimerRef.current);
       }
-      if (audioRef.current) {
-        void audioRef.current.close();
-      }
     };
   }, []);
 
-  const playTone = useCallback((
-    type: 'hit' | 'good' | 'bad' | 'star' | 'win'
-  ) => {
-    if (
-      !soundOn ||
-      typeof window === 'undefined' ||
-      !window.AudioContext
-    ) {
-      return;
-    }
-
-    try {
-      if (!audioRef.current) {
-        audioRef.current = new window.AudioContext();
-      }
-
-      const context = audioRef.current;
-
-      if (context.state === 'suspended') {
-        void context.resume();
-      }
-
-      const notes: Record<typeof type, number[]> = {
-        hit: [220],
-        good: [510, 680],
-        bad: [260, 180],
-        star: [510, 650, 820],
-        win: [520, 660, 790, 1040],
-      };
-
-      notes[type].forEach((frequency, index) => {
-        const oscillator = context.createOscillator();
-        const volume = context.createGain();
-        const start = context.currentTime + index * 0.075;
-
-        oscillator.type = type === 'hit' ? 'triangle' : 'sine';
-        oscillator.frequency.setValueAtTime(frequency, start);
-        volume.gain.setValueAtTime(0.001, start);
-        volume.gain.exponentialRampToValueAtTime(0.055, start + 0.015);
-        volume.gain.exponentialRampToValueAtTime(0.001, start + 0.12);
-
-        oscillator.connect(volume);
-        volume.connect(context.destination);
-        oscillator.start(start);
-        oscillator.stop(start + 0.13);
-      });
-    } catch {
-      // O áudio é opcional e nunca deve impedir o jogo.
-    }
-  }, [soundOn]);
+  const playTone = useCallback((type: TennisCue) => {
+    if (soundOn) getGameAudio().effect(type);
+  }, [getGameAudio, soundOn]);
 
   useEffect(() => {
     if (
@@ -525,6 +526,7 @@ const TennisEducation: React.FC = () => {
     busyRef.current = false;
     wasteQueueRef.current = shuffleWaste();
     remainingMsRef.current = GAME_DURATION_MS;
+    countdownSecondRef.current = null;
     lastFrameRef.current = null;
     mascotOffsetRef.current = { x: 0, y: 0 };
     if (mascotRef.current) mascotRef.current.style.translate = '0px 0px';
@@ -540,8 +542,10 @@ const TennisEducation: React.FC = () => {
     setFeedback(null);
 
     showWaste(getNextWaste());
+    getGameAudio().setEnabled(soundOn);
+    getGameAudio().start(true);
     setPhase('playing');
-  }, [getNextWaste, showWaste]);
+  }, [getGameAudio, getNextWaste, showWaste, soundOn]);
 
   // A raquetada parte da posição real onde a Bolacha intercetou o lixo.
   const fireShot = useCallback((chosen: BinId) => {
@@ -673,15 +677,9 @@ const TennisEducation: React.FC = () => {
         setFeedback(null);
       }, 1150);
 
-      playTone(
-        !correct
-          ? 'bad'
-          : newScore >= WIN_SCORE
-            ? 'win'
-            : milestone
-              ? 'star'
-              : 'good'
-      );
+      const isEnding = newScore >= WIN_SCORE || newScore <= 0 ||
+        newErrors > MAX_ERRORS || remainingMsRef.current <= 0;
+      if (!isEnding) playTone(!correct ? 'bad' : milestone ? 'star' : 'good');
 
       if (newScore >= WIN_SCORE) {
         setPhase('won');
@@ -732,6 +730,7 @@ const TennisEducation: React.FC = () => {
 
     // Uma segunda escolha durante o avanço muda apenas o destino.
     if (approachRef.current) return;
+    playTone('serve');
     selectionTimeRef.current = flightElapsedRef.current;
 
     const courtBox = courtRef.current.getBoundingClientRect();
@@ -760,7 +759,7 @@ const TennisEducation: React.FC = () => {
       racketX: desiredX - toX,
       racketY: desiredY - toY,
     };
-  }, [phase]);
+  }, [phase, playTone]);
 
   // Relógio partilhado pelo cronómetro e pelo movimento.
   // A pausa congela ambos.
@@ -790,6 +789,11 @@ const TennisEducation: React.FC = () => {
         remainingMsRef.current <= 0
       ) {
         setRemainingMs(remainingMsRef.current);
+        const seconds = Math.ceil(remainingMsRef.current / 1000);
+        if (seconds > 0 && seconds <= 5 && countdownSecondRef.current !== seconds) {
+          countdownSecondRef.current = seconds;
+          getGameAudio().effect('tick');
+        }
         lastDisplay = now;
       }
 
@@ -863,7 +867,7 @@ const TennisEducation: React.FC = () => {
       cancelAnimationFrame(frame);
       lastFrameRef.current = null;
     };
-  }, [phase]);
+  }, [getGameAudio, phase]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -877,13 +881,7 @@ const TennisEducation: React.FC = () => {
       }
 
       if (event.key === 'Escape' && !busyRef.current) {
-        setPhase((current) =>
-          current === 'playing'
-            ? 'paused'
-            : current === 'paused'
-              ? 'playing'
-              : current
-        );
+        togglePause();
         return;
       }
 
@@ -899,7 +897,7 @@ const TennisEducation: React.FC = () => {
     return () => {
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [chooseBin]);
+  }, [chooseBin, togglePause]);
 
   const shotStyle = shot
     ? ({
@@ -957,6 +955,10 @@ const TennisEducation: React.FC = () => {
         </span>
       </div>
 
+      {audioBlocked && phase === 'playing' && (
+        <p className="reo-tennis-audio-note" role="status">Toca no botão de som para ativar a música.</p>
+      )}
+
       <div
         className={`reo-tennis-hud ${
           phase === 'playing' && remainingMs <= 10000
@@ -993,11 +995,12 @@ const TennisEducation: React.FC = () => {
         <button
           type="button"
           className="reo-tennis-sound"
-          onClick={() => setSoundOn((on) => !on)}
-          aria-label={soundOn ? 'Desligar som' : 'Ligar som'}
-          title={soundOn ? 'Desligar som' : 'Ligar som'}
+          onClick={toggleSound}
+          aria-label={audioBlocked ? 'Ativar música e efeitos' : soundOn ? 'Desligar música e efeitos' : 'Ligar música e efeitos'}
+          title={audioBlocked ? 'Ativar música e efeitos' : soundOn ? 'Desligar música e efeitos' : 'Ligar música e efeitos'}
+          aria-pressed={soundOn && !audioBlocked}
         >
-          {soundOn
+          {soundOn && !audioBlocked
             ? <Volume2 size={19} />
             : <VolumeX size={19} />}
         </button>
@@ -1005,13 +1008,7 @@ const TennisEducation: React.FC = () => {
         <button
           type="button"
           className="reo-tennis-pause"
-          onClick={() =>
-            setPhase(
-              phase === 'paused'
-                ? 'playing'
-                : 'paused'
-            )
-          }
+          onClick={togglePause}
           disabled={
             busyRef.current ||
             (phase !== 'playing' && phase !== 'paused')
@@ -1472,7 +1469,7 @@ const TennisEducation: React.FC = () => {
                 <button
                   className="reo-tennis-primary"
                   type="button"
-                  onClick={() => setPhase('playing')}
+                  onClick={togglePause}
                 >
                   <Play size={18} fill="currentColor" />
                   Continuar
@@ -1631,28 +1628,33 @@ const TennisEducation: React.FC = () => {
         )}
       </div>
 
-      <p className="reo-tennis-controls">
-        🖱️ <strong>Rato:</strong> clicar ·
-        📱 <strong>Telemóvel:</strong> tocar ·
-        ⌨️ <strong>Teclado:</strong> 1–4 ·
-        <Star size={13} aria-hidden="true" />
-        Sequência: {streak}
-      </p>
+      <details className="reo-tennis-help">
+        <summary>Controlos e dicas</summary>
+        <div className="reo-tennis-help-panel">
+          <p className="reo-tennis-controls">
+            🖱️ <strong>Rato:</strong> clicar ·
+            📱 <strong>Telemóvel:</strong> tocar ·
+            ⌨️ <strong>Teclado:</strong> 1–4 ·
+            <Star size={13} aria-hidden="true" />
+            Sequência: {streak}
+          </p>
 
-      <p className="reo-tennis-tip">
-        Na nossa escola, as cascas de fruta e os restos
-        de comida vão para o caixote cinzento (indiferenciado).
-      </p>
+          <p className="reo-tennis-tip">
+            Na nossa escola, as cascas de fruta e os restos
+            de comida vão para o caixote cinzento (indiferenciado).
+          </p>
 
-      <p className="reo-tennis-tip">
-        Garrafas e latas de bebidas com símbolo Volta devem
-        ser devolvidas num Ponto Volta, não nas ECOBAGS.
-      </p>
+          <p className="reo-tennis-tip">
+            Garrafas e latas de bebidas com símbolo Volta devem
+            ser devolvidas num Ponto Volta, não nas ECOBAGS.
+          </p>
 
-      <p className="reo-tennis-record">
-        Recorde pessoal neste dispositivo:
-        <strong> {Math.max(record, score)} pontos</strong>
-      </p>
+          <p className="reo-tennis-record">
+            Recorde pessoal neste dispositivo:
+            <strong> {Math.max(record, score)} pontos</strong>
+          </p>
+        </div>
+      </details>
     </section>
   );
 };
