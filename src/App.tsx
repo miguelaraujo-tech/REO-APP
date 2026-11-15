@@ -8,7 +8,7 @@ import Archive from './pages/Archive';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import ReoDash from './pages/ReoDash';
-import TennisEducation from './pages/TennisEducation';
+import TennisEducation from './pages/TennisEducationLoader';
 import Logo from './Logo';
 import ScrollToTop from './ScrollToTop';
 
