@@ -19,7 +19,6 @@ interface BeforeInstallPromptEvent extends Event {
 
 const App: React.FC = () => {
   const [isStandalone, setIsStandalone] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
@@ -27,86 +26,54 @@ const App: React.FC = () => {
       window.history.scrollRestoration = 'manual';
     }
 
-    const standalone =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone === true;
-    setIsStandalone(standalone);
-
-    const ua = window.navigator.userAgent;
-    setIsIOS(
-      /iPad|iPhone|iPod/.test(ua) ||
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-    );
+    const standaloneQuery = typeof window.matchMedia === 'function'
+      ? window.matchMedia('(display-mode: standalone)')
+      : null;
+    const updateDisplayMode = () => {
+      setIsStandalone(
+        standaloneQuery?.matches === true ||
+        (window.navigator as Navigator & { standalone?: boolean }).standalone === true
+      );
+    };
+    updateDisplayMode();
 
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
     };
+    const handleAppInstalled = () => setDeferredPrompt(null);
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall as EventListener);
+    window.addEventListener('appinstalled', handleAppInstalled);
+    if (standaloneQuery?.addEventListener) {
+      standaloneQuery.addEventListener('change', updateDisplayMode);
+    } else {
+      standaloneQuery?.addListener?.(updateDisplayMode);
+    }
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall as EventListener);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+      if (standaloneQuery?.removeEventListener) {
+        standaloneQuery.removeEventListener('change', updateDisplayMode);
+      } else {
+        standaloneQuery?.removeListener?.(updateDisplayMode);
+      }
     };
   }, []);
 
-  const installAndroid = async () => {
+  const installApp = async () => {
     if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice.catch(() => {});
+    const installPrompt = deferredPrompt;
+    // Cada convite só pode ser utilizado uma vez.
     setDeferredPrompt(null);
+    try {
+      await installPrompt.prompt();
+      await installPrompt.userChoice;
+    } catch {
+      // Se a instalação falhar ou não estiver disponível, a REO continua acessível.
+    }
   };
-
-  if (!isStandalone) {
-    return (
-      <div className="min-h-screen bg-[#0b0b13] text-white flex flex-col items-center justify-start px-6 pt-6 pb-6 text-center">
-        <div className="mb-3 animate-float">
-          <Logo className="w-24 h-24 rounded-full border-4 border-amber-500 shadow-[0_0_60px_rgba(245,158,11,0.35)]" />
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2">
-          Instale a Aplicação REO
-        </h1>
-        <p className="text-slate-400 max-w-md mb-4 text-base leading-relaxed">
-          Para aceder à Rádio Escolar Online, adicione a aplicação ao ecrã principal.
-        </p>
-        {isIOS && (
-          <div className="max-w-md text-left space-y-2 mt-1">
-            <h2 className="text-lg font-bold text-white text-center mb-1">
-              No iPhone siga estes passos:
-            </h2>
-            <div className="flex justify-center mb-1 animate-bounce">
-              <img
-                src="/share-icon.png"
-                alt="Partilhar"
-                className="w-16 h-16 object-contain drop-shadow-[0_0_25px_rgba(245,158,11,0.8)]"
-                draggable={false}
-              />
-            </div>
-            <ol className="space-y-1 text-slate-300 text-base leading-snug">
-              <li><strong>1.</strong> Toque em <strong>Partilhar</strong>.</li>
-              <li><strong>2.</strong> Escolha <strong>Adicionar ao ecrã principal (+)</strong>.</li>
-              <li><strong>3.</strong> Toque em <strong>Adicionar</strong>.</li>
-            </ol>
-            <p className="text-amber-500 font-bold text-center pt-2">
-              Não feche esta página enquanto instala.
-            </p>
-          </div>
-        )}
-        {!isIOS && deferredPrompt && (
-          <button
-            onClick={installAndroid}
-            className="mt-6 bg-amber-500 hover:bg-amber-400 text-black px-8 py-4 rounded-full font-black uppercase tracking-wide shadow-lg transition-all active:scale-95"
-          >
-            Instalar Aplicação
-          </button>
-        )}
-        {!isIOS && !deferredPrompt && (
-          <p className="text-slate-400 mt-6 max-w-md">
-            Se o botão de instalação não aparecer, utilize o menu do navegador e selecione “Instalar aplicação” ou “Adicionar ao ecrã principal”.
-          </p>
-        )}
-      </div>
-    );
-  }
 
   return (
     <Router>
@@ -126,7 +93,17 @@ const App: React.FC = () => {
               </div>
             </Link>
 
-            <nav className="flex items-center">
+            <nav className="flex items-center gap-1">
+              {!isStandalone && deferredPrompt && (
+                <button
+                  type="button"
+                  onClick={installApp}
+                  className="px-3 py-2 rounded-full bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition-colors"
+                  title="Instalar a REO neste dispositivo (opcional)"
+                >
+                  Instalar
+                </button>
+              )}
               <Link
                 to="/"
                 className="p-2 hover:bg-white/5 rounded-full transition-all text-slate-400 hover:text-amber-500"
